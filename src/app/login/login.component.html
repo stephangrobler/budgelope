@@ -1,1 +1,27 @@
-<h2>LoginComponent</h2>
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+      <h2>Login Component</h2>
+      <form class="">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="text" class="form-control" id="" placeholder="Email Address" [(ngModel)]="email" name="email" #em="ngModel">
+          <p class="help-block">Email is required.</p>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" class="form-control" id="" placeholder="" [(ngModel)]="password1" name="password1" #pwd1="ngModel">
+          <p class="help-block">Password is required.</p>
+        </div>
+        <div class="">
+          <button type="button" class="btn btn-default" (click)="login()">
+            Login
+          </button>
+          <button type="button" class="btn btn-danger" (click)="cancel()">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
