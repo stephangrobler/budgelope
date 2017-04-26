@@ -9,6 +9,7 @@ import { HomeComponent } from './home/home.component';
 import { ErrorComponent } from './error/error.component';
 import { LoginComponent } from './login/login.component';
 import { SignUpComponent } from './signup/signup.component';
+import { UserService } from './shared/user.service';
 import { AppRoutingModule } from './shared/app.routing';
 
 @NgModule({
@@ -26,7 +27,9 @@ import { AppRoutingModule } from './shared/app.routing';
     HttpModule,
     AppRoutingModule
   ],
-  providers: [],
+  providers: [
+    UserService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
