@@ -1,0 +1,32 @@
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="page-header">
+        <h1>Accounts <small>
+          <a [routerLink]="['/account/add']" class="btn btn-success">Add Account</a>
+        </small></h1>
+      </div>
+      <table class="table">
+        <thead>
+          <th>Name</th>
+          <th>Current Balance</th>
+          <th>Actions</th>
+        </thead>
+        <tbody>
+          <tr *ngFor="let account of accounts">
+            <td>{{ account.title }}</td>
+            <td>{{ account.current | currency:'ZAR':true }}</td>
+            <td>
+              <a (click)="editAccount(account)" class="btn btn-warning">
+                <span class="glyphicon glyphicon-pencil"></span>
+              </a>
+              <a (click)="deleteAccount(account)" class="btn btn-danger">
+                <span class="glyphicon glyphicon-remove"></span>
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -5,19 +5,25 @@ import { HomeComponent } from '../home/home.component';
 import { ErrorComponent } from '../error/error.component';
 import { LoginComponent } from '../login/login.component';
 import { SignUpComponent } from '../signup/signup.component';
+import { AccountListComponent } from '../accounts/account-list/account-list.component';
+import { AccountComponent } from '../accounts/account/account.component';
 
 @NgModule({
-    imports: [
-        RouterModule.forRoot([
-            {path: '', component: HomeComponent},
-            {path: 'login', component: LoginComponent},
-            {path: 'signup', component: SignUpComponent},
-            {path: '**', component: ErrorComponent }
-        ])
-    ],
-    exports: [
-        RouterModule
-    ]
+  imports: [
+    RouterModule.forRoot([
+      { path: '', component: HomeComponent },
+      // Accounts
+      { path: 'accounts', component: AccountListComponent },      
+      { path: 'account/:id', component: AccountComponent },
+      { path: 'account', component: AccountComponent },
+      { path: 'login', component: LoginComponent },
+      { path: 'signup', component: SignUpComponent },
+      { path: '**', component: ErrorComponent }
+    ])
+  ],
+  exports: [
+    RouterModule
+  ]
 })
 
-export class AppRoutingModule {}
+export class AppRoutingModule { }

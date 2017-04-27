@@ -11,6 +11,7 @@ import { LoginComponent } from './login/login.component';
 import { SignUpComponent } from './signup/signup.component';
 import { UserService } from './shared/user.service';
 import { AppRoutingModule } from './shared/app.routing';
+import { AccountsModule } from './accounts/accounts.module';
 
 @NgModule({
   declarations: [
@@ -25,7 +26,8 @@ import { AppRoutingModule } from './shared/app.routing';
     BrowserModule,
     FormsModule,
     HttpModule,
-    AppRoutingModule
+    AppRoutingModule,
+    AccountsModule
   ],
   providers: [
     UserService

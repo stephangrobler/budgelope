@@ -21,6 +21,7 @@ import { Component } from '@angular/core';
   <ul class="nav navbar-nav">
     <li><a [routerLink]="['/login']">Log In</a></li>
     <li><a [routerLink]="['/signup']">Sign Up</a></li>
+    <li><a [routerLink]="['/accounts']">Accounts</a></li>
     <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
       <ul class="dropdown-menu">

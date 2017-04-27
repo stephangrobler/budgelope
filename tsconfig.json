@@ -16,5 +16,13 @@
       "es2016",
       "dom"
     ]
-  }
+  },
+  "include": [
+    "app/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "typings/main",
+    "typings/main.d.ts"
+  ]
 }
