@@ -14,7 +14,6 @@ export class AccountService {
     newAccount.set({
       title: account.title,
       current: account.current,
-      userId: 1,
       id: newAccount.key
     });
   }
