@@ -13,12 +13,13 @@ import { AccountComponent } from '../accounts/account/account.component';
     RouterModule.forRoot([
       { path: '', component: HomeComponent },
       // Accounts
-      { path: 'accounts', component: AccountListComponent },      
+      { path: 'accounts', component: AccountListComponent },
       { path: 'account/:id', component: AccountComponent },
       { path: 'account', component: AccountComponent },
+
       { path: 'login', component: LoginComponent },
       { path: 'signup', component: SignUpComponent },
-      { path: '**', component: ErrorComponent }
+      // { path: '**', component: ErrorComponent }
     ])
   ],
   exports: [

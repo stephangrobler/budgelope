@@ -6,12 +6,14 @@ import { FormsModule } from '@angular/forms';
 import { AccountComponent } from './account/account.component';
 import { AccountService } from './accountShared/account.service';
 import { AccountListComponent } from './account-list/account-list.component';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
-    RouterModule
+    RouterModule,
+    SharedModule
   ],
   exports: [
     RouterModule
