@@ -1,3 +1,4 @@
+<navi-bar></navi-bar>
 <div class="container">
   <div class="row">
     <form class="form">
@@ -5,6 +6,14 @@
         <label for="">Budget Name</label>
         <input type="text" class="form-control" placeholder="" [(ngModel)]="budgetName" name="budgetName" #bName="ngModel">
         <p class="help-block">Short name for the budget.</p>
+      </div>
+      <div class="btn-group btn-group">
+        <button type="button" class="btn btn-default" (click)="saveBudget()">
+          Save
+        </button>
+        <button type="button" class="btn btn-danger" (click)="cancel()">
+          Cancel
+        </button>
       </div>
     </form>
   </div>

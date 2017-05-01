@@ -1,7 +1,8 @@
 export class Budget {
-  name: string;
-  start: Date;
-  userId: string;
-  id?: string;
-
+  constructor(
+    public name: string,
+    public start: Date,
+    public userId: string,
+    public id?: string
+  ) { }
 }
