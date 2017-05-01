@@ -5,6 +5,7 @@ import {
   ActivatedRouteSnapshot,
   RouterStateSnapshot
 } from '@angular/router';
+import { environment } from '../../environments/environment';
 import * as firebase from 'firebase';
 
 @Injectable()
@@ -16,12 +17,12 @@ export class UserService implements CanActivate {
 
   constructor(private router: Router) {
     var config = {
-      apiKey: "AIzaSyAJnyoZbx_6KPUiW6vaOzcmVHY1KoTtYoA",
-      authDomain: "yrab-6c2b5.firebaseapp.com",
-      databaseURL: "https://yrab-6c2b5.firebaseio.com",
-      projectId: "yrab-6c2b5",
-      storageBucket: "yrab-6c2b5.appspot.com",
-      messagingSenderId: "387753491485"
+      apiKey: environment.apiKey,
+      authDomain: environment.authDomain,
+      databaseURL: environment.databaseURL,
+      projectId: environment.projectId,
+      storageBucket: environment.storageBucket,
+      messagingSenderId: environment.messagingSenderId,
     };
     firebase.initializeApp(config);
   }
