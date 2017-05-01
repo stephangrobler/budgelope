@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import * as firebase from 'firebase';
 
 import { Budget } from '../../shared/budget';
 import { BudgetService } from '../budgetShared/budget.service';
@@ -11,7 +12,7 @@ import { UserService } from '../../shared/user.service';
 })
 export class BudgetComponent implements OnInit {
   budgetName: string;
-  theUser: string;
+  theUserId: string;
   budget: Budget;
 
   constructor(
@@ -21,14 +22,15 @@ export class BudgetComponent implements OnInit {
   ) {  }
 
   ngOnInit() {
-    this.theUser = this.userService.loggedInUser;
+    this.theUserId = this.userService.authUser.uid;
   }
 
   saveBudget(){
     this.budget = new Budget(
       this.budgetName,
       new Date(),
-      this.theUser
+      false,
+      this.theUserId
     );
     this.budgetService.createBudget(this.budget);
   }

@@ -8,13 +8,13 @@ export class BudgetService {
   constructor() {  }
 
   createBudget(budget: Budget){
-    let dbRef = firebase.database().ref('budgets');
+    let dbRef = firebase.database().ref('budgets/' + budget.userId);
     let newBudget = dbRef.push();
-    
+
     newBudget.set({
       name: budget.name,
       start: budget.start,
-      userId: budget.userId,
+      active: budget.active,
       id: newBudget.key
     })
   }
