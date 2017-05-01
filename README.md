@@ -1,4 +1,9 @@
-# Tbyn
+# Budgelope
+
+A budget software like the other thing YNAB, to learn Angular, coming from AngularJS.
+
+It works with Firebase. You would need to register a firebase instance and set the
+codes in the environment.ts files.
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.0.0.
 

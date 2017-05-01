@@ -36,7 +36,6 @@ import { BudgetsModule } from './budgets/budgets.module';
     CategoriesModule,
     SharedModule,
     BudgetsModule
-
   ],
   providers: [
     UserService
