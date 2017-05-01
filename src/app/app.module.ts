@@ -15,6 +15,7 @@ import { AppRoutingModule } from './shared/app.routing';
 import { AccountsModule } from './accounts/accounts.module';
 import { CategoriesModule } from './categories/categories.module';
 import { SharedModule } from './shared/shared.module';
+import { BudgetsModule } from './budgets/budgets.module';
 
 
 @NgModule({
@@ -33,7 +34,9 @@ import { SharedModule } from './shared/shared.module';
     AppRoutingModule,
     AccountsModule,
     CategoriesModule,
-    SharedModule
+    SharedModule,
+    BudgetsModule
+
   ],
   providers: [
     UserService
