@@ -5,6 +5,8 @@ import * as firebase from 'firebase';
 import { UserService } from '../../shared/user.service';
 import { AccountService } from '../accountShared/account.service';
 import { Account } from '../../shared/account';
+import { BudgetService } from '../../core/budget.service';
+import { Budget } from '../../shared/budget';
 
 @Component({
   templateUrl: 'account.component.html',
@@ -15,12 +17,14 @@ export class AccountComponent implements OnInit {
   accountCurrent: number;
   account: Account;
   accountId: any;
+  activeBudget: Budget;
 
   constructor(
     private accountService: AccountService,
     private userService: UserService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private budgetService: BudgetService
   ) { }
 
   ngOnInit() {
@@ -31,6 +35,7 @@ export class AccountComponent implements OnInit {
     if (this.accountId != "add"){
       this.getAccount(this.accountId);
     }
+    this.activeBudget = this.budgetService.getActiveBudget();
   }
 
   getAccount(id: string){
@@ -64,6 +69,7 @@ export class AccountComponent implements OnInit {
     this.account = new Account();
     this.account.title = this.accountTitle;
     this.account.current = this.accountCurrent;
+    this.account.budgetId = this.activeBudget.id;
     this.accountService.createAccount(this.account);
   }
 

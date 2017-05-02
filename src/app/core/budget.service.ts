@@ -8,29 +8,28 @@ export class BudgetService {
 
   activeBudget: Budget;
 
-  constructor() {  }
+  constructor() { }
 
   getActiveBudget() {
-    if (null == this.activeBudget){
+    if (null == this.activeBudget) {
       let currentUser = firebase.auth().currentUser;
       let dbRef = firebase.database().ref('budgets/' + currentUser.uid);
       dbRef.orderByChild('active').equalTo(true).once('value').then((snapshot) => {
         let tmp: string[] = snapshot.val(),
-            tmpObj = tmp[Object.keys(tmp)[0]];
-            this.activeBudget = new Budget(
-              tmpObj.name,
-              new Date(),
-              tmpObj.active
-            );
-        console.log(this.activeBudget);
-  
+          tmpObj = tmp[Object.keys(tmp)[0]]; // create a temp object from the first record returned
+        this.activeBudget = new Budget(
+          tmpObj.name,
+          new Date(),
+          tmpObj.active,
+          null,
+          tmpObj.id
+        );
       });
     }
     return this.activeBudget;
-
   }
 
-  createBudget(budget: Budget){
+  createBudget(budget: Budget) {
     let dbRef = firebase.database().ref('budgets/' + budget.userId);
     let newBudget = dbRef.push();
 

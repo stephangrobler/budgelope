@@ -9,7 +9,7 @@ export class AccountService {
   }
 
   createAccount(account: Account){
-    let dbRef = firebase.database().ref('accounts');
+    let dbRef = firebase.database().ref('accounts/' + account.budgetId);
     let newAccount = dbRef.push();
     newAccount.set({
       title: account.title,
