@@ -16,7 +16,7 @@ import { AccountsModule } from './accounts/accounts.module';
 import { CategoriesModule } from './categories/categories.module';
 import { SharedModule } from './shared/shared.module';
 import { BudgetsModule } from './budgets/budgets.module';
-
+import { CoreModule } from './core/core.module';
 
 @NgModule({
   declarations: [
@@ -35,7 +35,8 @@ import { BudgetsModule } from './budgets/budgets.module';
     AccountsModule,
     CategoriesModule,
     SharedModule,
-    BudgetsModule
+    BudgetsModule,
+    CoreModule
   ],
   providers: [
     UserService

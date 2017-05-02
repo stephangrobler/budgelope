@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import * as firebase from 'firebase';
 
 import { Budget } from '../../shared/budget';
-import { BudgetService } from '../budgetShared/budget.service';
+import { BudgetService } from '../../core/budget.service';
 import { UserService } from '../../shared/user.service';
 
 @Component({

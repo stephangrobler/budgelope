@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import * as firebase from 'firebase';
 
 import { UserService } from './user.service';
+import { BudgetService } from '../core/budget.service';
 import { Budget } from './budget';
 
 
@@ -15,31 +16,26 @@ import { Budget } from './budget';
 export class NavComponent implements OnInit {
   theUser: string;
   theBudget: Budget;
-  budgets : Budget[];
+  budgets: Budget[];
 
-  constructor( private userService: UserService, private router: Router){}
+  constructor(
+    private userService: UserService,
+    private budgetService: BudgetService,
+    private router: Router
+  ) { }
 
-  ngOnInit(){
-    this.userService.verifyUser();
+  ngOnInit() {
     this.theUser = this.userService.loggedInUser;
-    firebase.auth().onAuthStateChanged(() => {
-      console.log('auth changes');
-      this.getActiveBudget();
-    });
-    // this.getActiveBudget();
-  }
-
-  getActiveBudget(){
-    let currentUser = firebase.auth().currentUser;
-    console.log('currentUser', currentUser);
-    let dbRef = firebase.database().ref('budgets/' + currentUser.uid);
-    dbRef.once('value').then((snapshot) => {
-      let tmp: string[] = snapshot.val();
-      console.log('budgets', snapshot.val());
-
-      this.budgets = Object.keys(tmp).map(key => tmp[key]);
+    firebase.auth().onAuthStateChanged((user) => {
+      console.log('auth changes', user);
+      this.theBudget = this.budgetService.getActiveBudget();
+      this.userService.verifyUser();
+      this.theUser = this.userService.loggedInUser;
     });
   }
+
+
+
 
 
 }

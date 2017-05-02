@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import * as firebase from 'firebase';
+
 
 import { UserService } from './shared/user.service';
+
 
 @Component({
   selector: 'app-root',
@@ -14,5 +17,6 @@ export class AppComponent implements OnInit {
 
   ngOnInit(){
     this.userService.verifyUser();
+    
   }
 }
