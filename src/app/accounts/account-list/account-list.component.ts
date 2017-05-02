@@ -25,9 +25,7 @@ export class AccountListComponent implements OnInit {
 
   ngOnInit() {
     this.activeBudget = this.budgetService.getActiveBudget();
-    console.log(this.activeBudget);
     this.getAccounts();
-
   }
 
   getAccounts(){
