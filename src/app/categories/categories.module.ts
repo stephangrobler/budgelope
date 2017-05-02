@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 
 import { SharedModule } from '../shared/shared.module';
 import { CategoriesComponent } from './categories.component';
+import { CategoryComponent } from './category/category.component';
 import { CategoriesRoutingModule } from './categories-routing.module';
 
 @NgModule({
@@ -15,7 +16,8 @@ import { CategoriesRoutingModule } from './categories-routing.module';
     SharedModule
   ],
   declarations: [
-    CategoriesComponent
+    CategoriesComponent,
+    CategoryComponent
   ],
   providers: [
 
