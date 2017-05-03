@@ -1,1 +1,25 @@
 <navi-bar></navi-bar>
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+      <form class="form" action="index.html" method="post">
+        <div class="form-group">
+          <label for="">Category</label>
+          <input type="text" class="form-control" id="" placeholder="" [(ngModel)]="name" name="name" #nm="ngModel">
+          <p class="help-block"></p>
+        </div>
+        <div class="btn-group">
+
+          <button type="button" class="btn btn-success" (click)="saveCategory()">
+            Save
+          </button>
+          <button type="button" class="btn btn-danger" (click)="cancel()">
+            Cancel
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
