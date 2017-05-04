@@ -1,0 +1,36 @@
+<navi-bar></navi-bar>
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+      <form class="form" action="index.html" method="post">
+        <div class="form-group">
+          <label for="">Amount</label>
+          <input type="text" class="form-control" placeholder="" name="amount" [(ngModel)]="amount">
+          <p class="help-block"></p>
+        </div>
+        <div class="form-group">
+          <label for="">Category</label>
+          <select class="form-control" name="category" [(ngModel)]="categoryId">
+            <option [value]="category.id" *ngFor="let category of categories">{{category.name}}</option>
+          </select>
+          <p class="help-block"></p>
+        </div>
+        <div class="form-group">
+          <label for="">Account</label>
+          <select class="form-control" name="account" [(ngModel)]="accountId">
+            <option [value]="account.id" *ngFor="let account of accounts">{{account.title}}</option>
+          </select>
+          <p class="help-block"></p>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn-success" (click)="saveTransaction()">
+            Save Transaction
+          </button>
+          <button type="button" class="btn btn-danger" (click)="cancel()">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

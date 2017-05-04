@@ -6,6 +6,7 @@ import { TransactionRoutingModule } from './transaction-routing.module';
 import { SharedModule } from '../shared/shared.module';
 
 import { TransactionsComponent } from './transactions.component';
+import { TransactionComponent } from './transaction/transaction.component';
 
 @NgModule({
   imports: [
@@ -15,7 +16,8 @@ import { TransactionsComponent } from './transactions.component';
     SharedModule
   ],
   declarations: [
-    TransactionsComponent
+    TransactionsComponent,
+    TransactionComponent,
   ],
   providers: []
 })
