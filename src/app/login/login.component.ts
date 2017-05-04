@@ -20,6 +20,10 @@ export class LoginComponent implements OnInit {
     this.userSVC.verifyUser();
   }
 
+  signUp(){
+    this.router.navigate(['/signup']);
+  }
+
   cancel(){
     this.router.navigate(['/']);
   }

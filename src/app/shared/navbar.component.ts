@@ -26,14 +26,19 @@ export class NavComponent implements OnInit {
 
   ngOnInit() {
     this.theUser = this.userService.loggedInUser;
+    // check to see if the user is authenticated
     firebase.auth().onAuthStateChanged((user) => {
-      this.theBudget = this.budgetService.getActiveBudget();
-      this.userService.verifyUser();
-      this.theUser = this.userService.loggedInUser;
+      if (user) {
+        this.theBudget = this.budgetService.getActiveBudget();
+        this.userService.verifyUser();
+        this.theUser = this.userService.loggedInUser;
+      }
     });
   }
 
-
+  logout() {
+    this.userService.logout();
+  }
 
 
 

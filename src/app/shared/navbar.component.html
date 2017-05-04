@@ -21,12 +21,12 @@
       </ul>
       <div *ngIf="!theUser">
         <ul class="nav navbar-nav navbar-right">
-          <li><a [routerLink]="['/login']">Log In</a></li>
+          <li><a [routerLink]="['/login']">Log In <span class="glyphicon glyphicon-log-in"></span></a></li>
         </ul>
       </div>
       <div *ngIf="theUser">
         <ul class="nav navbar-nav navbar-right">
-          <li><a [routerLink]="['/login']">{{theUser}}</a></li>
+          <li><a href (click)="logout()">{{theUser}} <span class="glyphicon glyphicon-log-out"></span></a></li>
         </ul>
       </div>
 
