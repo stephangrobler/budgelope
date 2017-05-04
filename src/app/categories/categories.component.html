@@ -3,8 +3,20 @@
   <div class="row">
     <div class="col-xs-12">
       <div class="page-header">
-        <h1>Categories <small></small><a [routerLink]="['/category/add']" class="btn">Add Category</a></h1>
+        <h1>Categories <small></small><a [routerLink]="['/category/add']" class="btn btn-success">Add Category</a></h1>
       </div>
+      <table class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th>Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let category of categories">
+            <td>{{category.name}} {{'::' + category.parent}}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

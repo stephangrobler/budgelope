@@ -1,11 +1,13 @@
-<table class="table">
+<table class="table table-bordered table-striped">
   <thead>
-    <th>Name</th>
-    <th>Actions</th>
+    <tr>
+      <th>Name</th>
+      <th>Actions</th>
+    </tr>
   </thead>
   <tbody>
     <tr *ngFor="let budget of budgets">
-      <td>{{ budget.name }}</td>      
+      <td>{{ budget.name }}</td>
       <td>
         <a (click)="editAccount(budget)" class="btn btn-warning">
           <span class="glyphicon glyphicon-pencil"></span>

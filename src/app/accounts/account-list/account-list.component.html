@@ -7,11 +7,13 @@
           <a [routerLink]="['/account/add']" class="btn btn-success">Add Account</a>
         </small></h1>
       </div>
-      <table class="table">
+      <table class="table table-bordered table-striped">
         <thead>
-          <th>Name</th>
-          <th>Current Balance</th>
-          <th>Actions</th>
+          <tr>
+            <th>Name</th>
+            <th>Current Balance</th>
+            <th>Actions</th>
+          </tr>
         </thead>
         <tbody>
           <tr *ngFor="let account of accounts">
