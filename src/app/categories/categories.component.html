@@ -13,7 +13,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let category of categories">
-            <td>{{category.name}} {{'::' + category.parent}}</td>
+            <td>{{category.name}} {{' :: ' + category.parent}}</td>
           </tr>
         </tbody>
       </table>

@@ -25,6 +25,7 @@ export class CategoriesComponent implements OnInit {
   getCategories(){
     let dbRef = firebase.database().ref('categories/'+this.userId);
     dbRef.once('value').then((snapshot) => {
+
       let tmp: string[] = snapshot.val();
       this.categories = Object.keys(tmp).map(key => tmp[key]);
     });
