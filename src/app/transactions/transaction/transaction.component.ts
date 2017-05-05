@@ -16,8 +16,8 @@ import { TransactionService } from '../../core/transaction.service';
 })
 export class TransactionComponent implements OnInit {
   payeeId: string;
-  accountId: string;
-  categoryId: string;
+  account: Account;
+  category: Category;
   userId: string;
   amount: number;
   budget: Budget;
@@ -78,11 +78,14 @@ export class TransactionComponent implements OnInit {
 
   saveTransaction(){
     this.transaction = new Transaction();
-    this.transaction.categoryId = this.categoryId;
-    this.transaction.accountId = this.accountId;
+    this.transaction.categoryId = this.category.id;
+    this.transaction.category = this.category.name;
+    this.transaction.accountId = this.account.id;
+    this.transaction.account = this.account.title;
     this.transaction.amount = this.amount;
     this.transaction.payeeId = "MyPayee";
 
+    console.log(this.transaction);
     this.transactionService.createTransaction(
       this.transaction,
       this.userId,

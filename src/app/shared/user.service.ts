@@ -16,15 +16,7 @@ export class UserService implements CanActivate {
 
 
   constructor(private router: Router) {
-    var config = {
-      apiKey: environment.apiKey,
-      authDomain: environment.authDomain,
-      databaseURL: environment.databaseURL,
-      projectId: environment.projectId,
-      storageBucket: environment.storageBucket,
-      messagingSenderId: environment.messagingSenderId,
-    };
-    firebase.initializeApp(config);
+    firebase.initializeApp(environment.firebase);
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {

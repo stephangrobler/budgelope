@@ -10,15 +10,15 @@
         </div>
         <div class="form-group">
           <label for="">Category</label>
-          <select class="form-control" name="category" [(ngModel)]="categoryId">
-            <option [value]="category.id" *ngFor="let category of categories">{{category.name}}</option>
+          <select class="form-control" name="category" [(ngModel)]="category">
+            <option [ngValue]="category" *ngFor="let category of categories">{{category.name}}</option>
           </select>
           <p class="help-block"></p>
         </div>
         <div class="form-group">
           <label for="">Account</label>
-          <select class="form-control" name="account" [(ngModel)]="accountId">
-            <option [value]="account.id" *ngFor="let account of accounts">{{account.title}}</option>
+          <select class="form-control" name="account" [(ngModel)]="account">
+            <option [ngValue]="account" *ngFor="let account of accounts">{{account.title}}</option>
           </select>
           <p class="help-block"></p>
         </div>

@@ -13,7 +13,9 @@ export class TransactionService {
 
     newTrans.set({
       categoryId: transaction.categoryId,
+      category: transaction.category,
       accountId: transaction.accountId,
+      account: transaction.account,
       timestamp: firebase.database.ServerValue.TIMESTAMP,
       amount: transaction.amount,
       payeeId: transaction.payeeId

@@ -5,6 +5,22 @@
       <div class="page-header">
         <h1>Transactions <small></small><a [routerLink]="['/transaction/add']" class="btn">Add Transaction</a></h1>
       </div>
+      <table class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <td>Account</td>
+            <td>Category</td>
+            <td>Amount</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let transaction of transactions">
+            <td>{{transaction.account}}</td>
+            <td>{{transaction.category}}</td>
+            <td>{{transaction.amount}}</td>
+          </tr>
+        </tbody>
+      </table>
 
     </div>
   </div>
