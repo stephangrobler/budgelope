@@ -3,21 +3,26 @@
   <div class="row">
     <div class="col-xs-12">
       <div class="page-header">
-        <h1>Transactions <small></small><a [routerLink]="['/transaction/add']" class="btn">Add Transaction</a></h1>
+        <h1>Transactions <small></small><a [routerLink]="['/transaction/add']" class="btn btn-success">Add Transaction</a></h1>
       </div>
       <table class="table table-bordered table-striped">
         <thead>
           <tr>
+            <td>Date</td>
             <td>Account</td>
             <td>Category</td>
-            <td>Amount</td>
+            <td>inflow</td>
+            <td>outflow</td>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let transaction of transactions">
+          <tr *ngFor="let transaction of transactions | async">
+            <td>{{transaction.timestamp | date}}</td>
             <td>{{transaction.account}}</td>
             <td>{{transaction.category}}</td>
-            <td>{{transaction.amount}}</td>
+            <td><span *ngIf="transaction.amount > 0" class="label label-success">{{transaction.amount | currency:'ZAR':true}}</span></td>
+            <td><span *ngIf="transaction.amount < 0" class="label label-danger">{{transaction.amount | currency:'ZAR':true}}</span></td>
+
           </tr>
         </tbody>
       </table>

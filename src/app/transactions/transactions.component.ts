@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import * as firebase from 'firebase';
+import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 
 import { Transaction } from '../shared/transaction';
 import { TransactionService } from '../core/transaction.service';
@@ -14,13 +14,14 @@ export class TransactionsComponent implements OnInit {
 
   userId: string;
   budgetId: string;
-  transactions: Transaction[];
+  transactions: FirebaseListObservable<any[]>;
 
   constructor(
     private transService: TransactionService,
     private budgetService: BudgetService,
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private db: AngularFireDatabase
   ) {
 
   }
@@ -29,26 +30,9 @@ export class TransactionsComponent implements OnInit {
     this.userId = this.userService.authUser.uid;
     this.budgetId = this.budgetService.getActiveBudget().id;
     let ref = 'transactions/' + this.userId + '/' + this.budgetId;
-    this.getTransactions();
+    this.transactions = this.db.list(ref);
+
   }
 
-  getTransactions(){
-    let dbRef = firebase.database().ref('transactions/' + this.userId + '/' + this.budgetId);
-    let theList = [];
-    dbRef.on('child_added', (snapshot, prevKey) => {
-      let transVal = snapshot.val();
-      let id = snapshot.key;
 
-      let transaction = new Transaction();
-      transaction.id = id;
-      transaction.amount = transVal.amount;
-      transaction.date = new Date(transVal.timestamp);
-      transaction.category = transVal.category;
-      transaction.account = transVal.account;
-
-      theList.push(transaction);
-    });
-
-    this.transactions = theList;
-  }
 }

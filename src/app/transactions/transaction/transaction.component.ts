@@ -16,11 +16,14 @@ import { TransactionService } from '../../core/transaction.service';
 })
 export class TransactionComponent implements OnInit {
   payeeId: string;
+  payee: string;
+  cleared: boolean;
   account: Account;
   category: Category;
   userId: string;
   amount: number;
   budget: Budget;
+  type: string;
   transaction: Transaction;
   accounts: Account[];
   categories: Category[];
@@ -84,6 +87,9 @@ export class TransactionComponent implements OnInit {
     this.transaction.account = this.account.title;
     this.transaction.amount = this.amount;
     this.transaction.payeeId = "MyPayee";
+    this.transaction.payee = this.payee;
+    this.transaction.cleared = this.cleared;
+    this.transaction.type = this.type;
 
     console.log(this.transaction);
     this.transactionService.createTransaction(

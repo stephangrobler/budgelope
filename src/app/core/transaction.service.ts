@@ -18,7 +18,10 @@ export class TransactionService {
       account: transaction.account,
       timestamp: firebase.database.ServerValue.TIMESTAMP,
       amount: transaction.amount,
-      payeeId: transaction.payeeId
+      payeeId: transaction.payeeId,
+      payee: transaction.payee,
+      cleared: transaction.cleared,
+      type: transaction.type
     });
     alert('Transaction saved');
   }

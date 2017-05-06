@@ -10,5 +10,6 @@ export class Transaction{
   payee: string;
   amount: number;
   date: Date;
-
+  type: string; // income or expense
+  cleared: boolean; 
 }
