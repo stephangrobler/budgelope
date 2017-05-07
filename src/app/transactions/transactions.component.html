@@ -9,16 +9,18 @@
         <thead>
           <tr>
             <td>Date</td>
+            <td>Payee</td>
             <td>Account</td>
             <td>Category</td>
             <td>Inflow</td>
             <td>Outflow</td>
-            <td width="10%">Cleared</td>
+            <td width="5%">Cleared</td>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let transaction of transactions | async">
+          <tr *ngFor="let transaction of transactions | async" [routerLink]="['/transaction/'+transaction.$key]">
             <td>{{transaction.timestamp | date}}</td>
+            <td>{{transaction.payee}}</td>
             <td>{{transaction.account}}</td>
             <td>{{transaction.category}}</td>
             <td><span *ngIf="transaction.type == 'income'" class="label label-success">{{transaction.amount | currency:'ZAR':true}}</span></td>

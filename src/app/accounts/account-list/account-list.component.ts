@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AngularFireDatabase } from 'angularfire2/database';
+import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 
 import { UserService } from '../../shared/user.service';
 import { Account } from '../../shared/account';
@@ -13,7 +13,7 @@ import { Budget } from '../../shared/budget';
 })
 export class AccountListComponent implements OnInit {
   theUser: string;
-  accounts: FirebaseObjectObservable<any>;
+  accounts: FirebaseListObservable<any>;
   activeBudget: Budget;
 
   constructor(

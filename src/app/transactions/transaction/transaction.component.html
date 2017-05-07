@@ -2,47 +2,49 @@
 <div class="container">
   <div class="row">
     <div class="col-xs-12">
-      <form class="form" >
+      <form class="form" *ngIf="transaction" >
         <div class="form-group">
           <div >
             <label for="expense_type" class="radio-inline">
-              <input id="expense_type" type="radio" value="expense" name="type" [(ngModel)]="type"> Expense
+              <input id="expense_type" type="radio" value="expense" name="type" [(ngModel)]="transaction.type"> Expense
             </label>
             <label for="income_type" class="radio-inline">
-              <input id="income_type" type="radio" value="income" name="type" [(ngModel)]="type"> Income
+              <input id="income_type" type="radio" value="income" name="type" [(ngModel)]="transaction.type"> Income
             </label>
           </div>
           <p class="help-block"></p>
         </div>
         <div class="form-group">
           <label for="">Amount</label>
-          <input type="text" class="form-control" placeholder="" name="amount" [(ngModel)]="amount">
+          <input type="text" class="form-control" placeholder="" name="amount" [(ngModel)]="transaction.amount">
           <p class="help-block"></p>
         </div>
         <div class="form-group">
           <label for="">Payee</label>
-          <input type="text" class="form-control" id="" placeholder="" [(ngModel)]="payee" name="payee">
+          <input type="text" class="form-control" id="" placeholder="" [(ngModel)]="transaction.payee" name="transaction.payee">
           <p class="help-block"></p>
         </div>
         <div class="form-group">
           <label for="">Category</label>
-          <select class="form-control" name="category" [(ngModel)]="category">
-            <option [ngValue]="category" *ngFor="let category of categories">{{category.name}}</option>
+          <select class="form-control" name="category" [(ngModel)]="transaction.category">
+            <option [ngValue]="category" *ngFor="let category of categories | async">{{category.name}}</option>
           </select>
           <p class="help-block"></p>
         </div>
         <div class="form-group">
           <label for="">Account</label>
-          <select class="form-control" name="account" [(ngModel)]="account">
-            <option [ngValue]="account" *ngFor="let account of accounts">{{account.title}}</option>
+          <select class="form-control" name="account" [(ngModel)]="transaction.account">
+            <option [ngValue]="account" *ngFor="let account of accounts | async">{{account.title}}</option>
           </select>
           <p class="help-block"></p>
         </div>
         <div class="checkbox">
           <label for="cleared_trans">
-            <input type="checkbox" name="cleared" id="cleared_trans" [(ngModel)]="cleared"> Cleared
+            <input type="checkbox" name="cleared" id="cleared_trans" [(ngModel)]="transaction.cleared"> Cleared
           </label>
         </div>
+        {{item | async | json}}
+
         <div class="btn-group">
           <button type="button" class="btn btn-success" (click)="saveTransaction()">
             Save Transaction
@@ -52,6 +54,7 @@
           </button>
         </div>
       </form>
+      {{transaction | json}}
     </div>
   </div>
 </div>
