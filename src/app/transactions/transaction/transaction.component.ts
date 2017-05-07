@@ -17,7 +17,7 @@ import { TransactionService } from '../../core/transaction.service';
 export class TransactionComponent implements OnInit {
   payeeId: string;
   payee: string;
-  cleared: boolean;
+  cleared: boolean = false;
   account: Account;
   category: Category;
   userId: string;

@@ -11,8 +11,9 @@
             <td>Date</td>
             <td>Account</td>
             <td>Category</td>
-            <td>inflow</td>
-            <td>outflow</td>
+            <td>Inflow</td>
+            <td>Outflow</td>
+            <td width="10%">Cleared</td>
           </tr>
         </thead>
         <tbody>
@@ -20,8 +21,12 @@
             <td>{{transaction.timestamp | date}}</td>
             <td>{{transaction.account}}</td>
             <td>{{transaction.category}}</td>
-            <td><span *ngIf="transaction.amount > 0" class="label label-success">{{transaction.amount | currency:'ZAR':true}}</span></td>
-            <td><span *ngIf="transaction.amount < 0" class="label label-danger">{{transaction.amount | currency:'ZAR':true}}</span></td>
+            <td><span *ngIf="transaction.type == 'income'" class="label label-success">{{transaction.amount | currency:'ZAR':true}}</span></td>
+            <td><span *ngIf="transaction.type == 'expense'" class="label label-danger">{{transaction.amount | currency:'ZAR':true}}</span></td>
+            <td>
+              <span class="glyphicon glyphicon-check" *ngIf="transaction.cleared"></span>
+              <span class="glyphicon glyphicon-unchecked" *ngIf="!transaction.cleared"></span>
+            </td>
 
           </tr>
         </tbody>
