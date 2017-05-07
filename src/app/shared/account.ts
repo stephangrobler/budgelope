@@ -1,7 +1,9 @@
 export class Account {
   id: any;
-  title: string;
-  current: number;
+  name: string;
+  balance: number;
+  startingBalance: number;
+  accountType: string;
   budgetId: string;
   accountTypeId: string;
 }

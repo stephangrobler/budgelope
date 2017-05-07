@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import * as firebase from 'firebase';
+import { AngularFireDatabase, FirebaseObjectObservable } from 'angularfire2/database';
 
 import { UserService } from '../../shared/user.service';
 import { AccountService } from '../accountShared/account.service';
@@ -13,18 +13,23 @@ import { Budget } from '../../shared/budget';
 })
 export class AccountComponent implements OnInit {
   thisUser: string;
-  accountTitle: string;
-  accountCurrent: number;
+
+  accName: string;
+  accStartingBalance: number;
+
   account: Account;
   accountId: any;
+  accountType: string;
   activeBudget: Budget;
+  item: FirebaseObjectObservable<any>;
 
   constructor(
     private accountService: AccountService,
     private userService: UserService,
     private router: Router,
     private route: ActivatedRoute,
-    private budgetService: BudgetService
+    private budgetService: BudgetService,
+    private db:AngularFireDatabase
   ) { }
 
   ngOnInit() {
@@ -32,24 +37,14 @@ export class AccountComponent implements OnInit {
     this.route.params.forEach((params: Params) => {
       this.accountId = params["id"];
     });
-    if (this.accountId != "add"){
-      this.getAccount(this.accountId);
-    }
     this.activeBudget = this.budgetService.getActiveBudget();
+    if (this.accountId != "add"){
+      this.item = this.db.object('accounts/'+this.activeBudget.id +'/'+this.accountId);
+      this.item.subscribe(acc => { this.account = acc });
+    }
+    console.log('account', this.account);
   }
 
-  getAccount(id: string){
-    let dbRef = firebase.database().ref('accounts').child(id);
-    dbRef.once('value').then((snapshot) => {
-      this.account = new Account();
-      this.account.id = snapshot.val().id;
-      this.account.title = snapshot.val().title;
-      this.account.current = snapshot.val().current;
-
-      this.accountTitle = this.account.title;
-      this.accountCurrent = this.account.current;
-    });
-  }
 
   saveAccount(){
     if (this.accountId != "add"){
@@ -60,15 +55,25 @@ export class AccountComponent implements OnInit {
   }
 
   editAccount() {
-    this.account.title = this.accountTitle;
-    this.account.current = this.accountCurrent;
-    this.accountService.updateAccount(this.account);
+    if (!this.account.balance){
+      this.item.update({
+        name: this.account.name,
+        startingBalance: this.account.startingBalance,
+        balance: this.account.startingBalance
+      });
+    } else {
+      this.item.update({
+        name: this.account.name,
+        startingBalance: this.account.startingBalance
+      });
+    }
+
   }
 
   createAccount() {
     this.account = new Account();
-    this.account.title = this.accountTitle;
-    this.account.current = this.accountCurrent;
+    this.account.name = this.accName;
+    this.account.startingBalance = this.accStartingBalance;
     this.account.budgetId = this.activeBudget.id;
     this.accountService.createAccount(this.account);
   }

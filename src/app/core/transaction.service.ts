@@ -25,21 +25,21 @@ export class TransactionService {
     });
 
     // update the selected account
-    //
     let accRef = firebase.database().ref('accounts/'+budgetId+'/'+transaction.accountId);
-    let accVal;
+
     let acc = accRef.once('value', (account) => {
-      accVal = account.val();
+      let accVal = account.val();
+      let  balance: number = parseFloat(accVal.balance);
+      console.log(accVal, balance);
       if (transaction.type == 'expense'){
-        accVal.current = parseFloat(accVal.current) - transaction.amount;
-      } else if (transaction.type == 'income') {
-        accVal.current = parseFloat(accVal.current) + transaction.amount;
+        balance -= transaction.amount;
+      } else if (transaction.type == 'income') {        
+        balance = balance + parseFloat(transaction.amount.toString());
       }
-      console.log('accVal', accVal);
+      accVal.balance = balance;
+      console.log('accVal', accVal, balance);
       firebase.database().ref('accounts/'+budgetId+'/'+transaction.accountId).update(accVal);
     });
-
-    // dbRef.update(accVal);
 
     alert('Transaction saved');
   }

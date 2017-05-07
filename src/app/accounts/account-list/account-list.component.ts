@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import * as firebase from 'firebase';
+import { AngularFireDatabase } from 'angularfire2/database';
 
 import { UserService } from '../../shared/user.service';
 import { Account } from '../../shared/account';
@@ -13,27 +13,21 @@ import { Budget } from '../../shared/budget';
 })
 export class AccountListComponent implements OnInit {
   theUser: string;
-  accounts: Account[];
+  accounts: FirebaseObjectObservable<any>;
   activeBudget: Budget;
 
   constructor(
     private userService: UserService,
     private accountService: AccountService,
     private budgetService: BudgetService,
-    private router: Router
+    private router: Router,
+    private db:AngularFireDatabase
   ) {  }
 
   ngOnInit() {
     this.activeBudget = this.budgetService.getActiveBudget();
-    this.getAccounts();
-  }
-
-  getAccounts(){
-    let dbRef = firebase.database().ref('accounts/' + this.activeBudget.id );
-    dbRef.once('value').then((snapshot) => {
-      let tmp: string[] = snapshot.val();
-      this.accounts = Object.keys(tmp).map(key => tmp[key]);
-    });
+    let accRef = 'accounts/' + this.activeBudget.id;
+    this.accounts = this.db.list(accRef);
   }
 
   editAccount(single: Account){

@@ -11,5 +11,5 @@ export class Transaction{
   amount: number;
   date: Date;
   type: string; // income or expense
-  cleared: boolean; 
+  cleared: boolean;
 }
