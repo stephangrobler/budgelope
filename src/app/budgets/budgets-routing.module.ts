@@ -8,7 +8,7 @@ import { BudgetListComponent } from './budgetlist/budgetlist.component';
 
 const routes: Routes = [
   {path: "budgets", component: BudgetsComponent},
-  {path: "budgetview", component: BudgetviewComponent},
+  {path: "budgetview/:id", component: BudgetviewComponent},
   {path: "budget/:id", component: BudgetComponent}
 ];
 

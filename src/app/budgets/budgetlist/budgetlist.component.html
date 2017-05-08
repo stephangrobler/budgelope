@@ -9,6 +9,9 @@
     <tr *ngFor="let budget of budgets">
       <td>{{ budget.name }}</td>
       <td>
+        <a class="btn btn-info" [routerLink]="['/budgetview/'+budget.id]">
+          <span class="glyphicon glyphicon-eye-open"></span>
+        </a>
         <a (click)="editAccount(budget)" class="btn btn-warning">
           <span class="glyphicon glyphicon-pencil"></span>
         </a>
