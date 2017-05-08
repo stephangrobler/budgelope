@@ -1,0 +1,77 @@
+<!-- 3month view -->
+<div class="container">
+  <div class="row">
+    <div class="col-xs-2">
+      <div class="page-header">
+        <h3>Accounts <small></small></h3>
+      </div>
+    </div>
+    <div class="col-xs-10">
+      <div class="row">
+        <div class="col-xs-2">
+          Categories
+        </div>
+        <div class="col-xs-5">
+          <h2>month 1</h2>
+          <div class="row">
+            <div class="col-xs-12 col-sm-4">
+              Planned
+            </div>
+            <div class="col-xs-12 col-sm-4">
+              Actual
+            </div>
+            <div class="col-xs-12 col-sm-4">
+              Balance
+            </div>
+          </div>
+        </div>
+        <div class="col-xs-5">
+          <h2>month 2</h2>
+          <div class="row">
+            <div class="col-xs-12 col-sm-4">
+              Planned
+            </div>
+            <div class="col-xs-12 col-sm-4">
+              Actual
+            </div>
+            <div class="col-xs-12 col-sm-4">
+              Balance
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row" *ngFor="let item of categoriesAllocations" style="background: #ddd; border-bottom: 1px solid #666;">
+        <div class="col-xs-2">
+          {{item.category}}
+        </div>
+        <div class="col-xs-5">
+          <div class="row" style="margin-bottom: 20px;">
+            <div class="col-xs-12 col-sm-4">
+              {{item.allocations['2017-04'].Planned |  number:'3.2'}}
+            </div>
+            <div class="col-xs-12 col-sm-4">
+                {{item.allocations['2017-04'].Actual |  number:'3.2'}}
+            </div>
+            <div class="col-xs-12 col-sm-4">
+                {{item.allocations['2017-04'].Balance |  number:'3.2'}}
+            </div>
+          </div>
+        </div>
+        <div class="col-xs-5">
+          <div class="row" style="margin-bottom: 20px;">
+            <div class="col-xs-12 col-sm-4">
+                {{item.allocations['2017-05'].Planned |  number:'3.2'}}
+            </div>
+            <div class="col-xs-12 col-sm-4">
+                {{item.allocations['2017-05'].Actual |  number:'3.2'}}
+            </div>
+            <div class="col-xs-12 col-sm-4">
+                {{item.allocations['2017-05'].Balance |  number:'3.2'}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

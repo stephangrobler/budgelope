@@ -9,6 +9,7 @@ import { BudgetComponent } from './budget/budget.component';
 import { BudgetListComponent } from './budgetlist/budgetlist.component';
 import { BudgetService } from '../core/budget.service';
 import { SharedModule } from '../shared/shared.module';
+import { BudgetviewComponent } from './budgetview/budgetview.component';
 
 @NgModule({
   imports: [
@@ -20,7 +21,8 @@ import { SharedModule } from '../shared/shared.module';
   declarations: [
     BudgetsComponent,
     BudgetComponent,
-    BudgetListComponent
+    BudgetListComponent,
+    BudgetviewComponent
   ],
   providers: [
     

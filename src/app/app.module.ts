@@ -22,7 +22,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { SharedModule } from './shared/shared.module';
 import { BudgetsModule } from './budgets/budgets.module';
 import { TransactionModule } from './transactions/transactions.module';
-import { CoreModule } from './core/core.module';
+import { CoreModule } from './core/core.module';;
 
 @NgModule({
   declarations: [
@@ -38,7 +38,7 @@ import { CoreModule } from './core/core.module';
     HttpModule,
     NgbModule.forRoot(),
     AngularFireModule.initializeApp(environment.firebase),
-    AngularFireDatabaseModule, 
+    AngularFireDatabaseModule,
     AngularFireAuthModule,
     AppRoutingModule,
     AccountsModule,
