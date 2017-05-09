@@ -47,27 +47,14 @@
         <div class="col-xs-5" *ngFor="let allocations of item.allocations | async">
           <div class="row" style="margin-bottom: 20px;">
             <div class="col-xs-12 col-sm-4">
-              {{allocations.Planned |  number:'3.2'}}
+              {{allocations.Planned |  number:'1.2'}}
             </div>
             <div class="col-xs-12 col-sm-4">
-                {{allocations.Actual |  number:'3.2'}}
+                {{allocations.Actual |  number:'1.2'}}
             </div>
             <div class="col-xs-12 col-sm-4">
-                {{allocations.Balance |  number:'3.2'}}
+                {{allocations.Balance |  number:'1.2'}}
             </div>
-          </div>
-        </div>
-        <div class="col-xs-5">
-          <div class="row" style="margin-bottom: 20px;">
-            <!-- <div class="col-xs-12 col-sm-4">
-                {{item.allocations['2017-05'].Planned |  number:'3.2'}}
-            </div>
-            <div class="col-xs-12 col-sm-4">
-                {{item.allocations['2017-05'].Actual |  number:'3.2'}}
-            </div>
-            <div class="col-xs-12 col-sm-4">
-                {{item.allocations['2017-05'].Balance |  number:'3.2'}}
-            </div> -->
           </div>
         </div>
       </div>
