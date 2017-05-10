@@ -19,12 +19,11 @@ export class TransactionService {
       category: transaction.category.name,
       accountId: transaction.account.$key,
       account: transaction.account.name,
-      amount: transaction.amount,
+      amount: parseFloat(transaction.amount),
       type: transaction.type,
-      payee: transaction.payee
+      payee: transaction.payee,
+      timestamp: firebase.database.ServerValue.TIMESTAMP
     };
-
-    console.log(transactionItem);
 
     items.push({
       categoryId: transaction.category.$key,
@@ -35,7 +34,7 @@ export class TransactionService {
       type: transaction.type,
       payee: transaction.payee
     }).then(response => {
-      alert('transaction created successfull');
+
       // update the relevant account amount
       let updateObj = {};
       let accBalance: number = transaction.account.balance;
@@ -55,54 +54,18 @@ export class TransactionService {
         accBalance -= transaction.amount;
         catBalance -= transaction.amount;
       } else if (transaction.type == "income"){
-        accBalance += transaction.amount;
-        catBalance += transaction.amount;
+        accBalance += parseFloat(transaction.amount);
+        catBalance += parseFloat(transaction.amount);
       }
       updateObj['accounts/' + budgetId + '/' + transaction.account.$key + '/balance'] = accBalance;
       updateObj['categories/' + userId + '/' + transaction.category.$key + '/balance'] = catBalance;
 
-      console.log('updatePaths', updateObj);
       this.db.object('/').update(updateObj);
-      alert('updates done successfully');
 
     }).catch(error => {
       alert('there was an error creating the transaction.');
       console.log('ERROR:', error);
     });
-
-
-    // let dbRef = firebase.database().ref('transactions/'+userId + '/' + budgetId);
-    // let newTrans = dbRef.push();
-    //
-    // newTrans.set({
-    //   categoryId: transaction.categoryId,
-    //   category: transaction.category,
-    //   accountId: transaction.accountId,
-    //   account: transaction.account,
-    //   timestamp: firebase.database.ServerValue.TIMESTAMP,
-    //   amount: transaction.amount,
-    //   payeeId: transaction.payeeId,
-    //   payee: transaction.payee,
-    //   cleared: transaction.cleared,
-    //   type: transaction.type
-    // });
-    //
-    // // update the selected account
-    // let accRef = firebase.database().ref('accounts/'+budgetId+'/'+transaction.accountId);
-    //
-    // let acc = accRef.once('value', (account) => {
-    //   let accVal = account.val();
-    //   let  balance: number = parseFloat(accVal.balance);
-    //   ;
-    //   if (transaction.type == 'expense'){
-    //     balance -= transaction.amount;
-    //   } else if (transaction.type == 'income') {
-    //     balance = balance + parseFloat(transaction.amount.toString());
-    //   }
-    //   accVal.balance = balance;
-    //
-    //   firebase.database().ref('accounts/'+budgetId+'/'+transaction.accountId).update(accVal);
-    // });
 
     alert('Transaction saved');
   }

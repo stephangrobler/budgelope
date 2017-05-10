@@ -9,11 +9,13 @@
         <thead>
           <tr>
             <th>Name</th>
+            <th>Balance</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let category of categories">
             <td>{{category.name}} {{' :: ' + category.parent}}</td>
+            <td class="text-right">{{category.balance | number:'1.2'}}</td>
           </tr>
         </tbody>
       </table>
