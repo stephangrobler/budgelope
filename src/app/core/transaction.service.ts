@@ -25,15 +25,7 @@ export class TransactionService {
       timestamp: firebase.database.ServerValue.TIMESTAMP
     };
 
-    items.push({
-      categoryId: transaction.category.$key,
-      category: transaction.category.name,
-      accountId: transaction.account.$key,
-      account: transaction.account.name,
-      amount: transaction.amount,
-      type: transaction.type,
-      payee: transaction.payee
-    }).then(response => {
+    items.push(transactionItem).then(response => {
 
       // update the relevant account amount
       let updateObj = {};

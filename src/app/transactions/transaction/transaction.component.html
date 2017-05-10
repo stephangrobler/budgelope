@@ -43,8 +43,6 @@
             <input type="checkbox" name="cleared" id="cleared_trans" [(ngModel)]="transaction.cleared"> Cleared
           </label>
         </div>
-        {{item | async | json}}
-
         <div class="btn-group">
           <button type="button" class="btn btn-success" (click)="saveTransaction()">
             Save Transaction
