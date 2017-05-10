@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { AngularFireDatabase, FirebaseObjectObservable, FirebaseListObservable } from 'angularfire2/database';
 
-import { AnalyticsService } from '../../core/analytics.service';
 import { Transaction } from '../../shared/transaction';
 import { Account } from '../../shared/account';
 import { Budget } from '../../shared/budget';
@@ -38,12 +37,10 @@ export class TransactionComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private db: AngularFireDatabase,
-    private _analytics: AnalyticsService
 
   ) { }
 
   ngOnInit() {
-    this._analytics.pageView('/transaction.html');
     this.userId = this.userService.authUser.uid;
     this.activeBudget = this.budgetService.getActiveBudget();
     this.route.params.forEach((params: Params) => {
