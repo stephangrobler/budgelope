@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { AngularFireDatabase, FirebaseObjectObservable, FirebaseListObservable } from 'angularfire2/database';
 
+import { AnalyticsService } from '../../core/analytics.service';
 import { Transaction } from '../../shared/transaction';
 import { Account } from '../../shared/account';
 import { Budget } from '../../shared/budget';
@@ -36,11 +37,13 @@ export class TransactionComponent implements OnInit {
     private transactionService: TransactionService,
     private router: Router,
     private route: ActivatedRoute,
-    private db: AngularFireDatabase
+    private db: AngularFireDatabase,
+    private _analytics: AnalyticsService
 
   ) { }
 
   ngOnInit() {
+    this._analytics.pageView('/transaction.html');
     this.userId = this.userService.authUser.uid;
     this.activeBudget = this.budgetService.getActiveBudget();
     this.route.params.forEach((params: Params) => {
@@ -52,7 +55,6 @@ export class TransactionComponent implements OnInit {
     } else {
       this.transaction = {};
     }
-    console.log(this.transaction);
     // get the budget accounts
     this.accounts = this.db.list('accounts/' + this.activeBudget.id);
     this.categories = this.db.list('categories/' + this.userId);
@@ -86,22 +88,11 @@ export class TransactionComponent implements OnInit {
   }
 
   create() {
-    let items = this.db.list('transactions/' + this.userId + '/' + this.activeBudget.id);
-    items.push({
-      categoryId: this.transaction.category.$key,
-      category: this.transaction.category.name,
-      accountId: this.transaction.account.$key,
-      account: this.transaction.account.name,
-      amount: this.transaction.amount,
-      type: this.transaction.type,
-      payee: this.transaction.payee
-    }).then(response => {
-      alert('transaction created successfull');
-      this.updateAccount(this.transaction.account);
-    }).catch(error => {
-      alert('there was an error creating the transaction.');
-      console.log('ERROR:', error);
-    });
+    this.transactionService.createTransaction(
+      this.transaction,
+      this.userId,
+      this.activeBudget.id
+    );
   }
 
   updateAccount(account: any){

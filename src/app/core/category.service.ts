@@ -12,7 +12,10 @@ export class CategoryService {
 
     newCat.set({
       name: category.name,
-      parent: category.parent
+      parent: category.parent,
+      balance: 0
     });
   }
+
+  
 }

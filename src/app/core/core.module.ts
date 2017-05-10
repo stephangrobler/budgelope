@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { BudgetService } from './budget.service';
 import { CategoryService } from './category.service';
 import { TransactionService } from './transaction.service';
+import { AnalyticsService } from './analytics.service';
 
 @NgModule({
   imports: [],
@@ -10,7 +11,8 @@ import { TransactionService } from './transaction.service';
   providers: [
     BudgetService,
     CategoryService,
-    TransactionService
+    TransactionService,
+    AnalyticsService
   ]
 })
 export class CoreModule { }
