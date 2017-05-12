@@ -13,19 +13,31 @@ export class BudgetService {
   getActiveBudget() {
     if (null == this.activeBudget) {
       let currentUser = firebase.auth().currentUser;
-      let dbRef = firebase.database().ref('budgets/' + currentUser.uid);
-      dbRef.orderByChild('active').equalTo(true).once('value').then((snapshot) => {
-        let tmp: string[] = snapshot.val(),
-          tmpObj = tmp[Object.keys(tmp)[0]]; // create a temp object from the first record returned
-        this.activeBudget = new Budget(
-          tmpObj.name,
-          new Date(),
-          tmpObj.active,
-          null,
-          tmpObj.id
-        );
+      // get the activebudget from the user object
+      let dbRef = firebase.database().ref('users/' + currentUser.uid + '/activeBudget');
+      let tmpObj: any = {};
+
+      dbRef.once('value').then((snapshot) => {
+        let tmp: string[] = snapshot.val();
+        let bRef = firebase.database().ref('budgets/' + tmp);
+
+        bRef.once('value', (bSnap) => {
+          tmpObj = bSnap.val();
+          this.activeBudget = new Budget(
+            tmpObj.name,
+            new Date(),
+            tmpObj.active,
+            null,
+            tmpObj.id
+          );        
+        });
+
+        console.log('tmpObj', tmpObj);
       });
+
+
     }
+    console.log('this', this.activeBudget);
     return this.activeBudget;
   }
 

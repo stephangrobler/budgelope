@@ -11,7 +11,7 @@ import { UserService } from '../../shared/user.service';
 })
 export class BudgetListComponent implements OnInit {
   theUserId: string;
-  budgets: Budget[];
+  budgets: any[];
 
   constructor(private userService: UserService) {  }
 
@@ -22,11 +22,20 @@ export class BudgetListComponent implements OnInit {
   }
 
   getBudgets(){
-    let dbRef = firebase.database().ref('budgets/' + this.theUserId);
+    let dbRef = firebase.database().ref('users/'+this.theUserId+'/budgets');
 
     dbRef.once('value').then((snapshot) => {
       let tmp: string[] = snapshot.val();
-      this.budgets = Object.keys(tmp).map(key => tmp[key]);
+      let bList: any[] = [];
+
+      // loop through to get all the users budgets
+      Object.keys(tmp).forEach((key) => {        
+        let bRef = firebase.database().ref('budgets/'+key);
+        bRef.once('value', (bSnap) => {
+          bList.push(bSnap.val());
+        });
+      });
+      this.budgets = bList;
     });
   }
 }
