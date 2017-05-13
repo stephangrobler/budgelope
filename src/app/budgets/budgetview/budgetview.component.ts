@@ -12,92 +12,28 @@ import { UserService } from '../../shared/user.service';
 export class BudgetviewComponent implements OnInit {
   categoriesAllocations: FirebaseListObservable<any>;
   categories: any[];
+  allocations: FirebaseListObservable<any>;
   userId: string;
   activeBudget: any;
+  selectedMonth: string = '201704';
 
   constructor(
     private db:AngularFireDatabase,
     private budgetService: BudgetService,
     private userService: UserService
   ) {
-    this.activeBudget = this.budgetService.getActiveBudget();
-    this.userId = this.userService.authUser.uid;
+    // this.activeBudget = this.budgetService.getActiveBudget();
+    // this.userId = this.userService.authUser.uid;
+    this.activeBudget = {id: '-Kj4WoSIBP26dbPlEwj5'};
+    this.userId = '';
 
-    db.list('categories/'+this.userId, ).subscribe(categories => {
-      categories.forEach(snap => {
-        let dbRef = 'categoryAllocations/' + this.activeBudget.id + '/' + snap.$key;
-        snap.allocations = this.db.list(dbRef, {
-          query: {
-            limitToLast: 2
-          }
-        });
-
+    db.list('categories/' + this.activeBudget.id).subscribe((catSnap) => {
+      catSnap.forEach((cat) => {
+        let allRef = this.db.object('categoryAllocations/' + this.activeBudget.id +'/'+this.selectedMonth+'/' + cat.$key);
+        cat.allocations = allRef;
       });
-      console.log(categories);
-      this.categories = categories;
+      this.categories = catSnap;
     });
-
-
-
-    /*
-      "category": "Groceries",
-      "allocations": {
-        "2017-04": {
-          "Planned": 500,
-          "Actual": 0,
-          "Balance": 500
-        },
-        "2017-05": {
-          "Planned": 1500,
-          "Actual": 2000,
-          "Balance": -500
-        },
-        "2017-06": {
-          "Planned": 500,
-          "Actual": 1000,
-          "Balance": -500
-        }
-      },
-    }, {
-        "category": "Spending Money",
-        "allocations": {
-          "2017-04": {
-            "Planned": 500,
-            "Actual": 0,
-            "Balance": 500
-          },
-          "2017-05": {
-            "Planned": 1500,
-            "Actual": 1000,
-            "Balance": 500
-          },
-          "2017-06": {
-            "Planned": 500,
-            "Actual": 1000,
-            "Balance": -500
-          }
-        },
-      }, {
-        "category": "Restaurants",
-        "allocations": {
-          "2017-04": {
-            "Planned": 500,
-            "Actual": 0,
-            "Balance": 500
-          },
-          "2017-05": {
-            "Planned": 1500,
-            "Actual": 1000,
-            "Balance": 500
-          },
-          "2017-06": {
-            "Planned": 500,
-            "Actual": 1000,
-            "Balance": -500
-          }
-        },
-      }
-    ];*/
   }
 
   ngOnInit() {
