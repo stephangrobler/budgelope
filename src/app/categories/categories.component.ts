@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import * as firebase from 'firebase';
+import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 
 import { Category } from '../shared/category';
 import { CategoryService} from '../core/category.service';
 import { UserService } from '../shared/user.service';
+
+import { BudgetService } from '../core/budget.service';
 
 @Component({
   templateUrl: 'categories.component.html',
@@ -11,22 +14,19 @@ import { UserService } from '../shared/user.service';
 
 export class CategoriesComponent implements OnInit {
   userId: string;
-  categories: Category[];
+  categories: FirebaseListObservable<any>;
+  activeBudget: any;
 
   constructor(
-    private userService: UserService
+    private userService: UserService,
+    private budgetService: BudgetService,
+    private db: AngularFireDatabase
   ) {  }
 
   ngOnInit() {
+    this.activeBudget = this.budgetService.getActiveBudget();
     this.userId = this.userService.authUser.uid;
-    this.getCategories();
+    this.categories = this.db.list('categories/'+this.activeBudget.id);
   }
 
-  getCategories(){
-    let dbRef = firebase.database().ref('categories/'+this.userId);
-    dbRef.once('value').then((snapshot) => {
-      let tmp: string[] = snapshot.val();
-      this.categories = Object.keys(tmp).map(key => tmp[key]);
-    });
-  }
 }
