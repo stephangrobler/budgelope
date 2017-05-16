@@ -13,11 +13,15 @@
 
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav">
+      <ul class="nav navbar-nav" *ngIf="theUser">
         <li><a [routerLink]="['/budgets']">Budgets <span *ngIf="theBudget">[ {{theBudget.name}} ]</span></a></li>
         <li><a [routerLink]="['/accounts']">Accounts</a></li>
         <li><a [routerLink]="['/categories']">Categories</a></li>
         <li><a [routerLink]="['/transactions']">Transactions</a></li>
+      </ul>
+      <ul class="nav navbar-nav" *ngIf="!theUser">
+        <li><a [routerLink]="['/features']">Features</a></li>
+        <li><a [routerLink]="['/pricing']">Pricing</a></li>
       </ul>
       <div *ngIf="!theUser">
         <ul class="nav navbar-nav navbar-right">
