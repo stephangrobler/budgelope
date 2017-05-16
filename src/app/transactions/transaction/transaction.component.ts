@@ -47,14 +47,14 @@ export class TransactionComponent implements OnInit {
       this.transactionId = params["id"];
     });
     if (this.transactionId != "add") {
-      this.item = this.db.object('transactions/' + this.userId + '/' + this.activeBudget.id + '/' + this.transactionId);
+      this.item = this.db.object('transactions/' + this.activeBudget.id + '/' + this.transactionId);
       this.item.subscribe(transaction => { this.transaction = transaction });
     } else {
       this.transaction = {};
     }
     // get the budget accounts
     this.accounts = this.db.list('accounts/' + this.activeBudget.id);
-    this.categories = this.db.list('categories/' + this.userId);
+    this.categories = this.db.list('categories/' + this.activeBudget.id);
   }
 
   saveTransaction() {

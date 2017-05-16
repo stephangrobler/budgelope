@@ -18,7 +18,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let transaction of transactions | async" [routerLink]="['/transaction/'+transaction.$key]">
+          <tr *ngFor="let transaction of transactions" [routerLink]="['/transaction/'+transaction.$key]">
             <td>{{transaction.timestamp | date}}</td>
             <td>{{transaction.payee}}</td>
             <td>{{transaction.account}}</td>

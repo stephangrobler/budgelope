@@ -14,7 +14,7 @@ export class TransactionsComponent implements OnInit {
 
   userId: string;
   budgetId: string;
-  transactions: FirebaseListObservable<any[]>;
+  transactions: any[];
 
   constructor(
     private transService: TransactionService,
@@ -29,8 +29,14 @@ export class TransactionsComponent implements OnInit {
   ngOnInit() {
     this.userId = this.userService.authUser.uid;
     this.budgetId = this.budgetService.getActiveBudget().id;
-    let ref = 'transactions/' + this.userId + '/' + this.budgetId;
-    this.transactions = this.db.list(ref);
+    let ref = 'transactions/' + this.budgetId;
+    this.db.list(ref).subscribe(snapshots => {
+      let list: any = [];
+      snapshots.forEach(trans => {
+        list.push(trans);
+      });
+      this.transactions = list.reverse();
+    });
 
   }
 

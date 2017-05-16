@@ -13,7 +13,7 @@ export class TransactionService {
   ) {  }
 
   createTransaction(transaction: any, userId: string, budgetId: string){
-    let items = this.db.list('transactions/' + userId + '/' + budgetId);
+    let items = this.db.list('transactions/' + budgetId);
     let transactionItem = {
       categoryId: transaction.category.$key,
       category: transaction.category.name,
@@ -50,7 +50,7 @@ export class TransactionService {
         catBalance += parseFloat(transaction.amount);
       }
       updateObj['accounts/' + budgetId + '/' + transaction.account.$key + '/balance'] = accBalance;
-      updateObj['categories/' + userId + '/' + transaction.category.$key + '/balance'] = catBalance;
+      updateObj['categories/' + budgetId + '/' + transaction.category.$key + '/balance'] = catBalance;
 
       this.db.object('/').update(updateObj);
 
