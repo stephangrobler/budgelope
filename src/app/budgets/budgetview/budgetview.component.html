@@ -8,44 +8,62 @@
       </div>
     </div>
     <div class="col-xs-9">
+      <!-- page-header -->
       <div class="row">
-        <div class="col-xs-4">
-          Categories
+        <div class="col-xs-12 col-sm-8">
+          <div class="page-header">
+            <h2>{{ this.selectedMonth.format("MMMM 'YY")}}</h2>
+          </div>
         </div>
-        <div class="col-xs-8">
-          <h2>month 1</h2>
+        <div class="col-xs-12 col-sm-4">
+          <ul class="list-group">
+            <li class="list-group-item">Available : 300</li>
+            <li class="list-group-item">Income : 45100</li>
+            <li class="list-group-item">Expense : 4000</li>
+          </ul>
+        </div>
+      </div>
+      <!-- header -->
+      <div class="row">
+        <div class="col-xs-8 col-xs-offset-4">
           <div class="row">
             <div class="col-xs-12 col-sm-4">
-              Planned
+              <div class="text-right">
+                Planned
+              </div>
             </div>
             <div class="col-xs-12 col-sm-4">
-              Actual
+              <div class="text-right">
+                Actual
+              </div>
             </div>
             <div class="col-xs-12 col-sm-4">
-              Balance
+              <div class="text-right">
+                Balance
+              </div>
             </div>
           </div>
         </div>
-
       </div>
-
-      <div class="row" *ngFor="let item of allocations | async" style="background: #ddd; border-bottom: 1px solid #666;">
+      <!-- catlist -->
+      <div class="row" *ngFor="let item of allocations | async" style="background: #eee; border-bottom: 1px solid #666;">
         <div class="col-xs-4">
           {{item.name}}
         </div>
-        <div class="col-xs-8" >
+        <div class="col-xs-8">
           <div class="row" style="padding: 5px 0;">
             <div class="col-xs-12 col-sm-4">
-              <input type="text" name="planned" class="form-control text-right"
-                  [(ngModel)]="item.planned"
-
-                  (blur)="blur(item)">
+              <input type="text" name="planned" class="form-control text-right" [(ngModel)]="item.planned" (blur)="blur(item)" (focus)="focus(item)">
             </div>
             <div class="col-xs-12 col-sm-4">
-                {{item.actual |  number:'1.2'}}
+              <div class="text-right">
+                {{item.actual | number:'1.2'}}
+              </div>
             </div>
             <div class="col-xs-12 col-sm-4">
-                {{item.planned - item.actual |  number:'1.2'}}
+              <div class="text-right">
+                {{item.planned - item.actual | number:'1.2'}}
+              </div>
 
             </div>
           </div>

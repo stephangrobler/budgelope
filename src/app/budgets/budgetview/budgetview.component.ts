@@ -4,6 +4,7 @@ import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/take';
 import * as firebase from 'firebase';
+import * as moment from 'moment';
 
 import { BudgetService } from '../../core/budget.service';
 import { UserService } from '../../shared/user.service';
@@ -19,7 +20,7 @@ export class BudgetviewComponent implements OnInit {
   allocations: FirebaseListObservable<any>;
   userId: string;
   activeBudget: any;
-  selectedMonth: string = '201707';
+  selectedMonth: any = moment();
   monthDisplay: Date;
 
   constructor(
@@ -29,9 +30,10 @@ export class BudgetviewComponent implements OnInit {
   ) {
     // this.activeBudget = this.budgetService.getActiveBudget();
     // this.userId = this.userService.authUser.uid;
+
     this.activeBudget = { id: '-Kj4WoSIBP26dbPlEwj5' };
     this.userId = '';
-    this.allocations = db.list('categoryAllocations/' + this.activeBudget.id + '/' + this.selectedMonth);
+    this.allocations = db.list('categoryAllocations/' + this.activeBudget.id + '/' + this.selectedMonth.format("YYYYMM"));
     this.allocations.subscribe(snp => {
 
       if (snp.length == 0){
@@ -52,6 +54,7 @@ export class BudgetviewComponent implements OnInit {
   }
 
   ngOnInit() {
+
   }
 
   alert(key) {
@@ -59,26 +62,16 @@ export class BudgetviewComponent implements OnInit {
   }
 
   focus(item) {
-    console.log('focus for', item);
+    item.original = item.planned;
   }
 
   blur(item) {
+    if (item.planned != item.original) {
 
-    if (item.planned) {
-      // cat.subscribe(catSnap => {
-      //   val = catSnap.val();
-      // });
-      //   if (!val.balance) {
-      //     val.balance = 0;
-      //   }
-      //   console.log(val);
-      //   console.log("OldBalance", val.balance);
-      //   val.balance += (item.Planned - val.old.Planned);
-      //   console.log("NewBalance", val.balance);
-      //   // check to see if the price is updated or the price is from zero
-      //   // catRef.update({ "balance": val.balance });
-      //   console.log(val);
-
+      this.db.object('categories/'+this.activeBudget.id+'/'+item.$key).take(1).subscribe((cat)=>{
+        cat.balance += parseFloat(item.planned) - parseFloat(item.original);
+        this.db.object('categories/'+this.activeBudget.id+'/'+item.$key).update({balance: cat.balance});
+      });
       this.allocations.update(item.$key, { "planned": item.planned });
     }
   }
