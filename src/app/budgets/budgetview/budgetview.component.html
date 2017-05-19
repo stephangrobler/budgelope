@@ -54,7 +54,9 @@
           <div class="col-xs-8">
             <div class="row" style="padding: 5px 0;">
               <div class="col-xs-12 col-sm-4">
+                <div *ngIf="item.parent != ''">
                 <input type="text" name="planned" class="form-control text-right" [(ngModel)]="item.planned" (blur)="blur(item)" (focus)="focus(item)">
+                </div>
               </div>
               <div class="col-xs-12 col-sm-4">
                 <div class="text-right">
