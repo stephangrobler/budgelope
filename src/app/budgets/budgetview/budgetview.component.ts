@@ -74,7 +74,7 @@ export class BudgetviewComponent implements OnInit {
     console.log('moment-end', end.valueOf());
     // get all the transactions for this month
     //
-    /* Uncomment to run transaction sync to actual month stuffs 
+    /* Uncomment to run transaction sync to actual month stuffs
     let tranlist = db.list('transactions/'+this.activeBudget.id);
     db.list('transactions/'+this.activeBudget.id).take(1).subscribe(tracks => {
       let running: number = 0;
@@ -139,12 +139,10 @@ export class BudgetviewComponent implements OnInit {
 
   blur(item) {
     if (item.planned != item.original) {
-
-      this.db.object('categories/'+this.activeBudget.id+'/'+item.$key).take(1).subscribe((cat)=>{
-        cat.balance += parseFloat(item.planned) - parseFloat(item.original);
-        this.db.object('categories/'+this.activeBudget.id+'/'+item.$key).update({balance: cat.balance});
-      });
-      this.allocations.update(item.$key, { "planned": item.planned });
+      let catBalance: number = 0;
+      item.balance += parseFloat(item.planned) - parseFloat(item.original);
+      this.db.object('categories/'+this.activeBudget.id+'/'+item.$key).update({balance: item.balance});
+      this.allocations.update(item.$key, { "planned": item.planned, "balance": item.balance });
     }
   }
 }
