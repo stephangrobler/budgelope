@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { AngularFireDatabase, FirebaseObjectObservable, FirebaseListObservable } from 'angularfire2/database';
+import * as moment from 'moment';
 
 import { Transaction } from '../../shared/transaction';
 import { Account } from '../../shared/account';
@@ -55,6 +56,7 @@ export class TransactionComponent implements OnInit {
     // get the budget accounts
     this.accounts = this.db.list('accounts/' + this.activeBudget.id);
     this.categories = this.db.list('categories/' + this.activeBudget.id);
+    this.db.object('categoryAllocations/'+moment().format("YYYYMM"))
   }
 
   saveTransaction() {
