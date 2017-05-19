@@ -46,17 +46,17 @@ export class BudgetviewComponent implements OnInit {
       this.totalAvailable = 0;
       snp.forEach(val => {
         this.totalBudgeted += parseFloat(val.planned);
-        if (val.type == "income"){
+        if (val.type == "income") {
           this.totalIncome += parseFloat(val.actual);
         } else {
           this.totalExpense += parseFloat(val.actual);
         }
       });
       this.totalAvailable = this.totalIncome - this.totalBudgeted;
-      if (snp.length == 0){
+      if (snp.length == 0) {
         console.log('creating new allocations records for ' + this.selectedMonth);
         // get the categories list and push new allocations to the list.
-        db.list('categories/'+this.activeBudget.id).subscribe(catSnapshots => {
+        db.list('categories/' + this.activeBudget.id).subscribe(catSnapshots => {
           catSnapshots.forEach(catSnapshot => {
             this.allocations.update(catSnapshot.$key, {
               planned: 0,
@@ -129,7 +129,7 @@ export class BudgetviewComponent implements OnInit {
     console.log('key for', key);
   }
 
-  calculateBalance(actual, planned){
+  calculateBalance(actual, planned) {
     return parseFloat(planned) + parseFloat(actual);
   }
 
@@ -141,7 +141,14 @@ export class BudgetviewComponent implements OnInit {
     if (item.planned != item.original) {
       let catBalance: number = 0;
       item.balance += parseFloat(item.planned) - parseFloat(item.original);
-      this.db.object('categories/'+this.activeBudget.id+'/'+item.$key).update({balance: item.balance});
+      // update the category balance
+      this.db.object('categories/' + this.activeBudget.id + '/' + item.$key).update({ balance: item.balance });
+      // update next months previous balance
+      let nextMonth = moment().add(1, 'months').format("YYYYMM");
+      let nextMonthRef = 'categoryAllocations/' + this.activeBudget.id + '/' + nextMonth + '/' + item.$key;
+
+      this.db.object(nextMonthRef).update({ previousBalance: item.balance });
+      // update the item with the planned and balance.
       this.allocations.update(item.$key, { "planned": item.planned, "balance": item.balance });
     }
   }
