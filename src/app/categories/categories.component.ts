@@ -26,7 +26,11 @@ export class CategoriesComponent implements OnInit {
   ngOnInit() {
     this.activeBudget = this.budgetService.getActiveBudget();
     this.userId = this.userService.authUser.uid;
-    this.categories = this.db.list('categories/'+this.activeBudget.id);
+    this.categories = this.db.list('categories/'+this.activeBudget.id, {
+      query: {
+        orderByChild: 'sortingOrder'
+      }
+    });
   }
 
 }

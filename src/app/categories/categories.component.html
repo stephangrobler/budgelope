@@ -14,7 +14,10 @@
         </thead>
         <tbody>
           <tr *ngFor="let category of categories | async">
-            <td>{{category.name}} {{' :: ' + category.parent}}</td>
+            <td>
+              <span *ngIf="category.parent == ''"><b>{{category.name}}</b></span>
+              <span *ngIf="category.parent != ''">{{category.name}}</span>              
+            </td>
             <td class="text-right">{{category.balance | number:'1.2'}}</td>
           </tr>
         </tbody>
