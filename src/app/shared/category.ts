@@ -1,9 +1,8 @@
 export class Category {
   name: string;
-  userId?: string;
   parent: string;
   parentId: string;
-  order: number;
+  sortingOrder: string;
   balance: number;
   id?: string;
 }

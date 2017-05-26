@@ -1,21 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Category } from '../shared/category';
+import { AngularFireDatabase } from 'angularfire2/database';
 import * as firebase from 'firebase';
 
 @Injectable()
 export class CategoryService {
-  constructor() {  }
+  constructor(
+    private db: AngularFireDatabase
+  ) {  }
 
-  createCategory(category: Category){
-    let dbRef = firebase.database().ref('categories/'+category.userId);
-    let newCat = dbRef.push();
-
-    newCat.set({
-      name: category.name,
-      parent: category.parent,
-      balance: 0
-    });
+  createCategory(budgetId: string, category: Category){
+    let dbRef = this.db.list('categories/' + budgetId);
+    let newCat = dbRef.push(category);
   }
 
-  
+
 }
