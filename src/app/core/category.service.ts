@@ -12,6 +12,7 @@ export class CategoryService {
   createCategory(budgetId: string, category: Category){
     let dbRef = this.db.list('categories/' + budgetId);
     let newCat = dbRef.push(category);
+    // create a allocation
   }
 
 

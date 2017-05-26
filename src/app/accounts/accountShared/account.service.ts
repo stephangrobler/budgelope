@@ -12,8 +12,8 @@ export class AccountService {
     let dbRef = firebase.database().ref('accounts/' + account.budgetId);
     let newAccount = dbRef.push();
     newAccount.set({
-      title: account.title,
-      current: account.current,
+      name: account.name,
+      balance: account.balance,
       id: newAccount.key
     });
   }
@@ -21,8 +21,8 @@ export class AccountService {
   updateAccount(update: Account){
     let dbRef = firebase.database().ref('accounts').child(update.id)
       .update({
-        title: update.title,
-        current: update.current
+        name: update.name,
+        balance: update.balance
       });
     alert('account updated');
   }
