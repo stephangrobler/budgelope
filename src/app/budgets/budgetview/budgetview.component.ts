@@ -1,11 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable } from 'angularfire2/database';
+import { AngularFireAuth } from 'angularfire2/auth';
+
+
+
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/take';
 import * as firebase from 'firebase';
 import * as moment from 'moment';
 
+import { Account } from '../../shared/account';
 import { BudgetService } from '../../core/budget.service';
 import { UserService } from '../../shared/user.service';
 
@@ -18,10 +23,13 @@ export class BudgetviewComponent implements OnInit {
   categoriesAllocations: FirebaseListObservable<any>;
   categories: any[];
   allocations: FirebaseListObservable<any>;
+  accounts: FirebaseListObservable<Account[]>;
   userId: string;
-  activeBudget: any;
+  activeBudget: string;
   selectedMonth: any = moment();
   monthDisplay: Date;
+
+  isHeader: boolean = false;
 
   totalIncome: number = 0;
   totalExpense: number = 0;
@@ -31,14 +39,36 @@ export class BudgetviewComponent implements OnInit {
   constructor(
     private db: AngularFireDatabase,
     private budgetService: BudgetService,
-    private userService: UserService
+    private userService: UserService,
+    private auth: AngularFireAuth
   ) {
-    // this.activeBudget = this.budgetService.getActiveBudget();
-    // this.userId = this.userService.authUser.uid;
+    auth.authState.subscribe((user) => {
+      if (!user){
+        return;
+      }
+      let profile = db.object('users/'+ user.uid).subscribe(profile => {
+        this.loadBudget(profile.activeBudget);
+        this.loadAccounts(profile.activeBudget);
+        this.activeBudget = profile.activeBudget;
+      });
+    });
+  }
 
-    this.activeBudget = { id: '-Kj4WoSIBP26dbPlEwj5' };
-    this.userId = '';
-    this.allocations = db.list('categoryAllocations/' + this.activeBudget.id + '/' + this.selectedMonth.format("YYYYMM"));
+  ngOnInit() {
+
+  }
+
+  checkIsHeader(item){
+    return item.parent == '';
+  }
+
+  loadBudget(budgetId: string) {
+    this.allocations = this.db.list('categoryAllocations/' + budgetId + '/' + this.selectedMonth.format("YYYYMM"), {
+      query: {
+        orderByChild: 'sortingOrder'
+      }
+    });
+
     this.allocations.subscribe(snp => {
       this.totalExpense = 0;
       this.totalBudgeted = 0;
@@ -54,9 +84,9 @@ export class BudgetviewComponent implements OnInit {
       });
       this.totalAvailable = this.totalIncome - this.totalBudgeted;
       if (snp.length == 0) {
-        console.log('creating new allocations records for ' + this.selectedMonth);
+
         // get the categories list and push new allocations to the list.
-        db.list('categories/' + this.activeBudget.id).subscribe(catSnapshots => {
+        this.db.list('categories/' + budgetId).subscribe(catSnapshots => {
           catSnapshots.forEach(catSnapshot => {
             this.allocations.update(catSnapshot.$key, {
               planned: 0,
@@ -75,7 +105,7 @@ export class BudgetviewComponent implements OnInit {
     // get all the transactions for this month
     //
     /* Uncomment to run transaction sync to actual month stuffs
-    let tranlist = db.list('transactions/'+this.activeBudget.id);
+    let tranlist = db.list('transactions/'+budgetId);
     db.list('transactions/'+this.activeBudget.id).take(1).subscribe(tracks => {
       let running: number = 0;
       let accObj = {};
@@ -121,8 +151,9 @@ export class BudgetviewComponent implements OnInit {
     /**/
   }
 
-  ngOnInit() {
-
+  loadAccounts(budgetId: string){
+    let accRef = 'accounts/' + budgetId;
+    this.accounts = this.db.list(accRef);
   }
 
   alert(key) {
@@ -142,10 +173,10 @@ export class BudgetviewComponent implements OnInit {
       let catBalance: number = 0;
       item.balance += parseFloat(item.planned) - parseFloat(item.original);
       // update the category balance
-      this.db.object('categories/' + this.activeBudget.id + '/' + item.$key).update({ balance: item.balance });
+      this.db.object('categories/' + this.activeBudget + '/' + item.$key).update({ balance: item.balance });
       // update next months previous balance
       let nextMonth = moment().add(1, 'months').format("YYYYMM");
-      let nextMonthRef = 'categoryAllocations/' + this.activeBudget.id + '/' + nextMonth + '/' + item.$key;
+      let nextMonthRef = 'categoryAllocations/' + this.activeBudget + '/' + nextMonth + '/' + item.$key;
 
       this.db.object(nextMonthRef).update({ previousBalance: item.balance });
       // update the item with the planned and balance.

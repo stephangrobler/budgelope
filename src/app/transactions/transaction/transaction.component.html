@@ -2,56 +2,59 @@
 <div class="container">
   <div class="row">
     <div class="col-xs-12">
-      <form class="form" *ngIf="transaction" >
-        <div class="form-group">
-          <div >
-            <label for="expense_type" class="radio-inline">
-              <input id="expense_type" type="radio" value="expense" name="type" [(ngModel)]="transaction.type"> Expense
-            </label>
-            <label for="income_type" class="radio-inline">
-              <input id="income_type" type="radio" value="income" name="type" [(ngModel)]="transaction.type"> Income
-            </label>
-          </div>
-          <p class="help-block"></p>
-        </div>
-        <div class="form-group">
-          <label for="">Amount</label>
-          <input type="text" class="form-control" placeholder="" name="amount" [(ngModel)]="transaction.amount">
-          <p class="help-block"></p>
-        </div>
-        <div class="form-group">
-          <label for="">Payee</label>
-          <input type="text" class="form-control" id="" placeholder="" [(ngModel)]="transaction.payee" name="transaction.payee">
-          <p class="help-block"></p>
-        </div>
-        <div class="form-group">
-          <label for="">Category</label>
-          <select class="form-control" name="category" [(ngModel)]="transaction.category">
-            <option [ngValue]="category" *ngFor="let category of categories | async">{{category.name}}</option>
-          </select>
-          <p class="help-block"></p>
-        </div>
-        <div class="form-group">
-          <label for="">Account</label>
-          <select class="form-control" name="account" [(ngModel)]="transaction.account">
-            <option [ngValue]="account" *ngFor="let account of accounts | async">{{account.title}}</option>
-          </select>
-          <p class="help-block"></p>
-        </div>
-        <div class="checkbox">
-          <label for="cleared_trans">
-            <input type="checkbox" name="cleared" id="cleared_trans" [(ngModel)]="transaction.cleared"> Cleared
-          </label>
-        </div>
-        <div class="btn-group">
-          <button type="button" class="btn btn-success" (click)="saveTransaction()">
-            Save Transaction
-          </button>
-          <button type="button" class="btn btn-danger" (click)="cancel()">
-            Cancel
-          </button>
-        </div>
+      <form class="form" *ngIf="transaction">
+        <md-card class="transaction-card">
+
+          <md-card-content>
+            <section>
+              <md-radio-group [(ngModel)]="transaction.type" name="type">
+                <md-radio-button [value]="'expense'">Spend</md-radio-button>
+                <md-radio-button [value]="'income'">Earn</md-radio-button>
+              </md-radio-group>
+            </section>
+            <section>
+              <md-input-container>
+                <input mdInput placeholder="Amount" value="" type="number" [(ngModel)]="transaction.amount" name="amount">
+              </md-input-container>
+            </section>
+            <section>
+              <md-input-container>
+                <input mdInput placeholder="Payee" value="" type="text" [(ngModel)]="transaction.payee" name="payee">
+              </md-input-container>
+            </section>
+            <section>
+              <md-select placeholder="Category" [(ngModel)]="transaction.category" name="category">
+                <md-option *ngFor="let category of categories" [value]="category">
+                  {{category.name}}
+                </md-option>
+              </md-select>
+            </section>
+            <section>
+              <md-select placeholder="Account" [(ngModel)]="transaction.account" name="account">
+                <md-option [value]="account" *ngFor="let account of accounts">
+                  {{account.name}}
+                </md-option>
+              </md-select>
+            </section>
+            <section>
+              <md-checkbox [(ngModel)]="transaction.cleared" name="cleared" [align]="end">
+                Cleared
+              </md-checkbox>
+            </section>
+          </md-card-content>
+          <md-card-actions>
+            <button md-raised-button color="primary" type="button" (click)="saveTransaction()">
+              Save Transaction
+            </button>
+            <button md-raised-button color="warn" type="button" (click)="cancel()">
+              Cancel
+            </button>
+          </md-card-actions>
+        </md-card>
+
+
       </form>
+      {{transaction | json}}
     </div>
   </div>
 </div>

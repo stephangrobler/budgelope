@@ -2,6 +2,9 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+import {MdCheckboxModule, MdInputModule, MdRadioModule, MdDatepickerModule, MdSelectModule, MdCardModule, MdButtonModule} from '@angular/material';
+import { NgxDatatableModule } from '@swimlane/ngx-datatable';
+
 import { TransactionRoutingModule } from './transaction-routing.module';
 import { SharedModule } from '../shared/shared.module';
 
@@ -13,7 +16,15 @@ import { TransactionComponent } from './transaction/transaction.component';
     CommonModule,
     FormsModule,
     TransactionRoutingModule,
-    SharedModule
+    SharedModule,
+    MdCheckboxModule,
+    MdInputModule,
+    MdRadioModule,
+    MdDatepickerModule,
+    MdSelectModule,
+    MdCardModule,
+    MdButtonModule,
+    NgxDatatableModule
   ],
   declarations: [
     TransactionsComponent,

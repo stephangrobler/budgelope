@@ -5,35 +5,21 @@
       <div class="page-header">
         <h1>Transactions <small></small><a [routerLink]="['/transaction/add']" class="btn btn-success">Add Transaction</a></h1>
       </div>
-      <table class="table table-bordered table-striped">
-        <thead>
-          <tr>
-            <td>Date</td>
-            <td>Payee</td>
-            <td>Account</td>
-            <td>Category</td>
-            <td>Inflow</td>
-            <td>Outflow</td>
-            <td width="5%">Cleared</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let transaction of transactions" [routerLink]="['/transaction/'+transaction.$key]">
-            <td>{{transaction.timestamp | date}}</td>
-            <td>{{transaction.payee}}</td>
-            <td>{{transaction.account}}</td>
-            <td>{{transaction.category}}</td>
-            <td><span *ngIf="transaction.type == 'income'" class="label label-success">{{transaction.amount | currency:'ZAR':true}}</span></td>
-            <td><span *ngIf="transaction.type == 'expense'" class="label label-danger">{{transaction.amount | currency:'ZAR':true}}</span></td>
-            <td>
-              <span class="glyphicon glyphicon-check" *ngIf="transaction.cleared"></span>
-              <span class="glyphicon glyphicon-unchecked" *ngIf="!transaction.cleared"></span>
-            </td>
-
-          </tr>
-        </tbody>
-      </table>
-
+      <ngx-datatable class="material" [rows]="transactions">
+        <ngx-datatable-column name="timestamp">
+          <ng-template let-column="column" let-sort="sortFn" ngx-datatable-header-template>
+            <span (click)="sort()">Date</span>
+          </ng-template>
+          <ng-template let-value="value" ngx-datatable-cell-template>
+            {{value | date}}
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column name="Account"></ngx-datatable-column>
+        <ngx-datatable-column name="Payee"></ngx-datatable-column>
+        <ngx-datatable-column name="Category"></ngx-datatable-column>
+        <ngx-datatable-column name="Amount"></ngx-datatable-column>
+        <ngx-datatable-column name="Cleared"></ngx-datatable-column>
+      </ngx-datatable>
     </div>
   </div>
 </div>

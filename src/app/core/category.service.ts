@@ -9,11 +9,22 @@ export class CategoryService {
     private db: AngularFireDatabase
   ) {  }
 
+
   createCategory(budgetId: string, category: Category){
     let dbRef = this.db.list('categories/' + budgetId);
     let newCat = dbRef.push(category);
     // create a allocation
+    
   }
+
+  updateCategory(budgetId: string, category: Category){
+
+  }
+
+  deleteCategory(budgetId: string, category: Category){
+
+  }
+
 
 
 }

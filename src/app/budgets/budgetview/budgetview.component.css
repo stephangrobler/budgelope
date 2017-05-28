@@ -1,0 +1,27 @@
+.container {
+  padding: 10px;
+}
+
+.header {
+  background: #353;
+}
+
+.budget-view .name {
+  order: 1;
+  width: 40%;
+}
+
+.budget-view .planned-input {
+  order: 2;
+  width: 20%;
+}
+
+.budget-view .actual {
+  order: 3;
+  width: 20%;
+}
+
+.budget-view .balance {
+  order: 4;
+  width: 20%;
+}

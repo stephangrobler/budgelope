@@ -36,7 +36,28 @@ export class CategoriesComponent implements OnInit {
           }
         });
         this.categories.subscribe(snap => {
-          console.log(snap);
+          let allocations = db.list('categoryAllocations/'+this.activeBudget);
+          allocations.take(1).subscribe((alloc)=>{
+            // console.log(alloc.$key);
+            // loop through the categories
+            snap.forEach(cat => {
+              // update each allocation in the allocations list, this should happen only on
+              // category creation
+              alloc.forEach(allocation => {
+                let ref: string = allocation.$key + '/' + cat.$key;
+                let actual: number = allocation[cat.$key].actual;
+                let planned: number = allocation[cat.$key].planned;
+                
+                if (!allocation[cat.$key].actual){
+                  actual = 0;
+                }
+                if (!allocation[cat.$key].planned){
+                  planned = 0;
+                }
+                // allocations.update(ref, {name: cat.name, sortingOrder: cat.sortingOrder, balance: cat.balance, actual: actual, planned: planned});
+              });
+            });
+          });
         });
       });
     })

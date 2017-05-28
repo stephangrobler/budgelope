@@ -29,15 +29,10 @@ export class BudgetService {
             tmpObj.active,
             null,
             tmpObj.id
-          );        
+          );
         });
-
-        console.log('tmpObj', tmpObj);
       });
-
-
     }
-    console.log('this', this.activeBudget);
     return this.activeBudget;
   }
 

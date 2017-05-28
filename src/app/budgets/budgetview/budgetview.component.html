@@ -2,12 +2,7 @@
 <navi-bar></navi-bar>
 <div class="container">
   <div class="row">
-    <div class="col-xs-3">
-      <div class="page-header">
-        <h3>Accounts <small></small></h3>
-      </div>
-    </div>
-    <div class="col-xs-9">
+    <div class="col-xs-12">
       <!-- page-header -->
       <div class="row">
         <div class="col-xs-12 col-sm-8">
@@ -16,64 +11,82 @@
           </div>
         </div>
         <div class="col-xs-12 col-sm-4">
-          <ul class="list-group">
-            <li class="list-group-item text-right">Available : {{ totalAvailable | number: '1.2'}}</li>
-            <li class="list-group-item text-right">Income : {{ totalIncome | number: '1.2'}}</li>
-            <li class="list-group-item text-right">Expense : {{ totalExpense | number: '1.2'}}</li>
-          </ul>
+          <md-list>
+            <md-list-item>Available : {{ totalAvailable | number: '1.2'}}</md-list-item>
+            <md-list-item>Income : {{ totalIncome | number: '1.2'}}</md-list-item>
+            <md-list-item>Expense : {{ totalExpense | number: '1.2'}}</md-list-item>
+          </md-list>
         </div>
       </div>
       <!-- header -->
       <div class="row">
-        <div class="col-xs-8 col-xs-offset-4">
+        <div class="col-xs-4">
+          create category
+        </div>
+        <div class="col-xs-8">
           <div class="row">
             <div class="col-xs-12 col-sm-4">
               <div class="text-right">
-                Planned
+
               </div>
             </div>
             <div class="col-xs-12 col-sm-4">
               <div class="text-right">
-                Actual
+
               </div>
             </div>
             <div class="col-xs-12 col-sm-4">
               <div class="text-right">
-                Balance
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- catlist -->
-      <div class="row" *ngFor="let item of allocations | async" style="background: #eee; border-bottom: 1px solid #666;">
-        <div *ngIf="item.type != 'income'">
-          <div class="col-xs-4">
-            {{item.name}}
-          </div>
-          <div class="col-xs-8">
-            <div class="row" style="padding: 5px 0;">
-              <div class="col-xs-12 col-sm-4">
-                <div *ngIf="item.parent != ''">
-                <input type="text" name="planned" class="form-control text-right" [(ngModel)]="item.planned" (blur)="blur(item)" (focus)="focus(item)">
-                </div>
-              </div>
-              <div class="col-xs-12 col-sm-4">
-                <div class="text-right">
-                  {{item.actual | number:'1.2'}}
-                </div>
-              </div>
-              <div class="col-xs-12 col-sm-4">
-                <div class="text-right">
-                  {{item.balance | number:'1.2'}}
-                </div>
 
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+      <!-- catlist -->
+      <md-card class="budget-view">
+        <md-card-header style="padding: 0 16px;">
+          <div class="name">
+
+          </div>
+          <div class="planned-input text-right">
+            Planned
+          </div>
+          <div class="actual text-right">
+            Actual
+          </div>
+          <div class="balance text-right">
+            Balance
+          </div>
+        </md-card-header>
+        <md-card-content>
+          <md-list>
+            <div  *ngFor="let item of allocations | async">
+            <md-list-item *ngIf="item.type != 'income'" [ngClass]="{'header': checkIsHeader(item)}">
+              <div class="name">
+                  {{item.name}}
+              </div>
+              <div class="planned-input">
+                <md-input-container *ngIf="item.parent != ''">
+                  <input mdInput type="number" name="planned" class="text-right" [(ngModel)]="item.planned" (blur)="blur(item)" (focus)="focus(item)">
+                </md-input-container>
+              </div>
+              <div class="actual text-right" *ngIf="item.parent != ''">
+                {{item.actual | number:'1.2'}}
+              </div>
+              <div class="balance text-right" *ngIf="item.parent != ''">
+                {{item.balance | number:'1.2'}}
+              </div>
+
+            </md-list-item>
+            <md-divider *ngIf="item.type != 'income'"></md-divider>
+            </div>
+          </md-list>
+        </md-card-content>
+
+      </md-card>
+
+
 
   </div>
 </div>

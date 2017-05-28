@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+import { AngularFireAuth } from 'angularfire2/auth';
 
 import { Transaction } from '../shared/transaction';
 import { TransactionService } from '../core/transaction.service';
@@ -14,30 +15,42 @@ export class TransactionsComponent implements OnInit {
 
   userId: string;
   budgetId: string;
-  transactions: any[];
+  transactions: FirebaseListObservable<Transaction[]>;
+
+  colums: any[];
 
   constructor(
     private transService: TransactionService,
     private budgetService: BudgetService,
     private userService: UserService,
     private router: Router,
-    private db: AngularFireDatabase
+    private db: AngularFireDatabase,
+    private af: AngularFireAuth
   ) {
-
+    af.authState.subscribe((user) => {
+      if (!user) {
+        return;
+      }
+      let profile = db.object('users/' + user.uid).subscribe(profile => {
+        this.loadTransactions(profile.activeBudget);
+      });
+    });
   }
 
   ngOnInit() {
-    this.userId = this.userService.authUser.uid;
-    this.budgetId = this.budgetService.getActiveBudget().id;
-    let ref = 'transactions/' + this.budgetId;
+
+  }
+
+  loadTransactions(budgetId: string) {
+    let ref = 'transactions/' + budgetId;
     this.db.list(ref).subscribe(snapshots => {
       let list: any = [];
       snapshots.forEach(trans => {
         list.push(trans);
       });
       this.transactions = list.reverse();
+      console.log(this.transactions);
     });
-
   }
 
 

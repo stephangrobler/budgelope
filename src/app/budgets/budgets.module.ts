@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+import {MdListModule} from '@angular/material';
+import {MdGridListModule, MdCardModule, MdInputModule} from '@angular/material';
 
 import { BudgetsRoutingModule } from './budgets-routing.module';
 import { BudgetsComponent } from './budgets.component';
@@ -16,7 +18,11 @@ import { BudgetviewComponent } from './budgetview/budgetview.component';
     CommonModule,
     SharedModule,
     BudgetsRoutingModule,
-    FormsModule
+    FormsModule,
+    MdListModule,
+    MdGridListModule,
+    MdCardModule,
+    MdInputModule
   ],
   declarations: [
     BudgetsComponent,
@@ -25,7 +31,7 @@ import { BudgetviewComponent } from './budgetview/budgetview.component';
     BudgetviewComponent
   ],
   providers: [
-    
+
   ]
 })
 export class BudgetsModule { }

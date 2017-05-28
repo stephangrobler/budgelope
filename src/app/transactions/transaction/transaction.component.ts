@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
+import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFireDatabase, FirebaseObjectObservable, FirebaseListObservable } from 'angularfire2/database';
 import * as moment from 'moment';
 
@@ -14,6 +15,7 @@ import { TransactionService } from '../../core/transaction.service';
 
 @Component({
   templateUrl: 'transaction.component.html',
+  styleUrls: ['./transaction.component.scss']
 })
 export class TransactionComponent implements OnInit {
   payeeId: string;
@@ -23,7 +25,7 @@ export class TransactionComponent implements OnInit {
   category: Category;
   userId: string;
   amount: number;
-  activeBudget: Budget;
+  activeBudget: string;
   type: string;
   transactionId: string;
   item: FirebaseObjectObservable<any>;
@@ -38,25 +40,35 @@ export class TransactionComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private db: AngularFireDatabase,
+    private af: AngularFireAuth
 
   ) { }
 
   ngOnInit() {
-    this.userId = this.userService.authUser.uid;
-    this.activeBudget = this.budgetService.getActiveBudget();
-    this.route.params.forEach((params: Params) => {
-      this.transactionId = params["id"];
+    this.af.authState.subscribe((user) => {
+      if (!user){
+        return;
+      }
+      let profile = this.db.object('users/'+ user.uid).subscribe(profile => {
+        this.activeBudget = profile.activeBudget;
+
+        this.route.params.forEach((params: Params) => {
+          this.transactionId = params["id"];
+        });
+        if (this.transactionId != "add") {
+          this.item = this.db.object('transactions/' + profile.activeBudget + '/' + this.transactionId);
+          this.item.subscribe(transaction => { this.transaction = transaction });
+        } else {
+          this.transaction = {};
+        }
+        // get the budget accounts
+        this.db.list('accounts/' + profile.activeBudget).take(1).subscribe(accounts => this.accounts = accounts);
+        this.db.list('categories/' + profile.activeBudget).take(1).subscribe(categories => this.categories = categories);
+        this.db.object('categoryAllocations/'+moment().format("YYYYMM"))
+      });
     });
-    if (this.transactionId != "add") {
-      this.item = this.db.object('transactions/' + this.activeBudget.id + '/' + this.transactionId);
-      this.item.subscribe(transaction => { this.transaction = transaction });
-    } else {
-      this.transaction = {};
-    }
-    // get the budget accounts
-    this.accounts = this.db.list('accounts/' + this.activeBudget.id);
-    this.categories = this.db.list('categories/' + this.activeBudget.id);
-    this.db.object('categoryAllocations/'+moment().format("YYYYMM"))
+
+
   }
 
   saveTransaction() {
@@ -90,12 +102,12 @@ export class TransactionComponent implements OnInit {
     this.transactionService.createTransaction(
       this.transaction,
       this.userId,
-      this.activeBudget.id
+      this.activeBudget
     );
   }
 
   updateAccount(account: any){
-    let accItem = this.db.object('/accounts/'+this.activeBudget.id + '/' + account.$key);
+    let accItem = this.db.object('/accounts/'+this.activeBudget + '/' + account.$key);
     let balance = account.balance;
     if (this.transaction.type == 'expense'){
       balance -= parseFloat(this.transaction.amount);
