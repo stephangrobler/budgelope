@@ -35,6 +35,7 @@ export class CategoriesComponent implements OnInit {
             orderByChild: 'sortingOrder'
           }
         });
+        console.log(this.categories);
         this.categories.subscribe(snap => {
           let allocations = db.list('categoryAllocations/'+this.activeBudget);
           allocations.take(1).subscribe((alloc)=>{
@@ -47,7 +48,7 @@ export class CategoriesComponent implements OnInit {
                 let ref: string = allocation.$key + '/' + cat.$key;
                 let actual: number = allocation[cat.$key].actual;
                 let planned: number = allocation[cat.$key].planned;
-                
+
                 if (!allocation[cat.$key].actual){
                   actual = 0;
                 }

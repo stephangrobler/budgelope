@@ -1,16 +1,14 @@
 <md-toolbar color="primary">
-<md-icon>menu</md-icon>
+  <md-icon>menu</md-icon>
 
-  <a [routerLink]="['/']">Budgalope</a>
-  <div  *ngIf="theUser">
-  <a md-button [routerLink]="['/budgetview/test']">Budgets</a>
-  <a md-button [routerLink]="['/accounts']">Accounts</a>
-  <a md-button [routerLink]="['/transactions']">Transactions</a>
-  <a md-button [routerLink]="['/categories']">Categories</a>
+  <a md-button [routerLink]="['/']">Budgalope</a>
+  <div *ngIf="theUser">
+    <a md-button [routerLink]="['/budgetview/test']">Budgets</a>
+    <a md-button [routerLink]="['/transactions']">Transactions</a>
   </div>
-  <div  *ngIf="!theUser">
-    <a [routerLink]="['/features']">Features</a>
-    <a [routerLink]="['/pricing']">Pricing</a>
+  <div *ngIf="!theUser">
+    <a md-button [routerLink]="['/features']">Features</a>
+    <a md-button [routerLink]="['/pricing']">Pricing</a>
   </div>
   <div *ngIf="!theUser" style="float: right">
     <a md-button [routerLink]="['/login']">Log In <md-icon>login</md-icon></a>
