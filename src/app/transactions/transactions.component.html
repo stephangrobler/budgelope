@@ -3,8 +3,12 @@
   <div class="row">
     <div class="col-xs-12">
       <div class="page-header">
-        <h1>Transactions <small></small><a [routerLink]="['/transaction/add']" class="btn btn-success">Add Transaction</a></h1>
+        <h1>Transactions</h1>
+        <a md-mini-fab [routerLink]="['/transaction/add']" class="btn btn-success">
+          <md-icon>add</md-icon>
+        </a>
       </div>
+
       <ngx-datatable class="material" [rows]="transactions">
         <ngx-datatable-column name="timestamp">
           <ng-template let-column="column" let-sort="sortFn" ngx-datatable-header-template>
