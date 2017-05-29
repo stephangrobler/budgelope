@@ -4,45 +4,27 @@
   <div class="row">
     <div class="col-xs-12">
       <!-- page-header -->
-      <div class="row">
-        <div class="col-xs-12 col-sm-8">
-          <div class="page-header">
-            <h2>{{ this.selectedMonth.format("MMMM 'YY")}}</h2>
-          </div>
-        </div>
-        <div class="col-xs-12 col-sm-4">
+
+      <div class="page-header">
+        <h2></h2>
+      </div>
+
+      <md-card>
+        <md-card-header>
+          {{ this.selectedMonth.format("MMMM 'YY")}}
+        </md-card-header>
+        <md-card-content>
           <md-list>
             <md-list-item>Available : {{ totalAvailable | number: '1.2'}}</md-list-item>
             <md-list-item>Income : {{ totalIncome | number: '1.2'}}</md-list-item>
             <md-list-item>Expense : {{ totalExpense | number: '1.2'}}</md-list-item>
           </md-list>
-        </div>
-      </div>
+        </md-card-content>
+
+      </md-card>
+
       <!-- header -->
-      <div class="row">
-        <div class="col-xs-4">
-          create category
-        </div>
-        <div class="col-xs-8">
-          <div class="row">
-            <div class="col-xs-12 col-sm-4">
-              <div class="text-right">
 
-              </div>
-            </div>
-            <div class="col-xs-12 col-sm-4">
-              <div class="text-right">
-
-              </div>
-            </div>
-            <div class="col-xs-12 col-sm-4">
-              <div class="text-right">
-
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
       <!-- catlist -->
       <md-card class="budget-view">
         <md-card-header style="padding: 0 16px;">
@@ -61,25 +43,25 @@
         </md-card-header>
         <md-card-content>
           <md-list>
-            <div  *ngFor="let item of allocations | async">
-            <md-list-item *ngIf="item.type != 'income'" [ngClass]="{'header': checkIsHeader(item)}">
-              <div class="name">
+            <div *ngFor="let item of allocations | async">
+              <md-list-item *ngIf="item.type != 'income'" [ngClass]="{'header': checkIsHeader(item)}">
+                <div class="name">
                   {{item.name}}
-              </div>
-              <div class="planned-input">
-                <md-input-container *ngIf="item.parent != ''">
-                  <input mdInput type="number" name="planned" class="text-right" [(ngModel)]="item.planned" (blur)="blur(item)" (focus)="focus(item)">
-                </md-input-container>
-              </div>
-              <div class="actual text-right" *ngIf="item.parent != ''">
-                {{item.actual | number:'1.2'}}
-              </div>
-              <div class="balance text-right" *ngIf="item.parent != ''">
-                {{item.balance | number:'1.2'}}
-              </div>
+                </div>
+                <div class="planned-input">
+                  <md-input-container *ngIf="item.parent != ''">
+                    <input mdInput type="number" name="planned" class="text-right" [(ngModel)]="item.planned" (blur)="blur(item)" (focus)="focus(item)">
+                  </md-input-container>
+                </div>
+                <div class="actual text-right" *ngIf="item.parent != ''">
+                  {{item.actual | number:'1.2'}}
+                </div>
+                <div class="balance text-right" *ngIf="item.parent != ''">
+                  {{item.balance | number:'1.2'}}
+                </div>
 
-            </md-list-item>
-            <md-divider *ngIf="item.type != 'income'"></md-divider>
+              </md-list-item>
+              <md-divider *ngIf="item.type != 'income'"></md-divider>
             </div>
           </md-list>
         </md-card-content>
@@ -88,5 +70,5 @@
 
 
 
+    </div>
   </div>
-</div>

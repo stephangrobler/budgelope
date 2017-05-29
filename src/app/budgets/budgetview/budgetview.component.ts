@@ -17,7 +17,7 @@ import { UserService } from '../../shared/user.service';
 @Component({
   selector: 'app-budgetview',
   templateUrl: './budgetview.component.html',
-  styleUrls: ['./budgetview.component.css']
+  styleUrls: ['./budgetview.component.scss']
 })
 export class BudgetviewComponent implements OnInit {
   categoriesAllocations: FirebaseListObservable<any>;

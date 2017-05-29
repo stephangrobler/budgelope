@@ -1,9 +1,12 @@
+@import "../../../styles";
+
 .container {
   padding: 10px;
 }
 
 .header {
-  background: #353;
+  background: mat-color($candy-app-accent);
+  color: mat-contrast($candy-app-accent,500) !important;
 }
 
 .budget-view .name {
