@@ -185,13 +185,10 @@ export class BudgetviewComponent implements OnInit {
   }
 
   log(event) {
-    console.log(event, this.sortList);
     let count: number = 1;
     let currentParent: any;
     let currentChildCount: number;
     this.sortList.forEach((item) => {
-      console.log(item);
-
       if (item.parent == '') {
         currentParent = item;
         currentChildCount = 0;
@@ -202,20 +199,18 @@ export class BudgetviewComponent implements OnInit {
       //   return;
       // }
       if (item.parent != '') {
-        console.log('current', currentParent.name);
         if (item.sortingOrder.substr(0, 3) == currentParent.sortingOrder) {
           // increment child count
           currentChildCount++;
-          console.log('currentChildCount', currentChildCount, currentParent.sortingOrder);
           let childOrder = currentParent.sortingOrder + ':' + ("000" + currentChildCount).slice(-3);
+
           if (childOrder != item.sortingOrder){
-            console.log(childOrder, '=>', item.sortingOrder);
+            console.log(item.sortingOrder, '=>', childOrder);
             this.allocations.update(item.$key, {'sortingOrder': childOrder});
             this.db.object('categories/'+this.activeBudget+'/'+item.$key).update( {'sortingOrder': childOrder});
           }
         }
       }
-
     })
   }
 
