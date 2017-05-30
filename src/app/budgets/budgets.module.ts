@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import {MdListModule} from '@angular/material';
 import {MdGridListModule, MdCardModule, MdInputModule} from '@angular/material';
+import { NgxDnDModule } from '@swimlane/ngx-dnd';
 
 import { BudgetsRoutingModule } from './budgets-routing.module';
 import { BudgetsComponent } from './budgets.component';
@@ -22,7 +23,8 @@ import { BudgetviewComponent } from './budgetview/budgetview.component';
     MdListModule,
     MdGridListModule,
     MdCardModule,
-    MdInputModule
+    MdInputModule,
+    NgxDnDModule
   ],
   declarations: [
     BudgetsComponent,

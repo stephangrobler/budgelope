@@ -24,6 +24,7 @@
     "@angular/router": "^4.0.0",
     "@ng-bootstrap/ng-bootstrap": "^1.0.0-alpha.25",
     "@swimlane/ngx-datatable": "^9.2.0",
+    "@swimlane/ngx-dnd": "^2.1.2",
     "angularfire2": "^4.0.0-rc.0",
     "autotrack": "^2.3.2",
     "core-js": "^2.4.1",

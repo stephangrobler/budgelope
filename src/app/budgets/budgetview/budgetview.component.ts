@@ -29,6 +29,21 @@ export class BudgetviewComponent implements OnInit {
   selectedMonth: any = moment();
   monthDisplay: Date;
 
+  orderableLists = [
+    [
+      "Item 1a",
+      "Item 2a",
+      "Item 3a"
+    ],
+    [
+      "Item 1b",
+      "Item 2b",
+      "Item 3b"
+    ]
+  ]
+
+  sortList: any[] = [];
+
   isHeader: boolean = false;
 
   totalIncome: number = 0;
@@ -43,10 +58,10 @@ export class BudgetviewComponent implements OnInit {
     private auth: AngularFireAuth
   ) {
     auth.authState.subscribe((user) => {
-      if (!user){
+      if (!user) {
         return;
       }
-      let profile = db.object('users/'+ user.uid).subscribe(profile => {
+      let profile = db.object('users/' + user.uid).subscribe(profile => {
         this.loadBudget(profile.activeBudget);
         this.loadAccounts(profile.activeBudget);
         this.activeBudget = profile.activeBudget;
@@ -58,7 +73,7 @@ export class BudgetviewComponent implements OnInit {
 
   }
 
-  checkIsHeader(item){
+  checkIsHeader(item) {
     return item.parent == '';
   }
 
@@ -70,6 +85,7 @@ export class BudgetviewComponent implements OnInit {
     });
 
     this.allocations.subscribe(snp => {
+      this.sortList = snp;
       this.totalExpense = 0;
       this.totalBudgeted = 0;
       this.totalIncome = 0;
@@ -151,7 +167,7 @@ export class BudgetviewComponent implements OnInit {
     /**/
   }
 
-  loadAccounts(budgetId: string){
+  loadAccounts(budgetId: string) {
     let accRef = 'accounts/' + budgetId;
     this.accounts = this.db.list(accRef);
   }
@@ -166,6 +182,41 @@ export class BudgetviewComponent implements OnInit {
 
   focus(item) {
     item.original = item.planned;
+  }
+
+  log(event) {
+    console.log(event, this.sortList);
+    let count: number = 1;
+    let currentParent: any;
+    let currentChildCount: number;
+    this.sortList.forEach((item) => {
+      console.log(item);
+
+      if (item.parent == '') {
+        currentParent = item;
+        currentChildCount = 0;
+      }
+      // is child
+      // if (!item.sortingOrder){
+      //   console.log('not found', item);
+      //   return;
+      // }
+      if (item.parent != '') {
+        console.log('current', currentParent.name);
+        if (item.sortingOrder.substr(0, 3) == currentParent.sortingOrder) {
+          // increment child count
+          currentChildCount++;
+          console.log('currentChildCount', currentChildCount, currentParent.sortingOrder);
+          let childOrder = currentParent.sortingOrder + ':' + ("000" + currentChildCount).slice(-3);
+          if (childOrder != item.sortingOrder){
+            console.log(childOrder, '=>', item.sortingOrder);
+            this.allocations.update(item.$key, {'sortingOrder': childOrder});
+            this.db.object('categories/'+this.activeBudget+'/'+item.$key).update( {'sortingOrder': childOrder});
+          }
+        }
+      }
+
+    })
   }
 
   blur(item) {

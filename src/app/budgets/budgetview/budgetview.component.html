@@ -10,9 +10,9 @@
       </div>
 
       <md-card>
-        <md-card-header>
+        <md-card-title>
           {{ this.selectedMonth.format("MMMM 'YY")}}
-        </md-card-header>
+        </md-card-title>
         <md-card-content>
           <md-list>
             <md-list-item>Available : {{ totalAvailable | number: '1.2'}}</md-list-item>
@@ -24,10 +24,17 @@
       </md-card>
 
       <!-- header -->
+<br>
+<ngx-dnd-container
+[model]="sortList" (drop)="log($event)">
+  <ng-template let-item="model">
+    {{item.name}}
+  </ng-template>
+</ngx-dnd-container>
 
       <!-- catlist -->
       <md-card class="budget-view">
-        <md-card-header style="padding: 0 16px;">
+        <md-card-title style="padding: 0 16px;">
           <div class="name">
 
           </div>
@@ -40,7 +47,7 @@
           <div class="balance text-right">
             Balance
           </div>
-        </md-card-header>
+        </md-card-title>
         <md-card-content>
           <md-list>
             <div *ngFor="let item of allocations | async">
