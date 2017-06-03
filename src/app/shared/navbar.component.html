@@ -3,7 +3,7 @@
 
   <a md-button [routerLink]="['/']">Budgalope</a>
   <div *ngIf="theUser">
-    <a md-button [routerLink]="['/budgetview/test']">Budgets</a>
+    <a md-button [routerLink]="['/budgetview']">Budgets</a>
     <a md-button [routerLink]="['/transactions']">Transactions</a>
   </div>
   <div *ngIf="!theUser">

@@ -2,8 +2,8 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import {MdListModule} from '@angular/material';
-import {MdGridListModule, MdCardModule, MdInputModule} from '@angular/material';
+import {MdListModule, MdIconModule} from '@angular/material';
+import {MdGridListModule, MdCardModule, MdInputModule, MdButtonModule} from '@angular/material';
 import { NgxDnDModule } from '@swimlane/ngx-dnd';
 
 import { BudgetsRoutingModule } from './budgets-routing.module';
@@ -23,6 +23,8 @@ import { BudgetviewComponent } from './budgetview/budgetview.component';
     MdListModule,
     MdGridListModule,
     MdCardModule,
+    MdIconModule,
+    MdButtonModule,
     MdInputModule,
     NgxDnDModule
   ],

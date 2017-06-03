@@ -1,33 +1,38 @@
 <navi-bar></navi-bar>
 <div class="container">
-  <div class="row">
-    <div class="col-xs-12">
-      <form class="form" action="index.html" method="post">
-        <div class="form-group">
-          <label for="">Category</label>
-          <input type="text" class="form-control" id="" placeholder="" [(ngModel)]="name" name="name" #nm="ngModel">
-          <p class="help-block"></p>
-        </div>
-        <div class="form-group">
-          <label for="">Parent</label>
-          -- {{parent}} --
-          <select class="form-control" name="parent" [(ngModel)]="parent" >
-            <option *ngFor="let category of categories" [ngValue]="category">{{category.name}}</option>
-          </select>
-          <p class="help-block"></p>
-        </div>
-        <div class="btn-group">
-
-          <button type="button" class="btn btn-success" (click)="saveCategory()">
-            Save
-          </button>
-          <button type="button" class="btn btn-danger" (click)="cancel()">
-            Cancel
-          </button>
-        </div>
-
-      </form>
-
-    </div>
-  </div>
+  <form class="form" action="index.html" method="post">
+    <md-card class="category-card">
+      <md-card-title>
+        Category
+      </md-card-title>
+      <md-card-content>
+        <section>
+          <md-input-container>
+            <input mdInput type="text" placeholder="Category name" [(ngModel)]="category.name" name="name" #nm="ngModel">
+          </md-input-container>
+        </section>
+        <section>
+          <md-select placeholder="Parent Category" [(ngModel)]="category.parent" name="parent">
+            <md-option *ngFor="let category of categories" [value]="category">
+              {{category.name}}
+            </md-option>
+          </md-select>
+        </section>
+        <section>
+          <md-radio-group [(ngModel)]="category.type" name="type">
+            <md-radio-button [value]="'expense'">Spend</md-radio-button>
+            <md-radio-button [value]="'income'">Earn</md-radio-button>
+          </md-radio-group>
+        </section>
+      </md-card-content>
+      <md-card-actions>
+        <button type="button" md-raised-button color="primary" (click)="saveCategory()">
+          Save
+        </button>
+        <button type="button" md-button (click)="cancel()">
+          Cancel
+        </button>
+      </md-card-actions>
+    </md-card>
+  </form>
 </div>

@@ -9,22 +9,41 @@
   color: mat-contrast($candy-app-accent,500) !important;
 }
 
-.budget-view .name {
-  order: 1;
-  width: 40%;
-}
+.budget-view {
+  .name {
+    order: 1;
+    width: 40%;
+  }
 
-.budget-view .planned-input {
-  order: 2;
-  width: 20%;
-}
+  .planned-input {
+    order: 2;
+    width: 20%;
+  }
 
-.budget-view .actual {
-  order: 3;
-  width: 20%;
-}
+  .actual {
+    order: 3;
+    width: 20%;
+  }
 
-.budget-view .balance {
-  order: 4;
-  width: 20%;
+  .balance {
+    order: 4;
+    width: 20%;
+  }
+
+  /deep/ .ngx-dnd-container {
+      border: none !important;
+      padding: 0;
+      margin: 0;
+
+      &:nth-child(odd){
+        background: transparent;
+      }
+      
+      .ngx-dnd-item {
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin: 0;
+      }
+  }
 }

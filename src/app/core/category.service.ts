@@ -14,11 +14,16 @@ export class CategoryService {
     let dbRef = this.db.list('categories/' + budgetId);
     let newCat = dbRef.push(category);
     // create a allocation
-    
+
   }
 
   updateCategory(budgetId: string, category: Category){
+    // update main category
+    let dbRef = this.db.object('categories/' + budgetId + '/' + category.$key);
+    console.log(category);
+    // update allocations
 
+    // update transactions
   }
 
   deleteCategory(budgetId: string, category: Category){

@@ -1,0 +1,11 @@
+.category-card {
+  font-size: 16px;
+  /deep/ .mat-card-content {
+    font-size: 16px;
+  }
+  section {
+    height: 70px;
+    width: 100%;
+  }
+
+}

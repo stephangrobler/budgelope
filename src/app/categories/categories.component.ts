@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import * as firebase from 'firebase';
+import * as moment from 'moment';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
 
@@ -25,20 +26,21 @@ export class CategoriesComponent implements OnInit {
     private auth: AngularFireAuth
   ) {
     auth.authState.subscribe(user => {
-      if (!user){
+      if (!user) {
         return;
       }
-      db.object('users/'+ user.uid).subscribe(profile => {
+      db.object('users/' + user.uid).subscribe(profile => {
         this.activeBudget = profile.activeBudget;
-        this.categories = this.db.list('categories/'+this.activeBudget, {
+        this.categories = this.db.list('categories/' + this.activeBudget, {
           query: {
             orderByChild: 'sortingOrder'
           }
         });
         console.log(this.categories);
+
         this.categories.subscribe(snap => {
-          let allocations = db.list('categoryAllocations/'+this.activeBudget);
-          allocations.take(1).subscribe((alloc)=>{
+          let allocations = db.list('categoryAllocations/' + this.activeBudget);
+          allocations.take(1).subscribe((alloc) => {
             // console.log(alloc.$key);
             // loop through the categories
             snap.forEach(cat => {
@@ -49,15 +51,43 @@ export class CategoriesComponent implements OnInit {
                 let actual: number = allocation[cat.$key].actual;
                 let planned: number = allocation[cat.$key].planned;
 
-                if (!allocation[cat.$key].actual){
+                if (!allocation[cat.$key].actual) {
                   actual = 0;
                 }
-                if (!allocation[cat.$key].planned){
+                if (!allocation[cat.$key].planned) {
                   planned = 0;
                 }
                 // allocations.update(ref, {name: cat.name, sortingOrder: cat.sortingOrder, balance: cat.balance, actual: actual, planned: planned});
               });
+              /*
+              //create array of nested allocations
+              let time: any = moment();
+              let allocat: any = {
+                "planned":500,
+                "actual":500,
+                "previousBalance": 500
+              }
+              cat.allocations = {};
+              for (let i = 0; i < 60; i++) {
+                  cat.allocations[time.format("YYYYMM")] = allocat;
+                  time.add(1, 'months');
+              }
+
+
+*/
             });
+            /*
+            // console.log('allocations on cat', JSON.stringify(snap));
+            let stime: any = moment();
+            // console.log(alloc);
+            let all: any = alloc[1];
+            let all10: any = {};
+            for (let i = 0; i < 60; i++) {
+                all10[stime.format("YYYYMM")] = all;
+                stime.add(1, 'months');
+            }
+            // console.log('sep alloc for cats', JSON.stringify(all10));
+            */
           });
         });
       });
