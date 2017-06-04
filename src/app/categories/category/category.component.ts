@@ -72,12 +72,9 @@ export class CategoryComponent implements OnInit {
           cat.sortingOrder = category.sortingOrder;
           cat.id = category.$key;
           rawList.push(cat);
+          this.childCounts[category.name] = 0;
         } else {
-          if (this.childCounts[category.parent]) {
             this.childCounts[category.parent] += 1;
-          } else {
-            this.childCounts[category.parent] = 1;
-          };
         }
       });
       this.categories = rawList;
@@ -89,17 +86,21 @@ export class CategoryComponent implements OnInit {
     this.category.parent = this.parent.name;
     this.category.parentId = this.parent.id;
     this.category.type = this.category.type;
-    console.log(this.category);
     if (this.categoryId == 'add') {
       this.category.sortingOrder = this.parent.sortingOrder + ':' + ("000" + (this.childCounts[this.parent.name] + 1)).slice(-3);
       this.categoryService.createCategory(this.activeBudget, this.category);
     } else {
-      this.categoryService.updateCategory(this.activeBudget, this.category);
+      let dbRef = this.db.object('categories/' + this.activeBudget + '/' + this.category.$key).update({
+        "name": this.category.name,
+        "parent" : this.category.parent,
+        "parentId" : this.category.parentId,
+        "type" : this.category.type
+      }).then(() => console.log('Update Successfull.'));
+
+      // this.categoryService.updateCategory(this.activeBudget, this.category);
     }
 
   }
-
-
 
   cancel() {
     this.router.navigate(['/budgetview']);
