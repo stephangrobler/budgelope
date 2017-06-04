@@ -4,7 +4,9 @@
     <div class="col-xs-12">
       <form class="form" *ngIf="transaction">
         <md-card class="transaction-card">
-
+          <md-card-title>
+            Transaction
+          </md-card-title>
           <md-card-content>
             <section>
               <md-radio-group [(ngModel)]="transaction.type" name="type">

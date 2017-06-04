@@ -11,7 +11,7 @@ import { Category } from '../shared/category';
 export class TransactionService {
   constructor(
     private db: AngularFireDatabase
-  ) {  }
+  ) { }
 
   /**
    * Creates a new transaction and updates the relevant paths with the correct
@@ -24,11 +24,11 @@ export class TransactionService {
    * @param  {string} budgetId    [description]
    * @return {[type]}             [description]
    */
-  createTransaction(transaction: any, userId: string, budgetId: string){
+  createTransaction(transaction: any, userId: string, budgetId: string) {
     let items = this.db.list('transactions/' + budgetId);
 
     // ensure value is negative if it is an expense.
-    if (transaction.type == "expense"){
+    if (transaction.type == "expense") {
       transaction.amount = -Math.abs(transaction.amount);
     } else {
       transaction.amount = Math.abs(transaction.amount);
@@ -50,21 +50,18 @@ export class TransactionService {
       let updateObj = {};
       let thisMonth = moment().format("YYYYMM");
       let nextMonth = moment().add(1, 'months').format('YYYYMM');
-      let allocRef = 'categoryAllocations/'+budgetId+'/'+thisMonth+'/'+transaction.category.$key;
-      let allocNextRef = 'categoryAllocations/'+budgetId+'/'+nextMonth+'/'+transaction.category.$key;
+      let allocRef = 'allocations/' + budgetId + '/' + thisMonth + '/' + transaction.category.$key;
+      let allocNextRef = 'allocations/' + budgetId + '/' + nextMonth + '/' + transaction.category.$key;
       let accBalance: number = transaction.account.balance;
       let catBalance: number = transaction.category.balance;
 
-
-
-
       // check to make sure the value is a number to populate transaction details
-      if (isNaN(accBalance)){
+      if (isNaN(accBalance)) {
         accBalance = 0;
       }
 
       // check to make sure the value is a number to populate transaction details
-      if (isNaN(catBalance)){
+      if (isNaN(catBalance)) {
         catBalance = 0;
       }
 
@@ -90,7 +87,7 @@ export class TransactionService {
           previousBalance: catBalance
         });
       });
-      
+
       console.log(updateObj);
       alert('Transaction saved');
     }).catch(error => {

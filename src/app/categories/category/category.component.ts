@@ -59,7 +59,7 @@ export class CategoryComponent implements OnInit {
 
     // get all the categories so that we can have counts to do the correct
     // saving and counts :P
-    parentCategories.subscribe(catSnap => {
+    parentCategories.take(1).subscribe(catSnap => {
 
       let rawList = [];
       this.childCounts = {};
@@ -76,15 +76,25 @@ export class CategoryComponent implements OnInit {
         } else {
             this.childCounts[category.parent] += 1;
         }
+        // set the parent category if not new category.
+
       });
       this.categories = rawList;
+
+
     });
 
   }
 
   saveCategory() {
-    this.category.parent = this.parent.name;
-    this.category.parentId = this.parent.id;
+    console.log('this.parent', this.parent);
+    if (this.parent){
+      this.category.parent = this.parent.name;
+      this.category.parentId = this.parent.id;
+    } else {
+      this.category.parent = "";
+      this.category.parentId = "";
+    }
     this.category.type = this.category.type;
     if (this.categoryId == 'add') {
       this.category.sortingOrder = this.parent.sortingOrder + ':' + ("000" + (this.childCounts[this.parent.name] + 1)).slice(-3);

@@ -66,11 +66,25 @@ exports.updateCategory = functions.database.ref('/categories/{budgetId}/{categor
           updateObj[refAll + '/name'] = original.name;
           updateObj[refAll + '/parent'] = original.parent;
           updateObj[refAll + '/type'] = original.type;
-
         });
-        return admin.database().ref('/').update(updateObj).then(() => console.log('Update Category ' + event.params.categoryId + ':' + original.name + ' complete.'));
+        return admin.database().ref('/').update(updateObj).then(() => {
+          console.log('Update Category ' + event.params.categoryId + ':' + original.name + ' complete.');
+        });
       });
     }
+  });
 
+exports.transactions = functions.database.ref('transactions/{budgetId}/{transactionId}')
+  .onWrite(event => {
+    // Exit when the data is deleted.
+    if (!event.data.exists()) {
+      //deleted
+      return;
+    }
 
+    if (!event.data.previous.exists()){
+      // new
+    } else {
+      // update
+    }
   });

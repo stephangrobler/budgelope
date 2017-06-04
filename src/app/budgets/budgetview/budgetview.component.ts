@@ -68,7 +68,7 @@ export class BudgetviewComponent implements OnInit {
     return item.parent == '';
   }
 
-  checkAllocations(budgetId: string){
+  checkAllocations(budgetId: string) {
     let months: string[] = [
       moment().format("YYYYMM"),
       moment().add(1, 'months').format("YYYYMM")
@@ -79,20 +79,23 @@ export class BudgetviewComponent implements OnInit {
       let list = this.db.list(ref);
 
       list.take(1).subscribe(catSnapshots => {
-        if (catSnapshots.length == 0){
+        if (catSnapshots.length == 0) {
           // get the categories list and push new allocations to the list.
           this.db.list('categories/' + budgetId).subscribe(catSnapshots => {
             catSnapshots.forEach(catSnapshot => {
+              if (!catSnapshot.type){
+                catSnapshot.type = 'expense';
+              }
               list.update(catSnapshot.$key, {
                 planned: 0,
                 actual: 0,
                 balance: 0,
                 name: catSnapshot.name,
                 parent: catSnapshot.parent,
-                sortingOrder: catSnapshot.sortingOrder
-
+                sortingOrder: catSnapshot.sortingOrder,
+                type: catSnapshot.type
               });
-              this.db.object('categoryAllocations/'+budgetId+'/'+catSnapshot.$key+'/'+month).set(true);
+              this.db.object('categoryAllocations/' + budgetId + '/' + catSnapshot.$key + '/' + month).set(true);
             });
           });
         }
@@ -213,8 +216,8 @@ export class BudgetviewComponent implements OnInit {
           currentChildCount++;
           let childOrder = currentParent.sortingOrder + ':' + ("000" + currentChildCount).slice(-3);
 
-          if (childOrder != item.sortingOrder){
-            this.db.object('categories/'+this.activeBudget+'/'+item.$key).update( {'sortingOrder': childOrder});
+          if (childOrder != item.sortingOrder) {
+            this.db.object('categories/' + this.activeBudget + '/' + item.$key).update({ 'sortingOrder': childOrder });
           }
         }
       }

@@ -1,4 +1,11 @@
 .transaction-card {
+  /deep/ .mat-card-content {
+    font-size: 16px;
+    .mat-input-container, .mat-select {
+      width: 100%;
+    }
+  }
+  
   section {
     height: 60px;
     width: 100%;

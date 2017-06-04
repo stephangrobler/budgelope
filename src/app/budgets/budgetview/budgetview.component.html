@@ -37,8 +37,8 @@
               <ng-template let-item="model">
                 <md-list-item *ngIf="item.type != 'income'" [ngClass]="{'header': checkIsHeader(item)}">
                   <div class="name">
-                    <a md-button [routerLink]="['/category/'+item.$key]">
-                      <md-icon>edit</md-icon>
+                    <a md-icon-button [routerLink]="['/category/'+item.$key]">
+                      <md-icon color="primary">edit</md-icon>
                     </a> {{item.name}}
                   </div>
                   <div class="planned-input">
