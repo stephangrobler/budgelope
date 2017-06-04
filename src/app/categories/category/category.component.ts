@@ -47,6 +47,7 @@ export class CategoryComponent implements OnInit {
         if (this.categoryId != "add") {
           this.db.object('categories/' + profile.activeBudget + '/' + this.categoryId).subscribe(cat => {
             this.category = cat;
+
           });
         }
       });
@@ -80,20 +81,25 @@ export class CategoryComponent implements OnInit {
         }
       });
       this.categories = rawList;
-    })
+    });
+
   }
 
   saveCategory() {
-    let category = new Category();
-    category.name = this.name;
-    category.parent = this.parent.name;
-    category.parentId = this.parent.id;
-    category.balance = 0;
-    category.sortingOrder = this.parent.sortingOrder + ':' + ("000" + (this.childCounts[this.parent.name] + 1)).slice(-3);
+    this.category.parent = this.parent.name;
+    this.category.parentId = this.parent.id;
+    this.category.type = this.category.type;
+    console.log(this.category);
+    if (this.categoryId == 'add') {
+      this.category.sortingOrder = this.parent.sortingOrder + ':' + ("000" + (this.childCounts[this.parent.name] + 1)).slice(-3);
+      this.categoryService.createCategory(this.activeBudget, this.category);
+    } else {
+      this.categoryService.updateCategory(this.activeBudget, this.category);
+    }
 
-    console.log(category);
-    //  this.categoryService.createCategory(this.activeBudget, category);
   }
+
+
 
   cancel() {
     this.router.navigate(['/budgetview']);

@@ -214,7 +214,6 @@ export class BudgetviewComponent implements OnInit {
           let childOrder = currentParent.sortingOrder + ':' + ("000" + currentChildCount).slice(-3);
 
           if (childOrder != item.sortingOrder){
-            this.allocations.update(item.$key, {'sortingOrder': childOrder});
             this.db.object('categories/'+this.activeBudget+'/'+item.$key).update( {'sortingOrder': childOrder});
           }
         }

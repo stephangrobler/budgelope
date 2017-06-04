@@ -22,7 +22,10 @@ export class CategoryService {
     let dbRef = this.db.object('categories/' + budgetId + '/' + category.$key);
     console.log(category);
     // update allocations
-
+    let allRef = this.db.list('categoryAllocations/'+ budgetId + '/' + category.$key);
+    allRef.subscribe(all => {
+      console.log(all);
+    })
     // update transactions
   }
 

@@ -12,7 +12,7 @@
           </md-input-container>
         </section>
         <section>
-          <md-select placeholder="Parent Category" [(ngModel)]="category.parent" name="parent">
+          <md-select placeholder="Parent Category" [(ngModel)]="parent" name="parent">
             <md-option *ngFor="let category of categories" [value]="category">
               {{category.name}}
             </md-option>
