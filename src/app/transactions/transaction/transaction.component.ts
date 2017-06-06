@@ -57,7 +57,7 @@ export class TransactionComponent implements OnInit {
   }
 
   filterCategories(val: string){
-    return val ? this.categories.filter(s => new RegExp(`^${val}`, 'gi').test(s.name))
+    return val ? this.categories.filter(s => new RegExp(`^${val}`, 'gi').test(s.name + s.parent))
                : this.categories;
   }
 
@@ -102,9 +102,10 @@ export class TransactionComponent implements OnInit {
 
   update() {
     let account: any = this.transaction.account;
+    let category: any = this.catCtrl.value;
     this.item.update({
-      categoryId: this.transaction.category.$key,
-      category: this.transaction.category.name,
+      categoryId: category.$key,
+      category: category.name,
       accountId: this.transaction.account.$key,
       account: this.transaction.account.name,
       amount: this.transaction.amount,
@@ -120,13 +121,13 @@ export class TransactionComponent implements OnInit {
   }
 
   create() {
-    console.log(this.catCtrl.value);
-    //
-    // this.transactionService.createTransaction(
-    //   this.transaction,
-    //   this.userId,
-    //   this.activeBudget
-    // );
+    // console.log(this.catCtrl.value);
+    this.transaction.category = this.catCtrl.value;
+    this.transactionService.createTransaction(
+      this.transaction,
+      this.userId,
+      this.activeBudget
+    );
   }
 
   updateAccount(account: any) {
