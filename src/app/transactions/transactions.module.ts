@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import {MdCheckboxModule,MdIconModule, MdInputModule, MdRadioModule, MdDatepickerModule, MdSelectModule, MdCardModule, MdButtonModule} from '@angular/material';
+import {MdCheckboxModule,MdIconModule, MdInputModule, MdRadioModule, MdDatepickerModule, MdSelectModule, MdCardModule, MdButtonModule, MdAutocompleteModule} from '@angular/material';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 
 import { TransactionRoutingModule } from './transaction-routing.module';
@@ -15,6 +15,7 @@ import { TransactionComponent } from './transaction/transaction.component';
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     TransactionRoutingModule,
     SharedModule,
     MdCheckboxModule,
@@ -25,7 +26,8 @@ import { TransactionComponent } from './transaction/transaction.component';
     MdCardModule,
     MdButtonModule,
     NgxDatatableModule,
-    MdIconModule
+    MdIconModule,
+    MdAutocompleteModule
   ],
   declarations: [
     TransactionsComponent,

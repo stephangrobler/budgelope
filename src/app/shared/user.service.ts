@@ -8,6 +8,8 @@ import {
 import { environment } from '../../environments/environment';
 import * as firebase from 'firebase';
 
+import { Account } from './account';
+
 @Injectable()
 export class UserService implements CanActivate {
   userLoggedIn: boolean = false;
@@ -32,7 +34,9 @@ export class UserService implements CanActivate {
   }
 
   register(email: string, password: string) {
-    firebase.auth().createUserWithEmailAndPassword(email, password)
+    firebase.auth().createUserWithEmailAndPassword(email, password).then((user) => {
+      this.setupProfile(user.uid);
+    })
       .catch(function(error) {
         alert(`${error.message} Please try again!`);
       });
@@ -78,10 +82,23 @@ export class UserService implements CanActivate {
     });
 
     // create a profile and set active budget
-    let profileRef = firebase.database().ref('/users/' + uid).set({
+    let profileRef = firebase.database().ref('/users/' + uid);
+    let profileObj = {
       activeBudget: budgetKey,
+      budgets: {},
       registered: "",
       subscription: "trial"
+    };
+    profileObj.budgets[budgetKey] = true;
+    profileRef.set(profileObj);
+
+    let accountRef = firebase.database().ref('/accounts/' + budgetKey).push();
+    let account = new Account();
+    accountRef.set({
+      "balance":0,
+      "name":"Starting Account",
+      "accountType":"Checking Account",
+      "createdDate":firebase.database.ServerValue.TIMESTAMP
     });
 
     // create all default categories for the budget

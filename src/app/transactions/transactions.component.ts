@@ -49,7 +49,6 @@ export class TransactionsComponent implements OnInit {
         list.push(trans);
       });
       this.transactions = list.reverse();
-      console.log(this.transactions);
     });
   }
 

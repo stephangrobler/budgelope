@@ -1,9 +1,9 @@
 export class Account {
-  id: any;
+  $key: string;
+  id?: any;
   name: string;
   balance: number;
-  startingBalance: number;
   accountType: string;
-  budgetId: string;
-  accountTypeId: string;
+  accountTypeId?: string;
+  createdDate: Date;
 }

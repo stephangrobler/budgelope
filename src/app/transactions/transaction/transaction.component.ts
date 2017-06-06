@@ -1,8 +1,11 @@
 import { Component, OnInit } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFireDatabase, FirebaseObjectObservable, FirebaseListObservable } from 'angularfire2/database';
 import * as moment from 'moment';
+import 'rxjs/add/operator/startWith';
+import 'rxjs/add/operator/map';
 
 import { Transaction } from '../../shared/transaction';
 import { Account } from '../../shared/account';
@@ -30,8 +33,11 @@ export class TransactionComponent implements OnInit {
   transactionId: string;
   item: FirebaseObjectObservable<any>;
   accounts: FirebaseListObservable<any>;
-  categories: FirebaseListObservable<any>;
+  categories: any[] = [];
   transaction: any;
+
+  catCtrl: FormControl;
+  filteredCategories: any;
 
   constructor(
     private userService: UserService,
@@ -42,14 +48,29 @@ export class TransactionComponent implements OnInit {
     private db: AngularFireDatabase,
     private af: AngularFireAuth
 
-  ) { }
+  ) {
+    this.catCtrl = new FormControl();
+    this.filteredCategories = this.catCtrl.valueChanges
+        .startWith(null)
+        .map(category => category && typeof category === 'object' ? category.name : category)
+        .map(name => name ? this.filterCategories(name) : this.categories.slice());
+  }
+
+  filterCategories(val: string){
+    return val ? this.categories.filter(s => new RegExp(`^${val}`, 'gi').test(s.name))
+               : this.categories;
+  }
+
+  displayFn(category: any): string {
+    return category ? ' ' + category.parent + ' > ' + category.name  : category;
+  }
 
   ngOnInit() {
     this.af.authState.subscribe((user) => {
-      if (!user){
+      if (!user) {
         return;
       }
-      let profile = this.db.object('users/'+ user.uid).subscribe(profile => {
+      let profile = this.db.object('users/' + user.uid).subscribe(profile => {
         this.activeBudget = profile.activeBudget;
 
         this.route.params.forEach((params: Params) => {
@@ -62,9 +83,9 @@ export class TransactionComponent implements OnInit {
           this.transaction = {};
         }
         // get the budget accounts
-        this.db.list('accounts/' + profile.activeBudget).take(1).subscribe(accounts => this.accounts = accounts);
-        this.db.list('categories/' + profile.activeBudget).take(1).subscribe(categories => this.categories = categories);
-        this.db.object('categoryAllocations/'+moment().format("YYYYMM"))
+        this.accounts = this.db.list('accounts/' + profile.activeBudget);
+        this.db.list('categories/' + profile.activeBudget).subscribe(snap => this.categories = snap);
+        this.db.object('allocations/' + moment().format("YYYYMM"))
       });
     });
 
@@ -99,22 +120,24 @@ export class TransactionComponent implements OnInit {
   }
 
   create() {
-    this.transactionService.createTransaction(
-      this.transaction,
-      this.userId,
-      this.activeBudget
-    );
+    console.log(this.catCtrl.value);
+    //
+    // this.transactionService.createTransaction(
+    //   this.transaction,
+    //   this.userId,
+    //   this.activeBudget
+    // );
   }
 
-  updateAccount(account: any){
-    let accItem = this.db.object('/accounts/'+this.activeBudget + '/' + account.$key);
+  updateAccount(account: any) {
+    let accItem = this.db.object('/accounts/' + this.activeBudget + '/' + account.$key);
     let balance = account.balance;
-    if (this.transaction.type == 'expense'){
+    if (this.transaction.type == 'expense') {
       balance -= parseFloat(this.transaction.amount);
-    } else if (this.transaction.type == 'income'){
+    } else if (this.transaction.type == 'income') {
       balance += parseFloat(this.transaction.amount);
     }
-    accItem.update({ "balance": balance}).then(response => {
+    accItem.update({ "balance": balance }).then(response => {
       alert('account updated from ' + account.balance + ' to ' + balance);
     })
   }

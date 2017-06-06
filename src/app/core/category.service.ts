@@ -34,10 +34,10 @@ export class CategoryService {
     let currentAllocationMonthRef = '/allocations/' + budgetId + '/' + month;
     let nextAllocationMonthRef = '/allocations/' + budgetId + '/' + nextMonth;
     return Promise.all([
-      admin.database().ref(currentAllocationMonthRef).child(categoryId).set(allocData),
-      admin.database().ref(nextAllocationMonthRef).child(categoryId).set(allocData),
-      admin.database().ref('/categoryAllocations/' + budgetId + '/' + categoryId).child(month).set(true),
-      admin.database().ref('/categoryAllocations/' + budgetId + '/' + categoryId).child(nextMonth).set(true)
+      firebase.database().ref(currentAllocationMonthRef).child(categoryId).set(allocData),
+      firebase.database().ref(nextAllocationMonthRef).child(categoryId).set(allocData),
+      firebase.database().ref('/categoryAllocations/' + budgetId + '/' + categoryId).child(month).set(true),
+      firebase.database().ref('/categoryAllocations/' + budgetId + '/' + categoryId).child(nextMonth).set(true)
     ]).then(() => {
       console.log('Created ' + catData.name + ' successfully!');
     });
@@ -55,7 +55,7 @@ export class CategoryService {
     // get all allocations
     let allocationsRef = '/categoryAllocations/' + budgetId + '/' + categoryId;
     // update the allocations
-    let allocationLocations = admin.database().ref(allocationsRef).once('value').then(results => {
+    let allocationLocations = firebase.database().ref(allocationsRef).once('value').then(results => {
       let allResults = results.val();
       // update allocations
 
@@ -67,7 +67,7 @@ export class CategoryService {
         updateObj[refAll + '/parent'] = category.parent;
         updateObj[refAll + '/type'] = category.type;
       });
-      return admin.database().ref('/').update(updateObj).then(() => {
+      return firebase.database().ref('/').update(updateObj).then(() => {
         console.log('Update Category ' + categoryId + ':' + category.name + ' complete.');
       });
     });

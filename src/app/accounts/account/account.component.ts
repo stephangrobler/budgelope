@@ -58,13 +58,12 @@ export class AccountComponent implements OnInit {
     if (!this.account.balance){
       this.item.update({
         name: this.account.name,
-        startingBalance: this.account.startingBalance,
-        balance: this.account.startingBalance
+        balance: this.account.balance
       });
     } else {
       this.item.update({
         name: this.account.name,
-        startingBalance: this.account.startingBalance
+        startingBalance: this.account.balance
       });
     }
 
@@ -73,8 +72,7 @@ export class AccountComponent implements OnInit {
   createAccount() {
     this.account = new Account();
     this.account.name = this.accName;
-    this.account.startingBalance = this.accStartingBalance;
-    this.account.budgetId = this.activeBudget.id;
+    this.account.balance = this.accStartingBalance;    
     this.accountService.createAccount(this.account);
   }
 

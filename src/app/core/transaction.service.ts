@@ -45,6 +45,9 @@ export class TransactionService {
       timestamp: firebase.database.ServerValue.TIMESTAMP
     };
 
+    console.log('Transaction Item', transactionItem);
+    console.log('Category Item', transaction.category);
+    console.log('Account Item', transaction.account);
     items.push(transactionItem).then(response => {
       // update the relevant account amount
       let updateObj = {};
@@ -65,8 +68,12 @@ export class TransactionService {
         catBalance = 0;
       }
 
+      console.log('before', catBalance);
+
       accBalance += parseFloat(transaction.amount);
       catBalance += parseFloat(transaction.amount);
+
+      console.log('after', catBalance);
 
       updateObj['accounts/' + budgetId + '/' + transaction.account.$key + '/balance'] = accBalance;
       updateObj['categories/' + budgetId + '/' + transaction.category.$key + '/balance'] = catBalance;
@@ -78,13 +85,17 @@ export class TransactionService {
         this.db.object(allocRef).update({
           actual: alloc.actual + parseFloat(transaction.amount),
           balance: catBalance
+        }).then((result) => {
+          console.log('successfull update allocation ', allocRef, alloc);
         });
       });
 
-      let allocationNextupdate = this.db.object(allocRef);
-      allocationNextupdate.take(1).subscribe(alloc => {
+      let allocationNextupdate = this.db.object(allocNextRef);
+      allocationNextupdate.take(1).subscribe(alloc2 => {
         this.db.object(allocNextRef).update({
           previousBalance: catBalance
+        }).then((result) => {
+          console.log('successfull update allocation 2 ', allocNextRef, alloc2);
         });
       });
 

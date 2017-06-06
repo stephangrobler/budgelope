@@ -25,19 +25,28 @@
               </md-input-container>
             </section>
             <section>
-              <md-select placeholder="Category" [(ngModel)]="transaction.category" name="category">
-                <md-option *ngFor="let category of categories" [value]="category">
-                  {{category.name}}
+              <md-input-container>
+                <input type="text" mdInput placeholder="Category" [mdAutocomplete]="auto" [formControl]="catCtrl">
+              </md-input-container>
+              <md-autocomplete #auto="mdAutocomplete" [displayWith]="displayFn">
+                <md-option *ngFor="let category of filteredCategories | async" [value]="category">
+                  <span *ngIf="category.parent">{{category.parent}} ></span>{{category.name}} 
                 </md-option>
-              </md-select>
+              </md-autocomplete>
             </section>
             <section>
-              <md-select placeholder="Account" [(ngModel)]="transaction.account" name="account">
-                <md-option [value]="account" *ngFor="let account of accounts">
+              <!-- {{filteredCategories | json}} -->
+            </section>
+            <!-- <section>
+              <md-input-container>
+                <input mdInput placeholder="Account" [mdAutocomplete]="auto2" name="account">
+              </md-input-container>
+              <md-autocomplete #auto2="mdAutocomplete">
+                <md-option [value]="account" *ngFor="let account of accounts | async">
                   {{account.name}}
                 </md-option>
-              </md-select>
-            </section>
+              </md-autocomplete>
+            </section> -->
             <section>
               <md-checkbox [(ngModel)]="transaction.cleared" name="cleared" [align]="end">
                 Cleared
