@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { AngularFireDatabase, FirebaseObjectObservable } from 'angularfire2/database';
+import { AngularFireDatabase, AngularFireObject } from 'angularfire2/database';
 
 import { UserService } from '../../shared/user.service';
 import { AccountService } from '../accountShared/account.service';
@@ -21,7 +21,7 @@ export class AccountComponent implements OnInit {
   accountId: any;
   accountType: string;
   activeBudget: Budget;
-  item: FirebaseObjectObservable<any>;
+  item: AngularFireObject<any>;
 
   constructor(
     private accountService: AccountService,
@@ -39,8 +39,8 @@ export class AccountComponent implements OnInit {
     });
     this.activeBudget = this.budgetService.getActiveBudget();
     if (this.accountId != "add"){
-      this.item = this.db.object('accounts/'+this.activeBudget.id +'/'+this.accountId);
-      this.item.subscribe(acc => { this.account = acc });
+      this.item = this.db.object<any>('accounts/'+this.activeBudget.id +'/'+this.accountId);
+      this.item.valueChanges().subscribe(acc => { this.account = acc });
     }
     console.log('account', this.account);
   }
@@ -72,7 +72,7 @@ export class AccountComponent implements OnInit {
   createAccount() {
     this.account = new Account();
     this.account.name = this.accName;
-    this.account.balance = this.accStartingBalance;    
+    this.account.balance = this.accStartingBalance;
     this.accountService.createAccount(this.account);
   }
 

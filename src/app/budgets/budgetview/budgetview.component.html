@@ -9,42 +9,42 @@
         <h2></h2>
       </div>
 
-      <md-card>
-        <md-card-title>
+      <mat-card>
+        <mat-card-title>
           {{ this.selectedMonth.format("MMMM 'YY")}}
-        </md-card-title>
-        <md-card-content>
-          <md-list>
-            <md-list-item>Available : {{ totalAvailable | number: '1.2'}}</md-list-item>
-            <md-list-item>Income : {{ totalIncome | number: '1.2'}}</md-list-item>
-            <md-list-item>Expense : {{ totalExpense | number: '1.2'}}</md-list-item>
-          </md-list>
-        </md-card-content>
+        </mat-card-title>
+        <mat-card-content>
+          <mat-list>
+            <mat-list-item>Available : {{ totalAvailable | number: '1.2'}}</mat-list-item>
+            <mat-list-item>Income : {{ totalIncome | number: '1.2'}}</mat-list-item>
+            <mat-list-item>Expense : {{ totalExpense | number: '1.2'}}</mat-list-item>
+          </mat-list>
+        </mat-card-content>
 
-      </md-card>
+      </mat-card>
 
       <!-- header -->
       <br>
-      <md-card class="budget-view">
-        <md-card-content>
-          <a md-fab [routerLink]="['/category/add']">
-            <md-icon>add</md-icon>
+      <mat-card class="budget-view">
+        <mat-card-content>
+          <a mat-fab [routerLink]="['/category/add']">
+            <mat-icon>add</mat-icon>
           </a>
 
-          <md-list>
+          <mat-list>
             <div class="ngx-dnd-container">
             <ngx-dnd-container [model]="sortList" (drop)="log($event)" class="sucker">
               <ng-template let-item="model">
-                <md-list-item *ngIf="item.type != 'income'" [ngClass]="{'header': checkIsHeader(item)}">
+                <mat-list-item *ngIf="item.type != 'income'" [ngClass]="{'header': checkIsHeader(item)}">
                   <div class="name">
-                    <a md-icon-button [routerLink]="['/category/'+item.$key]">
-                      <md-icon color="primary">edit</md-icon>
+                    <a mat-icon-button [routerLink]="['/category/'+item.$key]">
+                      <mat-icon color="primary">edit</mat-icon>
                     </a> {{item.name}}
                   </div>
                   <div class="planned-input">
-                    <md-input-container *ngIf="item.parent != ''">
+                    <mat-input-container *ngIf="item.parent != ''">
                       <input mdInput type="number" name="planned" class="text-right" [(ngModel)]="item.planned" (blur)="blur(item)" (focus)="focus(item)">
-                    </md-input-container>
+                    </mat-input-container>
                   </div>
                   <div class="actual text-right" *ngIf="item.parent != ''">
                     {{item.actual | number:'1.2'}}
@@ -53,17 +53,17 @@
                     {{item.balance | number:'1.2'}}
                   </div>
 
-                </md-list-item>
+                </mat-list-item>
               </ng-template>
             </ngx-dnd-container>
             </div>
-          </md-list>
-        </md-card-content>
-      </md-card>
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
 
       <!-- catlist -->
-      <!-- <md-card class="budget-view">
-        <md-card-title style="padding: 0 16px;">
+      <!-- <mat-card class="budget-view">
+        <mat-card-title style="padding: 0 16px;">
           <div class="name">
 
           </div>
@@ -76,18 +76,18 @@
           <div class="balance text-right">
             Balance
           </div>
-        </md-card-title>
-        <md-card-content>
-          <md-list>
+        </mat-card-title>
+        <mat-card-content>
+          <mat-list>
             <div *ngFor="let item of allocations | async">
-              <md-list-item *ngIf="item.type != 'income'" [ngClass]="{'header': checkIsHeader(item)}">
+              <mat-list-item *ngIf="item.type != 'income'" [ngClass]="{'header': checkIsHeader(item)}">
                 <div class="name">
                   {{item.name}}
                 </div>
                 <div class="planned-input">
-                  <md-input-container *ngIf="item.parent != ''">
+                  <mat-input-container *ngIf="item.parent != ''">
                     <input mdInput type="number" name="planned" class="text-right" [(ngModel)]="item.planned" (blur)="blur(item)" (focus)="focus(item)">
-                  </md-input-container>
+                  </mat-input-container>
                 </div>
                 <div class="actual text-right" *ngIf="item.parent != ''">
                   {{item.actual | number:'1.2'}}
@@ -96,13 +96,13 @@
                   {{item.balance | number:'1.2'}}
                 </div>
 
-              </md-list-item>
-              <md-divider *ngIf="item.type != 'income'"></md-divider>
+              </mat-list-item>
+              <mat-divider *ngIf="item.type != 'income'"></mat-divider>
             </div>
-          </md-list>
-        </md-card-content>
+          </mat-list>
+        </mat-card-content>
 
-      </md-card> -->
+      </mat-card> -->
 
 
 

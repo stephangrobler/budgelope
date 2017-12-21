@@ -80,9 +80,9 @@ export class TransactionService {
 
       this.db.object('/').update(updateObj);
 
-      let allocationupdate = this.db.object(allocRef);
-      allocationupdate.take(1).subscribe(alloc => {
-        this.db.object(allocRef).update({
+      let allocationupdate = this.db.object<any>(allocRef);
+      allocationupdate.valueChanges().take(1).subscribe(alloc => {
+        this.db.object<any>(allocRef).update({
           actual: alloc.actual + parseFloat(transaction.amount),
           balance: catBalance
         }).then((result) => {
@@ -90,8 +90,8 @@ export class TransactionService {
         });
       });
 
-      let allocationNextupdate = this.db.object(allocNextRef);
-      allocationNextupdate.take(1).subscribe(alloc2 => {
+      let allocationNextupdate = this.db.object<any>(allocNextRef);
+      allocationNextupdate.valueChanges().take(1).subscribe(alloc2 => {
         this.db.object(allocNextRef).update({
           previousBalance: catBalance
         }).then((result) => {
@@ -101,9 +101,6 @@ export class TransactionService {
 
       console.log(updateObj);
       alert('Transaction saved');
-    }).catch(error => {
-      alert('there was an error creating the transaction.');
-      console.log('ERROR:', error);
     });
 
 

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable } from 'angularfire2/database';
+import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
 
 import * as firebase from 'firebase';
@@ -41,11 +41,11 @@ export class CategoryComponent implements OnInit {
       if (!user) {
         return;
       }
-      this.db.object('users/' + user.uid).subscribe(profile => {
+      this.db.object<any>('users/' + user.uid).valueChanges().subscribe(profile => {
         this.activeBudget = profile.activeBudget;
         this.loadParentCategories(profile.activeBudget);
         if (this.categoryId != "add") {
-          this.db.object('categories/' + profile.activeBudget + '/' + this.categoryId).subscribe(cat => {
+          this.db.object<any>('categories/' + profile.activeBudget + '/' + this.categoryId).valueChanges().subscribe(cat => {
             this.category = cat;
 
           });
@@ -55,11 +55,11 @@ export class CategoryComponent implements OnInit {
   }
 
   loadParentCategories(budgetId: string) {
-    let parentCategories = this.db.list('categories/' + this.activeBudget);
+    let parentCategories = this.db.list<any>('categories/' + this.activeBudget);
 
     // get all the categories so that we can have counts to do the correct
     // saving and counts :P
-    parentCategories.take(1).subscribe(catSnap => {
+    parentCategories.valueChanges().take(1).subscribe(catSnap => {
 
       let rawList = [];
       this.childCounts = {};

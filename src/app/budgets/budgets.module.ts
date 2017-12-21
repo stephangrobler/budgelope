@@ -2,8 +2,8 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import {MdListModule, MdIconModule} from '@angular/material';
-import {MdGridListModule, MdCardModule, MdInputModule, MdButtonModule} from '@angular/material';
+import {MatListModule, MatIconModule} from '@angular/material';
+import {MatGridListModule, MatCardModule, MatInputModule, MatButtonModule} from '@angular/material';
 import { NgxDnDModule } from '@swimlane/ngx-dnd';
 
 import { BudgetsRoutingModule } from './budgets-routing.module';
@@ -20,12 +20,12 @@ import { BudgetviewComponent } from './budgetview/budgetview.component';
     SharedModule,
     BudgetsRoutingModule,
     FormsModule,
-    MdListModule,
-    MdGridListModule,
-    MdCardModule,
-    MdIconModule,
-    MdButtonModule,
-    MdInputModule,
+    MatListModule,
+    MatGridListModule,
+    MatCardModule,
+    MatIconModule,
+    MatButtonModule,
+    MatInputModule,
     NgxDnDModule
   ],
   declarations: [

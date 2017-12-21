@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+import { AngularFireDatabase, AngularFireList } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
-
+import { MatTableDataSource } from '@angular/material';
 import { Transaction } from '../shared/transaction';
 import { TransactionService } from '../core/transaction.service';
 import { BudgetService } from '../core/budget.service';
@@ -15,7 +15,8 @@ export class TransactionsComponent implements OnInit {
 
   userId: string;
   budgetId: string;
-  transactions: FirebaseListObservable<Transaction[]>;
+  transactions: MatTableDataSource<any>;
+  displayedColumns: ['Date'];
 
   colums: any[];
 
@@ -31,7 +32,7 @@ export class TransactionsComponent implements OnInit {
       if (!user) {
         return;
       }
-      let profile = db.object('users/' + user.uid).subscribe(profile => {
+      let profile = db.object<any>('users/' + user.uid).valueChanges().subscribe(profile => {
         this.loadTransactions(profile.activeBudget);
       });
     });
@@ -43,12 +44,13 @@ export class TransactionsComponent implements OnInit {
 
   loadTransactions(budgetId: string) {
     let ref = 'transactions/' + budgetId;
-    this.db.list(ref).subscribe(snapshots => {
+    this.db.list<Transaction>(ref).valueChanges().subscribe(snapshots => {
       let list: any = [];
       snapshots.forEach(trans => {
         list.push(trans);
       });
-      this.transactions = list.reverse();
+      this.transactions = new MatTableDataSource(list.reverse());
+
     });
   }
 

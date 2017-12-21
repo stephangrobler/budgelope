@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { AngularFireAuth } from 'angularfire2/auth';
-import { AngularFireDatabase, FirebaseObjectObservable, FirebaseListObservable } from 'angularfire2/database';
+import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angularfire2/database';
 import * as moment from 'moment';
 import 'rxjs/add/operator/startWith';
 import 'rxjs/add/operator/map';
@@ -31,8 +31,8 @@ export class TransactionComponent implements OnInit {
   activeBudget: string;
   type: string;
   transactionId: string;
-  item: FirebaseObjectObservable<any>;
-  accounts: FirebaseListObservable<any>;
+  item: AngularFireObject<any>;
+  accounts: AngularFireList<any>;
   categories: any[] = [];
   transaction: any;
 
@@ -70,21 +70,21 @@ export class TransactionComponent implements OnInit {
       if (!user) {
         return;
       }
-      let profile = this.db.object('users/' + user.uid).subscribe(profile => {
+      let profile = this.db.object<any>('users/' + user.uid).valueChanges().subscribe(profile => {
         this.activeBudget = profile.activeBudget;
 
         this.route.params.forEach((params: Params) => {
           this.transactionId = params["id"];
         });
         if (this.transactionId != "add") {
-          this.item = this.db.object('transactions/' + profile.activeBudget + '/' + this.transactionId);
-          this.item.subscribe(transaction => { this.transaction = transaction });
+          this.item = this.db.object<any>('transactions/' + profile.activeBudget + '/' + this.transactionId);
+          this.item.valueChanges().subscribe(transaction => { this.transaction = transaction });
         } else {
           this.transaction = {};
         }
         // get the budget accounts
         this.accounts = this.db.list('accounts/' + profile.activeBudget);
-        this.db.list('categories/' + profile.activeBudget).subscribe(snap => this.categories = snap);
+        this.db.list<any>('categories/' + profile.activeBudget).valueChanges().subscribe(snap => this.categories = snap);
         this.db.object('allocations/' + moment().format("YYYYMM"))
       });
     });

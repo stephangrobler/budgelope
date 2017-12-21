@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {MdToolbarModule, MdButtonModule, MdIconModule} from '@angular/material';
+import {MatToolbarModule, MatButtonModule, MatIconModule} from '@angular/material';
 
 import { NavComponent } from './navbar.component';
 
@@ -12,9 +12,9 @@ import { NavComponent } from './navbar.component';
     RouterModule,
     CommonModule,
     BrowserAnimationsModule,
-    MdToolbarModule,
-    MdButtonModule,
-    MdIconModule
+    MatToolbarModule,
+    MatButtonModule,
+    MatIconModule
   ],
   exports: [
     NavComponent

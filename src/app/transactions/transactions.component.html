@@ -4,26 +4,19 @@
     <div class="col-xs-12">
       <div class="page-header">
         <h1>Transactions</h1>
-        <a md-mini-fab [routerLink]="['/transaction/add']" class="btn btn-success">
-          <md-icon>add</md-icon>
+        <a mat-mini-fab [routerLink]="['/transaction/add']" class="btn btn-success">
+          <mat-icon>add</mat-icon>
         </a>
       </div>
+      <mat-table #table [dataSource]="transactions">
+        <ng-container>
+          <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
+          <mat-cell *matCellDef="let element">{{element.value}}</mat-cell>
+        </ng-container>
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      </mat-table>
 
-      <ngx-datatable class="material" [rows]="transactions">
-        <ngx-datatable-column name="timestamp">
-          <ng-template let-column="column" let-sort="sortFn" ngx-datatable-header-template>
-            <span (click)="sort()">Date</span>
-          </ng-template>
-          <ng-template let-value="value" ngx-datatable-cell-template>
-            {{value | date}}
-          </ng-template>
-        </ngx-datatable-column>
-        <ngx-datatable-column name="Account"></ngx-datatable-column>
-        <ngx-datatable-column name="Payee"></ngx-datatable-column>
-        <ngx-datatable-column name="Category"></ngx-datatable-column>
-        <ngx-datatable-column name="Amount"></ngx-datatable-column>
-        <ngx-datatable-column name="Cleared"></ngx-datatable-column>
-      </ngx-datatable>
     </div>
   </div>
 </div>
