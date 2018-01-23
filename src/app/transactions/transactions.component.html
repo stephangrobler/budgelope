@@ -9,9 +9,21 @@
         </a>
       </div>
       <mat-table #table [dataSource]="transactions">
-        <ng-container>
+        <ng-container matColumnDef="timestamp">
           <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
-          <mat-cell *matCellDef="let element">{{element.value}}</mat-cell>
+          <mat-cell *matCellDef="let transaction">{{transaction.timestamp}}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="payee">
+          <mat-header-cell *matHeaderCellDef>Payee</mat-header-cell>
+          <mat-cell *matCellDef="let transaction">{{transaction.payee}}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="category">
+          <mat-header-cell *matHeaderCellDef>Category</mat-header-cell>
+          <mat-cell *matCellDef="let transaction">{{transaction.category}}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="amount">
+          <mat-header-cell *matHeaderCellDef>Amount</mat-header-cell>
+          <mat-cell *matCellDef="let transaction">{{transaction.amount}}</mat-cell>
         </ng-container>
         <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
         <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>

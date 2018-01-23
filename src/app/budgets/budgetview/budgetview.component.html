@@ -42,15 +42,15 @@
                     </a> {{item.name}}
                   </div>
                   <div class="planned-input">
-                    <mat-input-container *ngIf="item.parent != ''">
+                    <!-- <mat-input-container *ngIf="item.parent != ''">
                       <input mdInput type="number" name="planned" class="text-right" [(ngModel)]="item.planned" (blur)="blur(item)" (focus)="focus(item)">
-                    </mat-input-container>
+                    </mat-input-container> -->
                   </div>
                   <div class="actual text-right" *ngIf="item.parent != ''">
                     {{item.actual | number:'1.2'}}
                   </div>
                   <div class="balance text-right" *ngIf="item.parent != ''">
-                    {{item.balance | number:'1.2'}}
+                    {{item.currentValue | number:'1.2'}}
                   </div>
 
                 </mat-list-item>

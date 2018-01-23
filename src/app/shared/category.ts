@@ -5,7 +5,6 @@ export class Category {
   parentId: string;
   sortingOrder: string;
   balance: number;
-  allocations: any;
   type?: string;
   id?: string;
 }

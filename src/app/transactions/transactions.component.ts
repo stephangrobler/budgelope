@@ -15,10 +15,8 @@ export class TransactionsComponent implements OnInit {
 
   userId: string;
   budgetId: string;
-  transactions: MatTableDataSource<any>;
-  displayedColumns: ['Date'];
-
-  colums: any[];
+  transactions: MatTableDataSource<Transaction>;
+  displayedColumns: ['timestamp', 'account', 'payee','amount','category'];
 
   constructor(
     private transService: TransactionService,
@@ -44,12 +42,14 @@ export class TransactionsComponent implements OnInit {
 
   loadTransactions(budgetId: string) {
     let ref = 'transactions/' + budgetId;
-    this.db.list<Transaction>(ref).valueChanges().subscribe(snapshots => {
+    this.db.list<Transaction>(ref).snapshotChanges(['child_added']).subscribe(snapshots => {
       let list: any = [];
       snapshots.forEach(trans => {
         list.push(trans);
       });
-      this.transactions = new MatTableDataSource(list.reverse());
+
+      this.transactions = new MatTableDataSource(list);
+      console.log(this.transactions);
 
     });
   }

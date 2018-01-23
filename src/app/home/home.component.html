@@ -31,6 +31,11 @@
         <p>After a 45 day trial, you can sign up for a YEAR for only $25. This will let you share a budget with up to 2 other users without them having to pay for their own subscriptions. If they love the software and want to create their own budgets, they
           would need their own subscriptions.</p>
       </section>
+      <ul>
+        <li class="text" *ngFor="let item of items | async">
+          {{item.name}}
+        </li>
+      </ul>
     </div>
   </div>
 </div>
