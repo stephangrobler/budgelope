@@ -8,7 +8,7 @@
           <mat-icon>add</mat-icon>
         </a>
       </div>
-      <mat-table #table [dataSource]="transactions">
+      <mat-table #table [dataSource]="dataSource">
         <ng-container matColumnDef="timestamp">
           <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
           <mat-cell *matCellDef="let transaction">{{transaction.timestamp}}</mat-cell>
@@ -16,6 +16,10 @@
         <ng-container matColumnDef="payee">
           <mat-header-cell *matHeaderCellDef>Payee</mat-header-cell>
           <mat-cell *matCellDef="let transaction">{{transaction.payee}}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="account">
+          <mat-header-cell *matHeaderCellDef>Account</mat-header-cell>
+          <mat-cell *matCellDef="let transaction">{{transaction.account}}</mat-cell>
         </ng-container>
         <ng-container matColumnDef="category">
           <mat-header-cell *matHeaderCellDef>Category</mat-header-cell>

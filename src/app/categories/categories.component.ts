@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import * as firebase from 'firebase';
 import * as moment from 'moment';
 import { AngularFireDatabase, AngularFireList } from 'angularfire2/database';
+import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
 
 import { Category } from '../shared/category';
@@ -16,32 +17,32 @@ import { BudgetService } from '../core/budget.service';
 
 export class CategoriesComponent implements OnInit {
 
-  categories: AngularFireList<Category[]>;
+  categories: AngularFirestoreCollection<Category[]>;
   activeBudget: string;
 
   constructor(
     private userService: UserService,
     private budgetService: BudgetService,
-    private db: AngularFireDatabase,
+    private db: AngularFirestore,
     private auth: AngularFireAuth
   ) {
     auth.authState.subscribe(user => {
       if (!user) {
         return;
       }
-      db.object<any>('users/' + user.uid).valueChanges().subscribe(profile => {
+      db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
         this.activeBudget = profile.activeBudget;
 
-        this.categories = this.db.list<Category[]>('categories/' + this.activeBudget, ref => ref.orderByChild('sortingOrder'));
+        this.categories = this.db.collection<Category[]>('budgets/' + this.activeBudget + '/categories');
 
         console.log(this.categories);
 
-        this.categories.valueChanges().subscribe(snap => {
-          let allocations = db.list<Category>('categoryAllocations/' + this.activeBudget);
-          allocations.valueChanges().take(1).subscribe((alloc) => {
+        // this.categories.valueChanges().subscribe(snap => {
+          // let allocations = db.c<Category>('categoryAllocations/' + this.activeBudget);
+          // allocations.valueChanges().take(1).subscribe((alloc) => {
             // console.log(alloc.$key);
             // loop through the categories
-            snap.forEach(cat => {
+            // snap.forEach(cat => {
               // update each allocation in the allocations list, this should happen only on
               // category creation
               /*
@@ -75,7 +76,7 @@ export class CategoriesComponent implements OnInit {
 
 
 */
-            });
+            // });
             /*
             // console.log('allocations on cat', JSON.stringify(snap));
             let stime: any = moment();
@@ -88,8 +89,8 @@ export class CategoriesComponent implements OnInit {
             }
             // console.log('sep alloc for cats', JSON.stringify(all10));
             */
-          });
-        });
+          // });
+        // });
       });
     })
   }

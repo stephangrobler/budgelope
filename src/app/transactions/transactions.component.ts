@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AngularFireDatabase, AngularFireList } from 'angularfire2/database';
+import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { MatTableDataSource } from '@angular/material';
+import { DataSource } from '@angular/cdk/collections';
 import { Transaction } from '../shared/transaction';
 import { TransactionService } from '../core/transaction.service';
 import { BudgetService } from '../core/budget.service';
@@ -15,23 +17,23 @@ export class TransactionsComponent implements OnInit {
 
   userId: string;
   budgetId: string;
-  transactions: MatTableDataSource<Transaction>;
-  displayedColumns: ['timestamp', 'account', 'payee','amount','category'];
+  displayedColumns = ['account', 'payee','category', 'amount'];
+  dataSource = new TransactionDataSource(this.transService);
+
 
   constructor(
     private transService: TransactionService,
     private budgetService: BudgetService,
     private userService: UserService,
     private router: Router,
-    private db: AngularFireDatabase,
+    private db: AngularFirestore,
     private af: AngularFireAuth
   ) {
     af.authState.subscribe((user) => {
       if (!user) {
         return;
       }
-      let profile = db.object<any>('users/' + user.uid).valueChanges().subscribe(profile => {
-        this.loadTransactions(profile.activeBudget);
+      let profile = db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
       });
     });
   }
@@ -40,19 +42,23 @@ export class TransactionsComponent implements OnInit {
 
   }
 
-  loadTransactions(budgetId: string) {
-    let ref = 'transactions/' + budgetId;
-    this.db.list<Transaction>(ref).snapshotChanges(['child_added']).subscribe(snapshots => {
-      let list: any = [];
-      snapshots.forEach(trans => {
-        list.push(trans);
-      });
 
-      this.transactions = new MatTableDataSource(list);
-      console.log(this.transactions);
 
-    });
+}
+
+export class TransactionDataSource extends DataSource<any>{
+  constructor (private transService : TransactionService) {
+    super();
   }
 
+  connect() {
+    this.transService.getTransactions().subscribe(te => {
+      console.log(te);
+    });
+    return this.transService.getTransactions();
+  }
 
+  disconnect() {
+
+  }
 }
