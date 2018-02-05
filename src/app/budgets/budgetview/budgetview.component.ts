@@ -2,18 +2,19 @@ import { Component, OnInit } from '@angular/core';
 import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angularfire2/database';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
-
-
-
+import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/take';
-import * as firebase from 'firebase';
+
 import * as moment from 'moment';
 
 import { Account } from '../../shared/account';
+import { Category } from '../../shared/category';
 import { BudgetService } from '../../core/budget.service';
 import { UserService } from '../../shared/user.service';
+
+export interface CategoryId extends Category { id: string };
 
 @Component({
   selector: 'app-budgetview',
@@ -32,7 +33,7 @@ export class BudgetviewComponent implements OnInit {
   nextMonth: any = moment().add(1, 'months');
   monthDisplay: Date;
 
-  sortList: any[] = [];
+  sortList: any;
 
   isHeader: boolean = false;
 
@@ -51,15 +52,26 @@ export class BudgetviewComponent implements OnInit {
       if (!user) {
         return;
       }
-      let budget = db.collection('budgets/pPkN7QxRdyyvG4Jy2hr6/categories').valueChanges().subscribe(budget => {
-        // check allocations exist
-        // this.checkAllocations(budget.activeBudget);
-        // this.loadBudget(budget.activeBudget);
-        // this.loadAccounts(budget.activeBudget);
-        // this.activeBudget = budget.activeBudget;
-        console.log(budget);
-        this.sortList = budget;
+      let ref = 'budgets/pPkN7QxRdyyvG4Jy2hr6/categories';
+      let testList = db.collection<Category>(ref).snapshotChanges().map(budget => {
+        let b = budget.map(b => {
+          let thisRef = ref + '/'+ b.payload.doc.id + '/categories';
+          
+          const data = b.payload.doc.data() as Category;
+          const catRef = db.collection<Category>(thisRef).snapshotChanges();
+
+          const id = b.payload.doc.id;
+          return { id, ...data }
+        });
+        console.log(b);
+        return b;
       });
+
+      testList.subscribe(list => {
+        console.log(list);
+        this.sortList = list;
+      });
+
     });
   }
 
@@ -82,6 +94,7 @@ export class BudgetviewComponent implements OnInit {
       let list = this.db.collection(ref).valueChanges();
 
       list.take(1).subscribe(catSnapshots => {
+        console.log(catSnapshots);
         if (catSnapshots.length == 0) {
           // get the categories list and push new allocations to the list.
           // this.db.list<any>('categories/' + budgetId).valueChanges().subscribe(catSnapshots => {
@@ -210,24 +223,24 @@ export class BudgetviewComponent implements OnInit {
     let count: number = 1;
     let currentParent: any;
     let currentChildCount: number;
-    this.sortList.forEach((item) => {
-      if (item.parent == '') {
-        currentParent = item;
-        currentChildCount = 0;
-      }
-
-      if (item.parent != '') {
-        if (item.sortingOrder.substr(0, 3) == currentParent.sortingOrder) {
-          // increment child count
-          currentChildCount++;
-          let childOrder = currentParent.sortingOrder + ':' + ("000" + currentChildCount).slice(-3);
-
-          if (childOrder != item.sortingOrder) {
-            // this.db.object('categories/' + this.activeBudget + '/' + item.$key).update({ 'sortingOrder': childOrder });
-          }
-        }
-      }
-    })
+    // this.sortList.forEach((item) => {
+    //   if (item.parent == '') {
+    //     currentParent = item;
+    //     currentChildCount = 0;
+    //   }
+    //
+    //   if (item.parent != '') {
+    //     if (item.sortingOrder.substr(0, 3) == currentParent.sortingOrder) {
+    //       // increment child count
+    //       currentChildCount++;
+    //       let childOrder = currentParent.sortingOrder + ':' + ("000" + currentChildCount).slice(-3);
+    //
+    //       if (childOrder != item.sortingOrder) {
+    //         // this.db.object('categories/' + this.activeBudget + '/' + item.$key).update({ 'sortingOrder': childOrder });
+    //       }
+    //     }
+    //   }
+    // })
   }
 
   blur(item) {

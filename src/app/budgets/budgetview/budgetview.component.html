@@ -34,7 +34,7 @@
           <mat-list>
             <div class="ngx-dnd-container">
             <ngx-dnd-container [model]="sortList" (drop)="log($event)" class="sucker">
-              <ng-template let-item="model">
+              <ng-template let-item="model" let-template="template">
                 <mat-list-item *ngIf="item.type != 'income'" [ngClass]="{'header': checkIsHeader(item)}">
                   <div class="name">
                     <a mat-icon-button [routerLink]="['/category/'+item.$key]">
@@ -54,6 +54,7 @@
                   </div>
 
                 </mat-list-item>
+              
               </ng-template>
             </ngx-dnd-container>
             </div>

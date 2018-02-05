@@ -13,7 +13,7 @@
         </section>
         <section>
           <mat-select placeholder="Parent Category" [(ngModel)]="parent" name="parent">
-            <mat-option *ngFor="let category of categories" [value]="category">
+            <mat-option *ngFor="let category of categories | async" [value]="category">
               {{category.name}}
             </mat-option>
           </mat-select>
