@@ -12,6 +12,7 @@ import { AccountComponent } from '../accounts/account/account.component';
   imports: [
     RouterModule.forRoot([
       { path: '', component: LoginComponent },
+      
       // Accounts
       { path: 'accounts', component: AccountListComponent },
       { path: 'account/:id', component: AccountComponent },
