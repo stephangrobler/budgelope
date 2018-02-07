@@ -3,8 +3,8 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import { AngularFireAuth } from 'angularfire2/auth';
 import * as firebase from 'firebase/app';
-
 import { UserService } from '../shared/user.service';
+import { MatGridListModule, MatButtonModule } from '@angular/material';
 
 
 @Component({
@@ -20,7 +20,15 @@ export class LoginComponent implements OnInit {
     private router: Router,
     public afAuth: AngularFireAuth
   ) {
-    this.user = afAuth.authState;
+    // check if a user is authentication and redirect to budget view else login
+    afAuth.authState.subscribe((user) => {
+      if (!user){
+        return;
+      } else {
+        this.router.navigate(['/budgetview']);
+      }
+      console.log(user);
+    });
   }
 
   ngOnInit() {}
@@ -33,7 +41,7 @@ export class LoginComponent implements OnInit {
   googleLogin() {
     this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then((user) => {
       console.log(user.user.providerData[0]);
-      
+
       this.router.navigate(['/']);
     });
   }

@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import * as firebase from 'firebase';
 import * as moment from 'moment';
-import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+import { AngularFireDatabase, AngularFireList } from 'angularfire2/database';
+import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
 
 import { Category } from '../shared/category';
@@ -16,36 +17,35 @@ import { BudgetService } from '../core/budget.service';
 
 export class CategoriesComponent implements OnInit {
 
-  categories: FirebaseListObservable<Category[]>;
+  categories: AngularFirestoreCollection<Category[]>;
   activeBudget: string;
 
   constructor(
     private userService: UserService,
     private budgetService: BudgetService,
-    private db: AngularFireDatabase,
+    private db: AngularFirestore,
     private auth: AngularFireAuth
   ) {
     auth.authState.subscribe(user => {
       if (!user) {
         return;
       }
-      db.object('users/' + user.uid).subscribe(profile => {
+      db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
         this.activeBudget = profile.activeBudget;
-        this.categories = this.db.list('categories/' + this.activeBudget, {
-          query: {
-            orderByChild: 'sortingOrder'
-          }
-        });
+
+        this.categories = this.db.collection<Category[]>('budgets/' + this.activeBudget + '/categories');
+
         console.log(this.categories);
 
-        this.categories.subscribe(snap => {
-          let allocations = db.list('categoryAllocations/' + this.activeBudget);
-          allocations.take(1).subscribe((alloc) => {
+        // this.categories.valueChanges().subscribe(snap => {
+          // let allocations = db.c<Category>('categoryAllocations/' + this.activeBudget);
+          // allocations.valueChanges().take(1).subscribe((alloc) => {
             // console.log(alloc.$key);
             // loop through the categories
-            snap.forEach(cat => {
+            // snap.forEach(cat => {
               // update each allocation in the allocations list, this should happen only on
               // category creation
+              /*
               alloc.forEach(allocation => {
                 let ref: string = allocation.$key + '/' + cat.$key;
                 let actual: number = allocation[cat.$key].actual;
@@ -59,6 +59,7 @@ export class CategoriesComponent implements OnInit {
                 }
                 // allocations.update(ref, {name: cat.name, sortingOrder: cat.sortingOrder, balance: cat.balance, actual: actual, planned: planned});
               });
+              */
               /*
               //create array of nested allocations
               let time: any = moment();
@@ -75,7 +76,7 @@ export class CategoriesComponent implements OnInit {
 
 
 */
-            });
+            // });
             /*
             // console.log('allocations on cat', JSON.stringify(snap));
             let stime: any = moment();
@@ -88,8 +89,8 @@ export class CategoriesComponent implements OnInit {
             }
             // console.log('sep alloc for cats', JSON.stringify(all10));
             */
-          });
-        });
+          // });
+        // });
       });
     })
   }

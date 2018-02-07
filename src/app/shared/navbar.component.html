@@ -1,19 +1,19 @@
-<md-toolbar color="primary">
-  <md-icon>menu</md-icon>
+<mat-toolbar color="primary">
+  <mat-icon>menu</mat-icon>
 
-  <a md-button [routerLink]="['/']">Budgalope</a>
+  <a mat-button [routerLink]="['/']">Budgalope</a>
   <div *ngIf="theUser">
-    <a md-button [routerLink]="['/budgetview']">Budgets</a>
-    <a md-button [routerLink]="['/transactions']">Transactions</a>
+    <a mat-button [routerLink]="['/budgetview']">Budgets</a>
+    <a mat-button [routerLink]="['/transactions']">Transactions</a>
   </div>
   <div *ngIf="!theUser">
-    <a md-button [routerLink]="['/features']">Features</a>
-    <a md-button [routerLink]="['/pricing']">Pricing</a>
+    <a mat-button [routerLink]="['/features']">Features</a>
+    <a mat-button [routerLink]="['/pricing']">Pricing</a>
   </div>
   <div *ngIf="!theUser" style="float: right">
-    <a md-button [routerLink]="['/login']">Log In <md-icon>login</md-icon></a>
+    <a mat-button [routerLink]="['/login']">Log In <mat-icon>login</mat-icon></a>
   </div>
   <div *ngIf="theUser" style="float: right">
-    <a md-button href (click)="logout()">{{theUser}}</a>
+    <a mat-button href (click)="logout()">{{theUser}}</a>
   </div>
-</md-toolbar>
+</mat-toolbar>

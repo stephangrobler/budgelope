@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import * as firebase from 'firebase';
 
 
+
 import { UserService } from './shared/user.service';
 
 
@@ -13,10 +14,14 @@ import { UserService } from './shared/user.service';
 export class AppComponent implements OnInit {
   title = 'app works!';
 
-  constructor(private userService: UserService) { }
+
+  constructor(private userService: UserService) {
+
+  }
 
   ngOnInit() {
     this.userService.verifyUser();
+
     let messaging = firebase.messaging();
     messaging.requestPermission()
       .then(function() {

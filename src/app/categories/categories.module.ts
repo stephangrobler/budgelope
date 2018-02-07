@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
-import {MdCheckboxModule, MdIconModule, MdInputModule, MdRadioModule, MdDatepickerModule, MdSelectModule, MdCardModule, MdButtonModule} from '@angular/material';
+import {MatCheckboxModule, MatIconModule, MatInputModule, MatRadioModule, MatDatepickerModule, MatSelectModule, MatCardModule, MatButtonModule} from '@angular/material';
 
 import { SharedModule } from '../shared/shared.module';
 import { CategoriesComponent } from './categories.component';
@@ -16,14 +16,14 @@ import { CategoriesRoutingModule } from './categories-routing.module';
     FormsModule,
     CategoriesRoutingModule,
     SharedModule,
-    MdCheckboxModule,
-    MdIconModule,
-    MdInputModule,
-    MdRadioModule,
-    MdDatepickerModule,
-    MdSelectModule,
-    MdCardModule,
-    MdButtonModule
+    MatCheckboxModule,
+    MatIconModule,
+    MatInputModule,
+    MatRadioModule,
+    MatDatepickerModule,
+    MatSelectModule,
+    MatCardModule,
+    MatButtonModule
   ],
   declarations: [
     CategoriesComponent,

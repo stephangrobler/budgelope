@@ -1,18 +1,20 @@
 import { Component, OnInit } from '@angular/core';
-import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable } from 'angularfire2/database';
+import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angularfire2/database';
+import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
-
-
-
+import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/take';
-import * as firebase from 'firebase';
+
 import * as moment from 'moment';
 
 import { Account } from '../../shared/account';
+import { Category } from '../../shared/category';
 import { BudgetService } from '../../core/budget.service';
 import { UserService } from '../../shared/user.service';
+
+export interface CategoryId extends Category { id: string };
 
 @Component({
   selector: 'app-budgetview',
@@ -20,10 +22,10 @@ import { UserService } from '../../shared/user.service';
   styleUrls: ['./budgetview.component.scss']
 })
 export class BudgetviewComponent implements OnInit {
-  categoriesAllocations: FirebaseListObservable<any>;
+  categoriesAllocations: AngularFireList<any>;
   categories: any[];
-  allocations: FirebaseListObservable<any>;
-  accounts: FirebaseListObservable<Account[]>;
+  allocations: AngularFireList<any>;
+  accounts: AngularFireList<Account[]>;
   userId: string;
   activeBudget: string;
 
@@ -31,7 +33,7 @@ export class BudgetviewComponent implements OnInit {
   nextMonth: any = moment().add(1, 'months');
   monthDisplay: Date;
 
-  sortList: any[] = [];
+  sortList: any;
 
   isHeader: boolean = false;
 
@@ -41,7 +43,7 @@ export class BudgetviewComponent implements OnInit {
   totalAvailable: number = 0;
 
   constructor(
-    private db: AngularFireDatabase,
+    private db: AngularFirestore,
     private budgetService: BudgetService,
     private userService: UserService,
     private auth: AngularFireAuth
@@ -50,13 +52,24 @@ export class BudgetviewComponent implements OnInit {
       if (!user) {
         return;
       }
-      let profile = db.object('users/' + user.uid).subscribe(profile => {
-        // check allocations exist
-        this.checkAllocations(profile.activeBudget);
-        this.loadBudget(profile.activeBudget);
-        this.loadAccounts(profile.activeBudget);
-        this.activeBudget = profile.activeBudget;
+      let ref = 'budgets/pPkN7QxRdyyvG4Jy2hr6/categories';
+      let testList = db.collection<Category>(ref).snapshotChanges().map(budget => {
+        let b = budget.map(b => {
+          let thisRef = ref + '/'+ b.payload.doc.id + '/categories';
+
+          const data = b.payload.doc.data() as Category;
+          const catRef = db.collection<Category>(thisRef).snapshotChanges();
+
+          const id = b.payload.doc.id;
+          return { id, ...data }
+        });
+        return b;
       });
+
+      testList.subscribe(list => {
+        this.sortList = list;
+      });
+
     });
   }
 
@@ -75,36 +88,40 @@ export class BudgetviewComponent implements OnInit {
     ];
 
     months.forEach(month => {
-      let ref = 'allocations/' + budgetId + '/' + month;
-      let list = this.db.list(ref);
+      let ref = '/budgets/pPkN7QxRdyyvG4Jy2hr6/categories/BlpH88FtFbxuMzh99EYA';
+      let list = this.db.collection(ref).valueChanges();
 
       list.take(1).subscribe(catSnapshots => {
+        console.log(catSnapshots);
         if (catSnapshots.length == 0) {
           // get the categories list and push new allocations to the list.
-          this.db.list('categories/' + budgetId).subscribe(catSnapshots => {
-            catSnapshots.forEach(catSnapshot => {
-              if (!catSnapshot.type){
-                catSnapshot.type = 'expense';
-              }
-              list.update(catSnapshot.$key, {
-                planned: 0,
-                actual: 0,
-                balance: 0,
-                name: catSnapshot.name,
-                parent: catSnapshot.parent,
-                sortingOrder: catSnapshot.sortingOrder,
-                type: catSnapshot.type
-              });
-              this.db.object('categoryAllocations/' + budgetId + '/' + catSnapshot.$key + '/' + month).set(true);
-            });
-          });
+          // this.db.list<any>('categories/' + budgetId).valueChanges().subscribe(catSnapshots => {
+          //   catSnapshots.forEach(catSnapshot => {
+          //     if (!catSnapshot.type){
+          //       catSnapshot.type = 'expense';
+          //     }
+          //     /*
+          //     list.update(catSnapshot.$key, {
+          //       planned: 0,
+          //       actual: 0,
+          //       balance: 0,
+          //       name: catSnapshot.name,
+          //       parent: catSnapshot.parent,
+          //       sortingOrder: catSnapshot.sortingOrder,
+          //       type: catSnapshot.type
+          //     });
+          //     this.db.object('categoryAllocations/' + budgetId + '/' + catSnapshot.$key + '/' + month).set(true);
+          //     */
+          //   });
+          // });
         }
       });
     })
   }
 
   loadBudget(budgetId: string) {
-    this.allocations = this.db.list('allocations/' + budgetId + '/' + this.selectedMonth.format("YYYYMM"), {
+    /*
+    this.allocations = this.db.list<any>('allocations/' + budgetId + '/' + this.selectedMonth.format("YYYYMM"), {
       query: {
         orderByChild: 'sortingOrder'
       }
@@ -185,7 +202,7 @@ export class BudgetviewComponent implements OnInit {
 
   loadAccounts(budgetId: string) {
     let accRef = 'accounts/' + budgetId;
-    this.accounts = this.db.list(accRef);
+    // this.accounts = this.db.list(accRef);
   }
 
   alert(key) {
@@ -204,24 +221,24 @@ export class BudgetviewComponent implements OnInit {
     let count: number = 1;
     let currentParent: any;
     let currentChildCount: number;
-    this.sortList.forEach((item) => {
-      if (item.parent == '') {
-        currentParent = item;
-        currentChildCount = 0;
-      }
-
-      if (item.parent != '') {
-        if (item.sortingOrder.substr(0, 3) == currentParent.sortingOrder) {
-          // increment child count
-          currentChildCount++;
-          let childOrder = currentParent.sortingOrder + ':' + ("000" + currentChildCount).slice(-3);
-
-          if (childOrder != item.sortingOrder) {
-            this.db.object('categories/' + this.activeBudget + '/' + item.$key).update({ 'sortingOrder': childOrder });
-          }
-        }
-      }
-    })
+    // this.sortList.forEach((item) => {
+    //   if (item.parent == '') {
+    //     currentParent = item;
+    //     currentChildCount = 0;
+    //   }
+    //
+    //   if (item.parent != '') {
+    //     if (item.sortingOrder.substr(0, 3) == currentParent.sortingOrder) {
+    //       // increment child count
+    //       currentChildCount++;
+    //       let childOrder = currentParent.sortingOrder + ':' + ("000" + currentChildCount).slice(-3);
+    //
+    //       if (childOrder != item.sortingOrder) {
+    //         // this.db.object('categories/' + this.activeBudget + '/' + item.$key).update({ 'sortingOrder': childOrder });
+    //       }
+    //     }
+    //   }
+    // })
   }
 
   blur(item) {
@@ -229,12 +246,12 @@ export class BudgetviewComponent implements OnInit {
       let catBalance: number = 0;
       item.balance += parseFloat(item.planned) - parseFloat(item.original);
       // update the category balance
-      this.db.object('categories/' + this.activeBudget + '/' + item.$key).update({ balance: item.balance });
+      // this.db.object('categories/' + this.activeBudget + '/' + item.$key).update({ balance: item.balance });
       // update next months previous balance
       let nextMonth = moment().add(1, 'months').format("YYYYMM");
       let nextMonthRef = 'allocations/' + this.activeBudget + '/' + nextMonth + '/' + item.$key;
 
-      this.db.object(nextMonthRef).update({ previousBalance: item.balance });
+      // this.db.object(nextMonthRef).update({ previousBalance: item.balance });
       // update the item with the planned and balance.
       this.allocations.update(item.$key, { "planned": item.planned, "balance": item.balance });
     }

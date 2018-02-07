@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs/Observable';
+
 export class Category {
   $key?: string;
   name: string;
@@ -5,7 +7,6 @@ export class Category {
   parentId: string;
   sortingOrder: string;
   balance: number;
-  allocations: any;
+  children?: any;
   type?: string;
-  id?: string;
 }

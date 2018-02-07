@@ -1,38 +1,38 @@
 <navi-bar></navi-bar>
 <div class="container">
   <form class="form" action="index.html" method="post">
-    <md-card class="category-card">
-      <md-card-title>
+    <mat-card class="category-card">
+      <mat-card-title>
         Category
-      </md-card-title>
-      <md-card-content>
+      </mat-card-title>
+      <mat-card-content>
         <section>
-          <md-input-container>
-            <input mdInput type="text" placeholder="Category name" [(ngModel)]="category.name" name="name" #nm="ngModel">
-          </md-input-container>
+          <mat-input-container>
+            <input matInput type="text" placeholder="Category name" [(ngModel)]="category.name" name="name" #nm="ngModel">
+          </mat-input-container>
         </section>
         <section>
-          <md-select placeholder="Parent Category" [(ngModel)]="parent" name="parent">
-            <md-option *ngFor="let category of categories" [value]="category">
+          <mat-select placeholder="Parent Category" [(ngModel)]="parent" name="parent">
+            <mat-option *ngFor="let category of categories | async" [value]="category">
               {{category.name}}
-            </md-option>
-          </md-select>
+            </mat-option>
+          </mat-select>
         </section>
         <section>
-          <md-radio-group [(ngModel)]="category.type" name="type">
-            <md-radio-button [value]="'expense'">Spend</md-radio-button>
-            <md-radio-button [value]="'income'">Earn</md-radio-button>
-          </md-radio-group>
+          <mat-radio-group [(ngModel)]="category.type" name="type">
+            <mat-radio-button [value]="'expense'">Spend</mat-radio-button>
+            <mat-radio-button [value]="'income'">Earn</mat-radio-button>
+          </mat-radio-group>
         </section>
-      </md-card-content>
-      <md-card-actions>
-        <button type="button" md-raised-button color="primary" (click)="saveCategory()">
+      </mat-card-content>
+      <mat-card-actions>
+        <button type="button" mat-raised-button color="primary" (click)="saveCategory()">
           Save
         </button>
-        <button type="button" md-button (click)="cancel()">
+        <button type="button" mat-button (click)="cancel()">
           Cancel
         </button>
-      </md-card-actions>
-    </md-card>
+      </mat-card-actions>
+    </mat-card>
   </form>
 </div>

@@ -9,13 +9,13 @@ export class AccountService {
   }
 
   createAccount(account: Account){
-    let dbRef = firebase.database().ref('accounts/' + account.budgetId);
-    let newAccount = dbRef.push();
-    newAccount.set({
-      name: account.name,
-      balance: account.balance,
-      id: newAccount.key
-    });
+    // let dbRef = firebase.database().ref('accounts/' + account);
+    // let newAccount = dbRef.push();
+    // newAccount.set({
+    //   name: account.name,
+    //   balance: account.balance,
+    //   id: newAccount.key
+    // });
   }
 
   updateAccount(update: Account){

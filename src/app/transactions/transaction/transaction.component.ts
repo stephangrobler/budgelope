@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { AngularFireAuth } from 'angularfire2/auth';
-import { AngularFireDatabase, FirebaseObjectObservable, FirebaseListObservable } from 'angularfire2/database';
+import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angularfire2/database';
+import { AngularFirestore, AngularFirestoreDocument, AngularFirestoreCollection } from 'angularfire2/firestore';
+import { Observable } from 'rxjs/Observable';
 import * as moment from 'moment';
 import 'rxjs/add/operator/startWith';
 import 'rxjs/add/operator/map';
@@ -31,8 +33,8 @@ export class TransactionComponent implements OnInit {
   activeBudget: string;
   type: string;
   transactionId: string;
-  item: FirebaseObjectObservable<any>;
-  accounts: FirebaseListObservable<any>;
+  item: AngularFirestoreDocument<any>;
+  accounts: Observable<any>;
   categories: any[] = [];
   transaction: any;
 
@@ -45,7 +47,7 @@ export class TransactionComponent implements OnInit {
     private transactionService: TransactionService,
     private router: Router,
     private route: ActivatedRoute,
-    private db: AngularFireDatabase,
+    private db: AngularFirestore,
     private af: AngularFireAuth
 
   ) {
@@ -70,22 +72,24 @@ export class TransactionComponent implements OnInit {
       if (!user) {
         return;
       }
-      let profile = this.db.object('users/' + user.uid).subscribe(profile => {
+      let profile = this.db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
         this.activeBudget = profile.activeBudget;
 
         this.route.params.forEach((params: Params) => {
           this.transactionId = params["id"];
         });
         if (this.transactionId != "add") {
-          this.item = this.db.object('transactions/' + profile.activeBudget + '/' + this.transactionId);
-          this.item.subscribe(transaction => { this.transaction = transaction });
+          this.item = this.db.doc<any>('budgets/' + profile.activeBudget + '/transactions/' + this.transactionId);
+          this.item.valueChanges().subscribe(transaction => { this.transaction = transaction });
         } else {
           this.transaction = {};
         }
         // get the budget accounts
-        this.accounts = this.db.list('accounts/' + profile.activeBudget);
-        this.db.list('categories/' + profile.activeBudget).subscribe(snap => this.categories = snap);
-        this.db.object('allocations/' + moment().format("YYYYMM"))
+        this.accounts = this.db.collection<any>('budgets/'+ profile.activeBudget+'/accounts').valueChanges();
+        this.db.collection<any>('budgets/' + profile.activeBudget + '/categories').valueChanges().subscribe(
+          snap => this.categories = snap
+        );
+        // this.db.object('allocations/' + moment().format("YYYYMM"))
       });
     });
 
@@ -131,7 +135,7 @@ export class TransactionComponent implements OnInit {
   }
 
   updateAccount(account: any) {
-    let accItem = this.db.object('/accounts/' + this.activeBudget + '/' + account.$key);
+    let accItem = this.db.doc('/accounts/' + this.activeBudget + '/' + account.$key);
     let balance = account.balance;
     if (this.transaction.type == 'expense') {
       balance -= parseFloat(this.transaction.amount);

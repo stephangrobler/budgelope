@@ -3,59 +3,59 @@
   <div class="row">
     <div class="col-xs-12">
       <form class="form" *ngIf="transaction">
-        <md-card class="transaction-card">
-          <md-card-title>
+        <mat-card class="transaction-card">
+          <mat-card-title>
             Transaction
-          </md-card-title>
-          <md-card-content>
+          </mat-card-title>
+          <mat-card-content>
             <section>
-              <md-radio-group [(ngModel)]="transaction.type" name="type">
-                <md-radio-button [value]="'expense'">Spend</md-radio-button>
-                <md-radio-button [value]="'income'">Earn</md-radio-button>
-              </md-radio-group>
+              <mat-radio-group [(ngModel)]="transaction.type" name="type">
+                <mat-radio-button [value]="'expense'">Spend</mat-radio-button>
+                <mat-radio-button [value]="'income'">Earn</mat-radio-button>
+              </mat-radio-group>
             </section>
             <section>
-              <md-input-container>
-                <input mdInput placeholder="Amount" value="" type="number" [(ngModel)]="transaction.amount" name="amount">
-              </md-input-container>
+              <mat-form-field>
+                <input matInput placeholder="Amount" value="" type="number" [(ngModel)]="transaction.amount" name="amount">
+              </mat-form-field>
             </section>
             <section>
-              <md-input-container>
-                <input mdInput placeholder="Payee" value="" type="text" [(ngModel)]="transaction.payee" name="payee">
-              </md-input-container>
+              <mat-form-field>
+                <input matInput placeholder="Payee" value="" type="text" [(ngModel)]="transaction.payee" name="payee">
+              </mat-form-field>
             </section>
             <section>
-              <md-input-container>
-                <input type="text" mdInput placeholder="Category" [mdAutocomplete]="auto" [formControl]="catCtrl">
-              </md-input-container>
-              <md-autocomplete #auto="mdAutocomplete" [displayWith]="displayFn">
-                <md-option *ngFor="let category of filteredCategories | async" [value]="category">
+              <mat-form-field>
+                <input type="text" matInput placeholder="Category" [matAutocomplete]="auto" [formControl]="catCtrl">
+              </mat-form-field>
+              <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+                <mat-option *ngFor="let category of filteredCategories | async" [value]="category">
                   <span *ngIf="category.parent">{{category.parent}} ></span>{{category.name}}
-                </md-option>
-              </md-autocomplete>
+                </mat-option>
+              </mat-autocomplete>
             </section>
             <section>
-              <md-select placeholder="Account" [(ngModel)]="transaction.account" name="account">
-                <md-option [value]="account" *ngFor="let account of accounts | async">
+              <mat-select placeholder="Account" [(ngModel)]="transaction.account" name="account">
+                <mat-option [value]="account" *ngFor="let account of accounts | async">
                   {{account.name}}
-                </md-option>
-              </md-select>
+                </mat-option>
+              </mat-select>
             </section>
             <section>
-              <md-checkbox [(ngModel)]="transaction.cleared" name="cleared" [align]="end">
+              <mat-checkbox [(ngModel)]="transaction.cleared" name="cleared" [align]="end">
                 Cleared
-              </md-checkbox>
+              </mat-checkbox>
             </section>
-          </md-card-content>
-          <md-card-actions>
-            <button md-raised-button color="primary" type="button" (click)="saveTransaction()">
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-raised-button color="primary" type="button" (click)="saveTransaction()">
               Save Transaction
             </button>
-            <button md-raised-button color="warn" type="button" (click)="cancel()">
+            <button mat-raised-button color="warn" type="button" (click)="cancel()">
               Cancel
             </button>
-          </md-card-actions>
-        </md-card>
+          </mat-card-actions>
+        </mat-card>
       </form>
     </div>
   </div>

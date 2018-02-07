@@ -3,9 +3,11 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { AngularFireModule } from 'angularfire2';
+import { AngularFirestoreModule } from 'angularfire2/firestore';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { AngularFireAuthModule } from 'angularfire2/auth';
-
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatGridListModule, MatButtonModule, MatInputModule } from '@angular/material';
 import { environment } from '../environments/environment';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -39,7 +41,12 @@ import { CoreModule } from './core/core.module';;
     NgbModule.forRoot(),
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireDatabaseModule,
+    AngularFirestoreModule,
     AngularFireAuthModule,
+    MatGridListModule,
+    MatButtonModule,
+    MatInputModule,
+    FlexLayoutModule,
     AppRoutingModule,
     AccountsModule,
     CategoriesModule,
