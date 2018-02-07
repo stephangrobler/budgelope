@@ -148,6 +148,6 @@ export class TransactionComponent implements OnInit {
   }
 
   cancel() {
-    this.router.navigate(['/transactions']);
+    this.router.navigate(['/budgetview/transactions']);
   }
 }

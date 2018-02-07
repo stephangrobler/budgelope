@@ -2,18 +2,8 @@
   <mat-icon>menu</mat-icon>
 
   <a mat-button [routerLink]="['/']">Budgalope</a>
+  <span style="flex: 1 1 auto"></span>
   <div *ngIf="theUser">
-    <a mat-button [routerLink]="['/budgetview']">Budgets</a>
-    <a mat-button [routerLink]="['/transactions']">Transactions</a>
-  </div>
-  <div *ngIf="!theUser">
-    <a mat-button [routerLink]="['/features']">Features</a>
-    <a mat-button [routerLink]="['/pricing']">Pricing</a>
-  </div>
-  <div *ngIf="!theUser" style="float: right">
-    <a mat-button [routerLink]="['/login']">Log In <mat-icon>login</mat-icon></a>
-  </div>
-  <div *ngIf="theUser" style="float: right">
     <a mat-button href (click)="logout()">{{theUser}}</a>
   </div>
 </mat-toolbar>

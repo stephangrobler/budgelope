@@ -5,9 +5,9 @@ import { TransactionsComponent } from './transactions.component';
 import { TransactionComponent } from './transaction/transaction.component';
 
 const app_routes: Routes = [
-  { path: 'transactions', component: TransactionsComponent },
-  { path: 'transaction/:id', component: TransactionComponent },
-  { path: '**', pathMatch: 'full', redirectTo: 'transactions' }
+  // { path: 'transactions', component: TransactionsComponent },
+  // { path: 'transaction/:id', component: TransactionComponent },
+  // { path: '**', pathMatch: 'full', redirectTo: 'transactions' }
 ];
 
 

@@ -1,15 +1,14 @@
 @import "../../../styles";
 
-.container {
-  padding: 10px;
-}
-
 .header {
   background: mat-color($candy-app-accent);
   color: mat-contrast($candy-app-accent,500) !important;
 }
 
 .budget-view {
+  .side-nav {
+    width: 200px;
+  }
   .name {
     order: 1;
     width: 40%;
@@ -38,7 +37,7 @@
       &:nth-child(odd){
         background: transparent;
       }
-      
+
       .ngx-dnd-item {
         background: transparent;
         border: none;
