@@ -48,9 +48,6 @@ export class TransactionDataSource extends DataSource<any>{
   }
 
   connect() {
-    this.transService.getTransactions().subscribe(te => {
-      console.log(te);
-    });
     return this.transService.getTransactions();
   }
 

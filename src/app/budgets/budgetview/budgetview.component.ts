@@ -56,19 +56,17 @@ export class BudgetviewComponent implements OnInit {
       let testList = db.collection<Category>(ref).snapshotChanges().map(budget => {
         let b = budget.map(b => {
           let thisRef = ref + '/'+ b.payload.doc.id + '/categories';
-          
+
           const data = b.payload.doc.data() as Category;
           const catRef = db.collection<Category>(thisRef).snapshotChanges();
 
           const id = b.payload.doc.id;
           return { id, ...data }
         });
-        console.log(b);
         return b;
       });
 
       testList.subscribe(list => {
-        console.log(list);
         this.sortList = list;
       });
 

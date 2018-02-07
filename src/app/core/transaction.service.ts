@@ -48,10 +48,6 @@ export class TransactionService {
       timestamp: firebase.database.ServerValue.TIMESTAMP
     });
 
-
-    console.log('Transaction Item', transactionItem);
-    console.log('Category Item', transaction.category);
-    console.log('Account Item', transaction.account);
     items.add(transactionItem.toObject()).then(response => {
       // update the relevant account amount
       let updateObj = {};

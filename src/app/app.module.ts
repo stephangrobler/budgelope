@@ -6,7 +6,8 @@ import { AngularFireModule } from 'angularfire2';
 import { AngularFirestoreModule } from 'angularfire2/firestore';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { AngularFireAuthModule } from 'angularfire2/auth';
-
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatGridListModule, MatButtonModule, MatInputModule } from '@angular/material';
 import { environment } from '../environments/environment';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -42,6 +43,10 @@ import { CoreModule } from './core/core.module';;
     AngularFireDatabaseModule,
     AngularFirestoreModule,
     AngularFireAuthModule,
+    MatGridListModule,
+    MatButtonModule,
+    MatInputModule,
+    FlexLayoutModule,
     AppRoutingModule,
     AccountsModule,
     CategoriesModule,
