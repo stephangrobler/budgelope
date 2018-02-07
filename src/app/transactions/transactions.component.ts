@@ -17,7 +17,7 @@ export class TransactionsComponent implements OnInit {
 
   userId: string;
   budgetId: string;
-  displayedColumns = ['account', 'payee','category', 'amount'];
+  displayedColumns = ['date', 'account', 'payee','category', 'amount'];
   dataSource = new TransactionDataSource(this.transService);
 
 

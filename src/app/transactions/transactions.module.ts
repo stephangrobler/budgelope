@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import {MatTableModule, MatCheckboxModule, MatIconModule, MatInputModule, MatRadioModule, MatDatepickerModule, MatSelectModule, MatCardModule, MatButtonModule, MatAutocompleteModule} from '@angular/material';
+import { MatTableModule, MatCheckboxModule, MatIconModule, MatInputModule, MatRadioModule, MatDatepickerModule, MatSelectModule, MatCardModule, MatButtonModule, MatAutocompleteModule} from '@angular/material';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 
 import { TransactionRoutingModule } from './transaction-routing.module';

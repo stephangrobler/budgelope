@@ -14,7 +14,7 @@ export class TransactionService {
   ) { }
 
   getTransactions(){
-      return this.db.collection<Transaction>('/budgets/pPkN7QxRdyyvG4Jy2hr6/transactions').valueChanges();
+      return this.db.collection<Transaction>('/budgets/pPkN7QxRdyyvG4Jy2hr6/transactions', ref => ref.orderBy('date', 'desc')).valueChanges();
   }
   /**
    * Creates a new transaction and updates the relevant paths with the correct
@@ -45,6 +45,7 @@ export class TransactionService {
       amount: parseFloat(transaction.amount),
       type: transaction.type,
       payee: transaction.payee,
+      date: transaction.date,
       timestamp: firebase.database.ServerValue.TIMESTAMP
     });
 

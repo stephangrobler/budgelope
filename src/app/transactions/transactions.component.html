@@ -8,9 +8,9 @@
         </a>
       </div>
       <mat-table #table [dataSource]="dataSource">
-        <ng-container matColumnDef="timestamp">
+        <ng-container matColumnDef="date">
           <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
-          <mat-cell *matCellDef="let transaction">{{transaction.timestamp}}</mat-cell>
+          <mat-cell *matCellDef="let transaction">{{transaction.date | date: 'MMM d, y'}}</mat-cell>
         </ng-container>
         <ng-container matColumnDef="payee">
           <mat-header-cell *matHeaderCellDef>Payee</mat-header-cell>

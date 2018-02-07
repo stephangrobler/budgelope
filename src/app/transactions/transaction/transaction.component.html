@@ -7,23 +7,28 @@
             Transaction
           </mat-card-title>
           <mat-card-content>
-            <section>
+
+              <mat-form-field>
+                <input matInput [matDatepicker]="picker" placeholder="Choose a date" [(ngModel)]="transaction.date" name="date">
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+              </mat-form-field>
               <mat-radio-group [(ngModel)]="transaction.type" name="type">
                 <mat-radio-button [value]="'expense'">Spend</mat-radio-button>
                 <mat-radio-button [value]="'income'">Earn</mat-radio-button>
               </mat-radio-group>
-            </section>
-            <section>
+            
+
               <mat-form-field>
                 <input matInput placeholder="Amount" value="" type="number" [(ngModel)]="transaction.amount" name="amount">
               </mat-form-field>
-            </section>
-            <section>
+            
+
               <mat-form-field>
                 <input matInput placeholder="Payee" value="" type="text" [(ngModel)]="transaction.payee" name="payee">
               </mat-form-field>
-            </section>
-            <section>
+            
+
               <mat-form-field>
                 <input type="text" matInput placeholder="Category" [matAutocomplete]="auto" [formControl]="catCtrl">
               </mat-form-field>
@@ -32,19 +37,19 @@
                   <span *ngIf="category.parent">{{category.parent}} ></span>{{category.name}}
                 </mat-option>
               </mat-autocomplete>
-            </section>
-            <section>
+            
+
               <mat-select placeholder="Account" [(ngModel)]="transaction.account" name="account">
                 <mat-option [value]="account" *ngFor="let account of accounts | async">
                   {{account.name}}
                 </mat-option>
               </mat-select>
-            </section>
-            <section>
+            
+
               <mat-checkbox [(ngModel)]="transaction.cleared" name="cleared" [align]="end">
                 Cleared
               </mat-checkbox>
-            </section>
+            
           </mat-card-content>
           <mat-card-actions>
             <button mat-raised-button color="primary" type="button" (click)="saveTransaction()">

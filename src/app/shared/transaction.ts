@@ -25,6 +25,7 @@ export class Transaction{
       this.amount = transactionData.amount ? transactionData.amount : null ;
       this.type = transactionData.type ? transactionData.type : null ;
       this.cleared = transactionData.cleared ? transactionData.cleared : null ;
+      this.date = transactionData.date ? transactionData.date : null ;
     }
   }
 
@@ -40,6 +41,7 @@ export class Transaction{
       "amount": this.amount,
       "type": this.type,
       "cleared": this.cleared,
+      "date": this.date,
     }
   }
 }
