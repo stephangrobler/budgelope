@@ -15,19 +15,19 @@
               </mat-radio-group>
             </section>
             <section>
-              <mat-input-container>
-                <input mdInput placeholder="Amount" value="" type="number" [(ngModel)]="transaction.amount" name="amount">
-              </mat-input-container>
+              <mat-form-field>
+                <input matInput placeholder="Amount" value="" type="number" [(ngModel)]="transaction.amount" name="amount">
+              </mat-form-field>
             </section>
             <section>
-              <mat-input-container>
-                <input mdInput placeholder="Payee" value="" type="text" [(ngModel)]="transaction.payee" name="payee">
-              </mat-input-container>
+              <mat-form-field>
+                <input matInput placeholder="Payee" value="" type="text" [(ngModel)]="transaction.payee" name="payee">
+              </mat-form-field>
             </section>
             <section>
-              <mat-input-container>
-                <input type="text" mdInput placeholder="Category" [matAutocomplete]="auto" [formControl]="catCtrl">
-              </mat-input-container>
+              <mat-form-field>
+                <input type="text" matInput placeholder="Category" [matAutocomplete]="auto" [formControl]="catCtrl">
+              </mat-form-field>
               <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
                 <mat-option *ngFor="let category of filteredCategories | async" [value]="category">
                   <span *ngIf="category.parent">{{category.parent}} ></span>{{category.name}}

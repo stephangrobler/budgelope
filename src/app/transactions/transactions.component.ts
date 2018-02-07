@@ -39,11 +39,7 @@ export class TransactionsComponent implements OnInit {
   }
 
   ngOnInit() {
-
   }
-
-
-
 }
 
 export class TransactionDataSource extends DataSource<any>{
