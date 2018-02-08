@@ -8,11 +8,20 @@ import { SignUpComponent } from '../signup/signup.component';
 import { AccountListComponent } from '../accounts/account-list/account-list.component';
 import { AccountComponent } from '../accounts/account/account.component';
 
+
+import { BudgetviewComponent } from '../budgets/budgetview/budgetview.component';
+import {TransactionComponent} from '../transactions/transaction/transaction.component';
+import {TransactionsComponent} from '../transactions/transactions.component';
+
 @NgModule({
   imports: [
     RouterModule.forRoot([
-      { path: '', component: LoginComponent },
-      
+      { path: '', component: HomeComponent, children: [
+        { path: "budgetview", component: BudgetviewComponent },
+        { path: 'transactions', component: TransactionsComponent},
+        { path: 'transaction/:id', component: TransactionComponent },
+      ] },
+
       // Accounts
       { path: 'accounts', component: AccountListComponent },
       { path: 'account/:id', component: AccountComponent },

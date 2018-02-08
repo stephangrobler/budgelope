@@ -1,51 +1,17 @@
 <navi-bar></navi-bar>
-
-<div class="container-fluid">
-  <div class="jumbotron">
-    <h1>Budgelope</h1>
-    <p>Your budget, simple.</p>
-    <p><a class="btn btn-primary btn-lg" href="#" [routerLink]="['/signup']" role="button">Sign Up Now!</a></p>
-  </div>
-</div>
-<div class="container">
-  <div class="row">
-    <div class="col-xs-12">
-      <section>
-        <div class="page-header">
-          <h2>Features <small></small></h2>
-        </div>
-        <ul class="list-unstyled">
-          <li>
-            Simple: I like simple, thats why I created this. A simple method of tracking spending and making sure I don't overspend. This should work for you too if simple is something you like.
-          </li>
-          <li>Realtime Sync: With Google Firebase in the backend, all your apps communicate in real time with each other, so no waiting for that other provider to sync before you can.</li>
-          <li>Share your budgets: You are able to share your budget with up to 2 people without paying more, now you can see who logged what.</li>
-
-        </ul>
-
-      </section>
-      <section>
-        <div class="page-header">
-          <h2>Pricing <small></small></h2>
-        </div>
-        <p>After a 45 day trial, you can sign up for a YEAR for only $25. This will let you share a budget with up to 2 other users without them having to pay for their own subscriptions. If they love the software and want to create their own budgets, they
-          would need their own subscriptions.</p>
-      </section>
-      <ul>
-        <li class="text" *ngFor="let item of items | async">
-          {{item.name}}
-        </li>
-      </ul>
+<mat-sidenav-container class="">
+  <mat-sidenav class="" mode="side" opened>
+    <mat-nav-list>
+      <a mat-list-item routerLink="/budgetview" routerLinkActive="active"> Budget </a>
+      <a mat-list-item routerLink="/accounts" routerLinkActive="active"> Accounts </a>
+      <a mat-list-item [routerLink]="['/transactions']">Transactions</a>
+    </mat-nav-list>
+    <div *ngIf="theUser">
+      <a mat-button [routerLink]="['/budgetview']">Budgets</a>
+      <a mat-button [routerLink]="['/transactions']">Transactions</a>
     </div>
-  </div>
-</div>
-<div  style="background: #333; color: #fff">
-<div class="container">
-  <div class="row">
-    <div class="col-xs-3">
-      Contact Us:
-      info@budgalope.com
-    </div>
-  </div>
-</div>
-</div>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>

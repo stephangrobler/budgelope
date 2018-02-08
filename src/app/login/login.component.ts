@@ -25,7 +25,7 @@ export class LoginComponent implements OnInit {
       if (!user){
         return;
       } else {
-        this.router.navigate(['/budgetview']);
+        this.router.navigate(['/']);
       }
       console.log(user);
     });

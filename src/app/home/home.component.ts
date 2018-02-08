@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AnalyticsService } from '../core/analytics.service';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { Observable } from 'rxjs/Observable';
+import { AngularFireAuth } from 'angularfire2/auth';
 
 @Component({
   templateUrl: 'home.component.html',
@@ -12,10 +14,18 @@ export class HomeComponent implements OnInit {
 
   constructor(
     private _analytics: AnalyticsService,
-    db: AngularFirestore
+    db: AngularFirestore,
+    private router: Router,
+    afAuth: AngularFireAuth
   ) {
-    this.items = db.collection('budgets').valueChanges();
-    console.log(this.items);
+
+    afAuth.authState.subscribe((user) => {
+      if (!user){
+        return;
+      } else {
+        this.router.navigate(['./budgetview']);
+      }
+    });
    }
 
   ngOnInit() {

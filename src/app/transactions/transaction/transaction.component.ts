@@ -19,6 +19,7 @@ import { TransactionService } from '../../core/transaction.service';
 
 
 @Component({
+  selector: 'app-transaction',
   templateUrl: 'transaction.component.html',
   styleUrls: ['./transaction.component.scss']
 })

@@ -7,7 +7,8 @@ import { AngularFirestoreModule } from 'angularfire2/firestore';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { AngularFireAuthModule } from 'angularfire2/auth';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { MatGridListModule, MatButtonModule, MatInputModule, MatNativeDateModule } from '@angular/material';
+import { MatGridListModule, MatButtonModule, MatInputModule, MatNativeDateModule,
+  MatListModule, MatCardModule, MatIconModule, MatSidenavModule, } from '@angular/material';
 import { environment } from '../environments/environment';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -47,6 +48,12 @@ import { CoreModule } from './core/core.module';;
     MatButtonModule,
     MatInputModule,
     MatNativeDateModule,
+    MatListModule,
+    MatCardModule,
+    MatIconModule,
+    MatButtonModule,
+    MatInputModule,
+    MatSidenavModule,
     FlexLayoutModule,
     AppRoutingModule,
     AccountsModule,

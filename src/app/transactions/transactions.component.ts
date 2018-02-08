@@ -9,9 +9,10 @@ import { Transaction } from '../shared/transaction';
 import { TransactionService } from '../core/transaction.service';
 import { BudgetService } from '../core/budget.service';
 import { UserService } from '../shared/user.service';
+import { TransactionComponent } from './transaction/transaction.component';
 
 @Component({
-  templateUrl: 'transactions.component.html',
+  templateUrl: 'transactions.component.html'
 })
 export class TransactionsComponent implements OnInit {
 
