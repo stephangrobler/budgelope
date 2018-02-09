@@ -20,6 +20,7 @@ export class TransactionsComponent implements OnInit {
   budgetId: string;
   displayedColumns = ['date', 'account', 'payee','category', 'amount'];
   dataSource = new TransactionDataSource(this.transService);
+  newTransaction: Transaction;
 
 
   constructor(
@@ -36,6 +37,9 @@ export class TransactionsComponent implements OnInit {
       }
       let profile = db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
       });
+    });
+    this.newTransaction = new Transaction({
+      date: new Date()
     });
   }
 

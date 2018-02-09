@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { AngularFireAuth } from 'angularfire2/auth';
@@ -24,6 +24,9 @@ import { TransactionService } from '../../core/transaction.service';
   styleUrls: ['./transaction.component.scss']
 })
 export class TransactionComponent implements OnInit {
+
+  @Input() transaction: Transaction;
+
   payeeId: string;
   payee: string;
   cleared: boolean = false;
@@ -37,7 +40,7 @@ export class TransactionComponent implements OnInit {
   item: AngularFirestoreDocument<any>;
   accounts: Observable<any>;
   categories: any[] = [];
-  transaction: any;
+  newTransaction: Transaction;
 
   catCtrl: FormControl;
   filteredCategories: any;
@@ -52,6 +55,9 @@ export class TransactionComponent implements OnInit {
     private af: AngularFireAuth
 
   ) {
+    this.newTransaction = new Transaction({
+      date: new Date()
+    });
     this.catCtrl = new FormControl();
     this.filteredCategories = this.catCtrl.valueChanges
         .startWith(null)
@@ -83,7 +89,7 @@ export class TransactionComponent implements OnInit {
           this.item = this.db.doc<any>('budgets/' + profile.activeBudget + '/transactions/' + this.transactionId);
           this.item.valueChanges().subscribe(transaction => { this.transaction = transaction });
         } else {
-          this.transaction = {};
+          this.transaction = new Transaction();
         }
         // get the budget accounts
         this.accounts = this.db.collection<any>('budgets/'+ profile.activeBudget+'/accounts').valueChanges();
@@ -111,8 +117,8 @@ export class TransactionComponent implements OnInit {
     this.item.update({
       categoryId: category.$key,
       category: category.name,
-      accountId: this.transaction.account.$key,
-      account: this.transaction.account.name,
+      accountId: this.transaction.account,
+      account: this.transaction.account,
       amount: this.transaction.amount,
       type: this.transaction.type,
       payee: this.transaction.payee
@@ -139,9 +145,9 @@ export class TransactionComponent implements OnInit {
     let accItem = this.db.doc('/accounts/' + this.activeBudget + '/' + account.$key);
     let balance = account.balance;
     if (this.transaction.type == 'expense') {
-      balance -= parseFloat(this.transaction.amount);
+      balance -= this.transaction.amount;
     } else if (this.transaction.type == 'income') {
-      balance += parseFloat(this.transaction.amount);
+      balance += this.transaction.amount;
     }
     accItem.update({ "balance": balance }).then(response => {
       alert('account updated from ' + account.balance + ' to ' + balance);

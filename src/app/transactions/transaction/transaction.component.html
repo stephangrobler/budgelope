@@ -1,33 +1,23 @@
-<div fxLayout="row">
-
+<div fxLayout="row" *ngIf="newTransaction">
     <div fxFlex="100">
+      <div fxLayout="column" flexLayoutGap="10">
       <form class="form">
         <mat-card class="transaction-card">
-          <mat-card-title>
-            Transaction
-          </mat-card-title>
           <mat-card-content>
-
+            <mat-select placeholder="Account" [(ngModel)]="newTransaction.account" name="account" style="margin-bottom: 20px">
+              <mat-option [value]="account" *ngFor="let account of accounts | async">
+                {{account.name}}
+              </mat-option>
+            </mat-select>
               <mat-form-field>
-                <input matInput [matDatepicker]="picker" placeholder="Choose a date" [(ngModel)]="transaction.date" name="date">
+                <input matInput [matDatepicker]="picker" placeholder="Choose a date" [(ngModel)]="newTransaction.date" name="date">
                 <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                 <mat-datepicker #picker></mat-datepicker>
               </mat-form-field>
-              <mat-radio-group [(ngModel)]="transaction.type" name="type">
-                <mat-radio-button [value]="'expense'">Spend</mat-radio-button>
-                <mat-radio-button [value]="'income'">Earn</mat-radio-button>
-              </mat-radio-group>
-
 
               <mat-form-field>
-                <input matInput placeholder="Amount" value="" type="number" [(ngModel)]="transaction.amount" name="amount">
+                <input matInput placeholder="Payee" value="" type="text" [(ngModel)]="newTransaction.payee" name="payee">
               </mat-form-field>
-
-
-              <mat-form-field>
-                <input matInput placeholder="Payee" value="" type="text" [(ngModel)]="transaction.payee" name="payee">
-              </mat-form-field>
-
 
               <mat-form-field>
                 <input type="text" matInput placeholder="Category" [matAutocomplete]="auto" [formControl]="catCtrl">
@@ -38,15 +28,14 @@
                 </mat-option>
               </mat-autocomplete>
 
+              <mat-form-field>
+                <input matInput placeholder="Out" value="" type="number" [(ngModel)]="newTransaction.amount" name="amount">
+              </mat-form-field>
+              <mat-form-field>
+                <input matInput placeholder="In" value="" type="number" [(ngModel)]="newTransaction.amount" name="amount">
+              </mat-form-field>
 
-              <mat-select placeholder="Account" [(ngModel)]="transaction.account" name="account">
-                <mat-option [value]="account" *ngFor="let account of accounts | async">
-                  {{account.name}}
-                </mat-option>
-              </mat-select>
-
-
-              <mat-checkbox [(ngModel)]="transaction.cleared" name="cleared" [align]="end">
+              <mat-checkbox [(ngModel)]="newTransaction.cleared" name="cleared" [align]="end">
                 Cleared
               </mat-checkbox>
 
@@ -61,6 +50,7 @@
           </mat-card-actions>
         </mat-card>
       </form>
+      </div>
     </div>
 
 </div>

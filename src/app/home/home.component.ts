@@ -23,7 +23,7 @@ export class HomeComponent implements OnInit {
       if (!user){
         return;
       } else {
-        this.router.navigate(['./budgetview']);
+        // this.router.navigate(['./budgetview']);
       }
     });
    }
