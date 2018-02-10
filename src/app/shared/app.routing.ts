@@ -18,7 +18,7 @@ import {TransactionsComponent} from '../transactions/transactions.component';
     RouterModule.forRoot([
       { path: '', component: HomeComponent, children: [
         { path: "budgetview", component: BudgetviewComponent },
-        { path: 'transactions', component: TransactionsComponent},
+        { path: 'transactions/:accountId', component: TransactionsComponent},
         { path: 'transaction/:id', component: TransactionComponent },
       ] },
 

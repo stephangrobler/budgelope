@@ -1,56 +1,59 @@
-<div fxLayout="row" *ngIf="newTransaction">
-    <div fxFlex="100">
-      <div fxLayout="column" flexLayoutGap="10">
-      <form class="form">
-        <mat-card class="transaction-card">
-          <mat-card-content>
-            <mat-select placeholder="Account" [(ngModel)]="newTransaction.account" name="account" style="margin-bottom: 20px">
-              <mat-option [value]="account" *ngFor="let account of accounts | async">
-                {{account.name}}
-              </mat-option>
-            </mat-select>
-              <mat-form-field>
+<div fxLayout="row" *ngIf="newTransaction"  style="display: flex; flex: 1 1 auto; flex-direction: row">
+  <div fxFlex="33" fxFlexOffset="33">
+    <form class="form">
+      <mat-card class="transaction-card">
+        <mat-card-content>
+          <div fxLayout="row" fxLayoutGap="10" style="display: flex; flex: 1 1 auto; flex-direction: row; flex-flow: row wrap;justify-content: space-around;">
+            <div fxFlex="33" style="width: 33%;">
+              <mat-select placeholder="Account" [(ngModel)]="newTransaction.account" name="account" style="margin-bottom: 20px">
+                <mat-option [value]="account" *ngFor="let account of accounts | async">
+                  {{account.name}}
+                </mat-option>
+              </mat-select>
+            </div>
+            <div fxFlex="33" style="width: 33%;">
+              <mat-form-field >
                 <input matInput [matDatepicker]="picker" placeholder="Choose a date" [(ngModel)]="newTransaction.date" name="date">
                 <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                 <mat-datepicker #picker></mat-datepicker>
               </mat-form-field>
+            </div>
+            <mat-form-field>
+              <input matInput placeholder="Payee" value="" type="text" [(ngModel)]="newTransaction.payee" name="payee">
+            </mat-form-field>
 
-              <mat-form-field>
-                <input matInput placeholder="Payee" value="" type="text" [(ngModel)]="newTransaction.payee" name="payee">
-              </mat-form-field>
+            <mat-form-field>
+              <input type="text" matInput placeholder="Category" [matAutocomplete]="auto" [formControl]="catCtrl">
+            </mat-form-field>
+            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+              <mat-option *ngFor="let category of filteredCategories | async" [value]="category">
+                <span *ngIf="category.parent">{{category.parent}} ></span>{{category.name}}
+              </mat-option>
+            </mat-autocomplete>
 
-              <mat-form-field>
-                <input type="text" matInput placeholder="Category" [matAutocomplete]="auto" [formControl]="catCtrl">
-              </mat-form-field>
-              <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
-                <mat-option *ngFor="let category of filteredCategories | async" [value]="category">
-                  <span *ngIf="category.parent">{{category.parent}} ></span>{{category.name}}
-                </mat-option>
-              </mat-autocomplete>
+            <mat-form-field>
+              <input matInput placeholder="Out" value="" type="number" [(ngModel)]="newTransaction.out" name="out">
+            </mat-form-field>
+            <mat-form-field>
+              <input matInput placeholder="In" value="" type="number" [(ngModel)]="newTransaction.in" name="in">
+            </mat-form-field>
 
-              <mat-form-field>
-                <input matInput placeholder="Out" value="" type="number" [(ngModel)]="newTransaction.amount" name="amount">
-              </mat-form-field>
-              <mat-form-field>
-                <input matInput placeholder="In" value="" type="number" [(ngModel)]="newTransaction.amount" name="amount">
-              </mat-form-field>
+            <mat-checkbox [(ngModel)]="newTransaction.cleared" name="cleared" [align]="end">
+              Cleared
+            </mat-checkbox>
 
-              <mat-checkbox [(ngModel)]="newTransaction.cleared" name="cleared" [align]="end">
-                Cleared
-              </mat-checkbox>
-
-          </mat-card-content>
-          <mat-card-actions>
-            <button mat-raised-button color="primary" type="button" (click)="saveTransaction()">
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="primary" type="button" (click)="saveTransaction()">
               Save Transaction
             </button>
-            <button mat-raised-button color="warn" type="button" (click)="cancel()">
+          <button mat-raised-button color="warn" type="button" (click)="cancel()">
               Cancel
             </button>
-          </mat-card-actions>
-        </mat-card>
-      </form>
-      </div>
-    </div>
+        </mat-card-actions>
+      </mat-card>
+    </form>
+  </div>
 
 </div>

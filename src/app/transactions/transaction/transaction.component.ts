@@ -104,11 +104,9 @@ export class TransactionComponent implements OnInit {
   }
 
   saveTransaction() {
-    if (this.transactionId == 'add') {
+
       this.create();
-    } else {
-      this.update();
-    }
+
   }
 
   update() {
@@ -133,9 +131,9 @@ export class TransactionComponent implements OnInit {
 
   create() {
     // console.log(this.catCtrl.value);
-    this.transaction.category = this.catCtrl.value;
+    this.newTransaction.category = this.catCtrl.value;
     this.transactionService.createTransaction(
-      this.transaction,
+      this.newTransaction,
       this.userId,
       this.activeBudget
     );

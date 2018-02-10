@@ -53,3 +53,9 @@ h1 {
 .container {
   padding: 15px;
 }
+
+router-outlet.router-flex + * {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}

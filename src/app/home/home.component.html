@@ -1,9 +1,17 @@
 <navi-bar></navi-bar>
 <mat-sidenav-container class="">
-  <mat-sidenav class="" mode="side" opened>
+  <mat-sidenav class="side-nav" mode="side" opened>
     <mat-nav-list>
       <a mat-list-item routerLink="/budgetview" routerLinkActive="active"> Budget </a>
       <a mat-list-item routerLink="/accounts" routerLinkActive="active"> Accounts </a>
+      <mat-nav-list>
+        <a mat-list-item routerLink="/transactions?accountId={{account.id}}"
+          *ngFor="let account of accounts | async"
+          routerLinkActive="active" style="font-size: 80%; height: 32px;">
+          {{account.name}}
+        </a>
+      </mat-nav-list>
+
       <a mat-list-item [routerLink]="['/transactions']">Transactions</a>
     </mat-nav-list>
     <div *ngIf="theUser">
@@ -12,6 +20,6 @@
     </div>
   </mat-sidenav>
   <mat-sidenav-content>
-    <router-outlet></router-outlet>
+    <router-outlet class="router-flex"></router-outlet>
   </mat-sidenav-content>
 </mat-sidenav-container>

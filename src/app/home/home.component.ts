@@ -10,23 +10,29 @@ import { AngularFireAuth } from 'angularfire2/auth';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  items : Observable<any[]>;
+  items: Observable<any[]>;
+  accounts: Observable<Account[]>;
 
   constructor(
     private _analytics: AnalyticsService,
-    db: AngularFirestore,
+    private db: AngularFirestore,
     private router: Router,
     afAuth: AngularFireAuth
   ) {
 
     afAuth.authState.subscribe((user) => {
-      if (!user){
+      if (!user) {
+        this.router.navigate(['/login']);
         return;
       } else {
         // this.router.navigate(['./budgetview']);
+        let profile = this.db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
+          // get accounts
+          this.accounts = this.db.collection<any>('budgets/' + profile.activeBudget + '/accounts').valueChanges();
+        });
       }
     });
-   }
+  }
 
   ngOnInit() {
     this._analytics.pageView('/');

@@ -18,7 +18,7 @@ export class TransactionsComponent implements OnInit {
 
   userId: string;
   budgetId: string;
-  displayedColumns = ['date', 'account', 'payee','category', 'amount'];
+  displayedColumns = ['date', 'account', 'payee', 'category', 'out', 'in'];
   dataSource = new TransactionDataSource(this.transService);
   newTransaction: Transaction;
 
@@ -48,7 +48,7 @@ export class TransactionsComponent implements OnInit {
 }
 
 export class TransactionDataSource extends DataSource<any>{
-  constructor (private transService : TransactionService) {
+  constructor(private transService: TransactionService) {
     super();
   }
 

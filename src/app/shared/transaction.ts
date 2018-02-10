@@ -9,6 +9,8 @@ export class Transaction{
   payeeId: string;
   payee: string;
   amount: number;
+  in: number;
+  out: number;
   date: Date;
   type: string; // income or expense
   cleared: boolean;
@@ -23,6 +25,8 @@ export class Transaction{
       this.payeeId = transactionData.payeeId ? transactionData.payeeId : null ;
       this.payee = transactionData.payee ? transactionData.payee : null ;
       this.amount = transactionData.amount ? transactionData.amount : null ;
+      this.in = transactionData.in ? transactionData.in : null ;
+      this.out = transactionData.out ? transactionData.out : null ;
       this.type = transactionData.type ? transactionData.type : null ;
       this.cleared = transactionData.cleared ? transactionData.cleared : null ;
       this.date = transactionData.date ? transactionData.date : null ;
@@ -37,8 +41,9 @@ export class Transaction{
       "accountId": this.accountId,
       "account": this.account,
       "payeeId": this.payeeId,
-      "payee": this.payee,
-      "amount": this.amount,
+      "payee": this.payee,      
+      "in": this.in,
+      "out": this.out,
       "type": this.type,
       "cleared": this.cleared,
       "date": this.date,

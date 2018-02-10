@@ -1,9 +1,9 @@
-<div class="container">
+<div fxLayout="row" fxLayoutGap="10">
   <div class="row">
     <div class="col-xs-12">
       <div class="page-header">
         <h1>Transactions</h1>
-        <app-transaction ></app-transaction>
+        <app-transaction></app-transaction>
       </div>
       <mat-table #table [dataSource]="dataSource">
         <ng-container matColumnDef="date">
@@ -22,9 +22,13 @@
           <mat-header-cell *matHeaderCellDef>Category</mat-header-cell>
           <mat-cell *matCellDef="let transaction">{{transaction.category}}</mat-cell>
         </ng-container>
-        <ng-container matColumnDef="amount">
-          <mat-header-cell *matHeaderCellDef>Amount</mat-header-cell>
-          <mat-cell *matCellDef="let transaction">{{transaction.amount}}</mat-cell>
+        <ng-container matColumnDef="out">
+          <mat-header-cell *matHeaderCellDef>Out</mat-header-cell>
+          <mat-cell *matCellDef="let transaction">{{transaction.out}}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="in">
+          <mat-header-cell *matHeaderCellDef>In</mat-header-cell>
+          <mat-cell *matCellDef="let transaction">{{transaction.in}}</mat-cell>
         </ng-container>
         <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
         <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>

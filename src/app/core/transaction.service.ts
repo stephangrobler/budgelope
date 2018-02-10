@@ -43,6 +43,8 @@ export class TransactionService {
       accountId: transaction.account.$key,
       account: transaction.account.name,
       amount: parseFloat(transaction.amount),
+      in: transaction.in,
+      out: transaction.out,
       type: transaction.type,
       payee: transaction.payee,
       date: transaction.date,
