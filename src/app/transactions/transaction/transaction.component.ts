@@ -12,7 +12,7 @@ import 'rxjs/add/operator/map';
 import { Transaction } from '../../shared/transaction';
 import { Account } from '../../shared/account';
 import { Budget } from '../../shared/budget';
-import { Category } from '../../shared/category';
+import { Category, CategoryId } from '../../shared/category';
 import { BudgetService } from '../../core/budget.service';
 import { UserService } from '../../shared/user.service';
 import { TransactionService } from '../../core/transaction.service';
@@ -39,7 +39,7 @@ export class TransactionComponent implements OnInit {
   transactionId: string;
   item: AngularFirestoreDocument<any>;
   accounts: Observable<any>;
-  categories: any[] = [];
+  categories: Observable<Category[]>;
   newTransaction: Transaction;
 
   catCtrl: FormControl;
@@ -60,18 +60,27 @@ export class TransactionComponent implements OnInit {
     });
     this.catCtrl = new FormControl();
     this.filteredCategories = this.catCtrl.valueChanges
-        .startWith(null)
-        .map(category => category && typeof category === 'object' ? category.name : category)
-        .map(name => name ? this.filterCategories(name) : this.categories.slice());
+      .startWith(null)
+      .map(category => {
+        console.log('category', category);
+        return category && typeof category === 'object' ? category.name : category;
+      })
+      .map(name => {
+        console.log('name', name);
+        return name ? this.filterCategories(name) : this.categories;
+      });
   }
 
-  filterCategories(val: string){
-    return val ? this.categories.filter(s => new RegExp(`^${val}`, 'gi').test(s.name + s.parent))
-               : this.categories;
+  filterCategories(val: string) {
+    console.log('val', val, this.categories.map(cat => cat));
+    return val ? this.categories.map(cat => {
+      console.log(cat);
+      return cat.filter(s => new RegExp(`^${val}`, 'gi').test(s.name + s.parent))
+    }) : this.categories.map(category => category);
   }
 
   displayFn(category: any): string {
-    return category ? ' ' + category.parent + ' > ' + category.name  : category;
+    return category ? ' ' + category.parent + ' > ' + category.name : category;
   }
 
   ngOnInit() {
@@ -92,10 +101,22 @@ export class TransactionComponent implements OnInit {
           this.transaction = new Transaction();
         }
         // get the budget accounts
-        this.accounts = this.db.collection<any>('budgets/'+ profile.activeBudget+'/accounts').valueChanges();
-        this.db.collection<any>('budgets/' + profile.activeBudget + '/categories').valueChanges().subscribe(
-          snap => this.categories = snap
-        );
+        this.accounts = this.db.collection<any>('budgets/' + profile.activeBudget + '/accounts').snapshotChanges()
+          .map(actions => {
+            return actions.map(a => {
+              const data = a.payload.doc.data() as Account;
+              const id = a.payload.doc.id;
+              return { id, ...data };
+            });
+          });
+        this.categories = this.db.collection<any>('budgets/' + profile.activeBudget + '/categories').snapshotChanges()
+          .map(actions => {
+            return actions.map(a => {
+              const data = a.payload.doc.data() as CategoryId;
+              const id = a.payload.doc.id;
+              return { id, ...data };
+            })
+          });
         // this.db.object('allocations/' + moment().format("YYYYMM"))
       });
     });
@@ -105,7 +126,7 @@ export class TransactionComponent implements OnInit {
 
   saveTransaction() {
 
-      this.create();
+    this.create();
 
   }
 

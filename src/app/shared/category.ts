@@ -2,6 +2,7 @@ import { Observable } from 'rxjs/Observable';
 
 export class Category {
   $key?: string;
+  id?: string;
   name: string;
   parent: string;
   parentId: string;
@@ -10,3 +11,5 @@ export class Category {
   children?: any;
   type?: string;
 }
+
+export interface CategoryId extends Category { id: string };
