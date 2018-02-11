@@ -19,6 +19,7 @@ import {TransactionsComponent} from '../transactions/transactions.component';
       { path: '', component: HomeComponent, children: [
         { path: "budgetview", component: BudgetviewComponent },
         { path: 'transactions/:accountId', component: TransactionsComponent},
+        { path: 'transactions', component: TransactionsComponent},
         { path: 'transaction/:id', component: TransactionComponent },
       ] },
 

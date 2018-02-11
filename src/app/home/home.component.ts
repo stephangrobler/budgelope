@@ -29,6 +29,7 @@ export class HomeComponent implements OnInit {
         let profile = this.db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
           // get accounts
           this.accounts = this.db.collection<any>('budgets/' + profile.activeBudget + '/accounts').valueChanges();
+          
         });
       }
     });

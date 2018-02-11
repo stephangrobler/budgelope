@@ -1,7 +1,7 @@
 <mat-toolbar color="primary">
   <mat-icon>menu</mat-icon>
 
-  <a mat-button [routerLink]="['/']">Budgalope</a>
+  <a mat-button [routerLink]="['/budgetview']">Budgalope</a>
   <span style="flex: 1 1 auto"></span>
   <div *ngIf="theUser">
     <a mat-button href (click)="logout()">{{theUser}}</a>
