@@ -88,7 +88,6 @@ export class TransactionService {
       //   });
       // });
 
-      console.log(updateObj);
       alert('Transaction saved');
     });
 
