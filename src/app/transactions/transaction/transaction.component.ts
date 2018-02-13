@@ -12,6 +12,7 @@ import 'rxjs/add/operator/map';
 import { Transaction } from '../../shared/transaction';
 import { Account } from '../../shared/account';
 import { Budget } from '../../shared/budget';
+import { Payee } from '../../shared/payee';
 import { Category, CategoryId } from '../../shared/category';
 import { BudgetService } from '../../core/budget.service';
 import { UserService } from '../../shared/user.service';
@@ -39,8 +40,10 @@ export class TransactionComponent implements OnInit {
   transactionId: string;
   item: AngularFirestoreDocument<any>;
   accounts: Observable<any>;
-  categories: Observable<Category[]>;
+  categories: CategoryId[];
   newTransaction: Transaction;
+
+  selectedAccount: Account;
 
   catCtrl: FormControl;
   filteredCategories: any;
@@ -62,21 +65,17 @@ export class TransactionComponent implements OnInit {
     this.filteredCategories = this.catCtrl.valueChanges
       .startWith(null)
       .map(category => {
-        console.log('category', category);
         return category && typeof category === 'object' ? category.name : category;
       })
       .map(name => {
-        console.log('name', name);
         return name ? this.filterCategories(name) : this.categories;
       });
   }
 
-  filterCategories(val: string) {
-    console.log('val', val, this.categories.map(cat => cat));
-    return val ? this.categories.map(cat => {
-      console.log(cat);
-      return cat.filter(s => new RegExp(`^${val}`, 'gi').test(s.name + s.parent))
-    }) : this.categories.map(category => category);
+  filterCategories(val: string): Category[] {
+    return val ? this.categories.filter(s => {
+      return new RegExp(`^${val}`, 'gi').test(s.name + s.parent);
+    }) : this.categories;
   }
 
   displayFn(category: any): string {
@@ -109,13 +108,15 @@ export class TransactionComponent implements OnInit {
               return { id, ...data };
             });
           });
-        this.categories = this.db.collection<any>('budgets/' + profile.activeBudget + '/categories').snapshotChanges()
+        this.db.collection<Category[]>('budgets/' + profile.activeBudget + '/categories').snapshotChanges()
           .map(actions => {
             return actions.map(a => {
               const data = a.payload.doc.data() as CategoryId;
               const id = a.payload.doc.id;
               return { id, ...data };
-            })
+            });
+          }).subscribe(categories => {
+            this.categories = categories;
           });
         // this.db.object('allocations/' + moment().format("YYYYMM"))
       });
@@ -125,9 +126,7 @@ export class TransactionComponent implements OnInit {
   }
 
   saveTransaction() {
-
     this.create();
-
   }
 
   update() {
@@ -152,9 +151,22 @@ export class TransactionComponent implements OnInit {
 
   create() {
     // console.log(this.catCtrl.value);
-    this.newTransaction.category = this.catCtrl.value;
+    let cat: Category = this.catCtrl.value;
+    this.newTransaction.categoryId = cat.id;
+    this.newTransaction.category = cat.name;
+
+    let acc: Account = this.selectedAccount;
+    this.newTransaction.account = acc.name;
+    this.newTransaction.accountId = acc.id;
+
+    let payee: Payee = new Payee();
+    payee.name = this.newTransaction.payee;
+
     this.transactionService.createTransaction(
       this.newTransaction,
+      acc,
+      cat,
+      payee,
       this.userId,
       this.activeBudget
     );

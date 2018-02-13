@@ -6,6 +6,7 @@ import * as moment from 'moment';
 import { Transaction } from '../shared/transaction';
 import { Account } from '../shared/account';
 import { Category } from '../shared/category';
+import { Payee } from '../shared/payee';
 
 @Injectable()
 export class TransactionService {
@@ -13,8 +14,8 @@ export class TransactionService {
     private db: AngularFirestore
   ) { }
 
-  getTransactions(){
-      return this.db.collection<Transaction>('/budgets/pPkN7QxRdyyvG4Jy2hr6/transactions', ref => ref.orderBy('date', 'desc')).valueChanges();
+  getTransactions() {
+    return this.db.collection<Transaction>('/budgets/pPkN7QxRdyyvG4Jy2hr6/transactions', ref => ref.orderBy('date', 'desc')).valueChanges();
   }
   /**
    * Creates a new transaction and updates the relevant paths with the correct
@@ -27,22 +28,24 @@ export class TransactionService {
    * @param  {string} budgetId    [description]
    * @return {[type]}             [description]
    */
-  createTransaction(transaction: any, userId: string, budgetId: string) {
-    let items = this.db.collection<Transaction>('budgets/' + budgetId + '/transactions');
+  createTransaction(transaction: Transaction, account: Account, category: Category, payee: Payee, userId: string, budgetId: string) {
+    let items = this.db.collection<Transaction>('budgets/' + budgetId + '/transactions'),
+      catStore = this.db.doc<Category>('budgets/' + budgetId + '/categories/' + category.id),
+      accStore = this.db.doc<Account>('budgets/' + budgetId + '/accounts/' + account.id);
 
     // ensure value is negative if it is an expense.
-    if (transaction.type == "expense") {
-      transaction.amount = -Math.abs(transaction.amount);
+    if (transaction.in > 0) {
+      transaction.amount = Math.abs(transaction.in);
     } else {
-      transaction.amount = Math.abs(transaction.amount);
+      transaction.amount = -Math.abs(transaction.out);
     }
 
     let transactionItem = new Transaction({
-      categoryId: transaction.category.$key,
-      category: transaction.category.name,
-      accountId: transaction.account.$key,
-      account: transaction.account.name,
-      amount: parseFloat(transaction.amount),
+      categoryId: transaction.categoryId,
+      category: transaction.category,
+      accountId: transaction.accountId,
+      account: transaction.account,
+      amount: transaction.amount,
       in: transaction.in,
       out: transaction.out,
       type: transaction.type,
@@ -51,32 +54,15 @@ export class TransactionService {
       timestamp: firebase.database.ServerValue.TIMESTAMP
     });
 
+
     items.add(transactionItem.toObject()).then(response => {
-      // update the relevant account amount
-      let updateObj = {};
-      let thisMonth = moment().format("YYYYMM");
-      let nextMonth = moment().add(1, 'months').format('YYYYMM');
-      let allocRef = 'allocations/' + budgetId + '/' + thisMonth + '/' + transaction.category.$key;
-      let allocNextRef = 'allocations/' + budgetId + '/' + nextMonth + '/' + transaction.category.$key;
-      let accBalance: number = transaction.account.balance;
-      let catBalance: number = transaction.category.balance;
 
-      // check to make sure the value is a number to populate transaction details
-      if (isNaN(accBalance)) {
-        accBalance = 0;
-      }
+      account.balance += transaction.amount;
+      category.balance += transaction.amount;
 
-      // check to make sure the value is a number to populate transaction details
-      if (isNaN(catBalance)) {
-        catBalance = 0;
-      }
+      accStore.update(account);
+      catStore.update(category);
 
-      console.log('before', catBalance);
-
-      accBalance += parseFloat(transaction.amount);
-      catBalance += parseFloat(transaction.amount);
-
-      console.log('after', catBalance);
 
       // updateObj['accounts/' + budgetId + '/' + transaction.account.$key + '/balance'] = accBalance;
       // updateObj['categories/' + budgetId + '/' + transaction.category.$key + '/balance'] = catBalance;

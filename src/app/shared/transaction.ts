@@ -41,7 +41,7 @@ export class Transaction{
       "accountId": this.accountId,
       "account": this.account,
       "payeeId": this.payeeId,
-      "payee": this.payee,      
+      "payee": this.payee,
       "in": this.in,
       "out": this.out,
       "type": this.type,
