@@ -10,6 +10,7 @@ export class Category {
   balance: number;
   children?: any;
   type?: string;
+  allocations?: object;
 }
 
 export interface CategoryId extends Category { id: string };

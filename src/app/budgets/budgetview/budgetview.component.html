@@ -36,13 +36,19 @@
                           <mat-icon color="primary">edit</mat-icon>
                         </a> {{item.name}}
                       </div>
-                      <div class="planned-input">
-                        <!-- <mat-input-container *ngIf="item.parent != ''">
-                          <input mdInput type="number" name="planned" class="text-right" [(ngModel)]="item.planned" (blur)="blur(item)" (focus)="focus(item)">
-                        </mat-input-container> -->
+                      <div class="planned-input text-right" *ngIf="item.allocations">
+                        <mat-form-field *ngIf="item.parent != ''">
+                          <input matInput
+                            type="number"
+                            name="planned"
+                            class="text-right"
+                            [(ngModel)]="item.allocations['201801'].planned"
+                            (blur)="blur(item)"
+                            (focus)="focus(item)">
+                        </mat-form-field>
                       </div>
-                      <div class="actual text-right" *ngIf="item.parent != ''">
-                        {{item.actual | number:'1.2'}}
+                      <div *ngIf="item.allocations" class="actual text-right">
+                        {{item.allocations['201801'].actual | number:'1.2'}}
                       </div>
                       <div class="balance text-right" *ngIf="item.parent != ''">
                         {{item.balance | number:'1.2'}}
