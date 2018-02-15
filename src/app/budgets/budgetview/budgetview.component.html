@@ -7,7 +7,7 @@
 
           <mat-card>
             <mat-card-title>
-              {{ this.selectedMonth.format("MMMM 'YY")}}
+              {{ this.selectedMonth }}
             </mat-card-title>
             <mat-card-content>
               <mat-list>
@@ -36,19 +36,21 @@
                           <mat-icon color="primary">edit</mat-icon>
                         </a> {{item.name}}
                       </div>
-                      <div class="planned-input text-right" *ngIf="item.allocations">
-                        <mat-form-field *ngIf="item.parent != ''">
+                      <div class="planned-input text-right">
+                        <mat-form-field *ngIf="item.allocations && item.parent != ''">
                           <input matInput
                             type="number"
                             name="planned"
                             class="text-right"
-                            [(ngModel)]="item.allocations['201801'].planned"
+                            [(ngModel)]="item.allocations[selectedMonth].planned"
                             (blur)="blur(item)"
                             (focus)="focus(item)">
                         </mat-form-field>
                       </div>
-                      <div *ngIf="item.allocations" class="actual text-right">
-                        {{item.allocations['201801'].actual | number:'1.2'}}
+                      <div  class="actual text-right">
+                        <span *ngIf="item.allocations">
+                        {{item.allocations[selectedMonth].actual | number:'1.2'}}
+                        </span>
                       </div>
                       <div class="balance text-right" *ngIf="item.parent != ''">
                         {{item.balance | number:'1.2'}}

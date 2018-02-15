@@ -14,7 +14,6 @@ import { Category } from '../../shared/category';
 import { BudgetService } from '../../core/budget.service';
 import { UserService } from '../../shared/user.service';
 
-export interface CategoryId extends Category { id: string };
 
 @Component({
   selector: 'app-budgetview',
@@ -48,22 +47,42 @@ export class BudgetviewComponent implements OnInit {
     private userService: UserService,
     private auth: AngularFireAuth
   ) {
+    this.selectedMonth = moment().format("YYYYMM");
+
     auth.authState.subscribe((user) => {
       if (!user) {
         return;
       }
+      this.activeBudget = 'pPkN7QxRdyyvG4Jy2hr6';
+
       let ref = 'budgets/pPkN7QxRdyyvG4Jy2hr6/categories';
-      let testList = db.collection<Category>(ref).snapshotChanges().map(budget => {
-        let b = budget.map(b => {
-          let thisRef = ref + '/'+ b.payload.doc.id + '/categories';
+      let testList = db.collection<Category[]>(ref).snapshotChanges().map(budget => {
+        let budgetList: any = budget.map(b => {
+          let thisRef = ref + '/' + b.payload.doc.id + '/categories';
 
           const data = b.payload.doc.data() as Category;
           const catRef = db.collection<Category>(thisRef).snapshotChanges();
 
           const id = b.payload.doc.id;
+
+          // ensure there are allocations for the current month and add if not
+          if (!data.allocations) {
+            data.allocations = {};
+            data.allocations[this.selectedMonth] = {
+              planned: 0,
+              actual: 0
+            };
+          } else if (data.allocations && !data.allocations[this.selectedMonth]) {
+            data.allocations[this.selectedMonth] = {
+              planned: 0,
+              actual: 0
+            };
+          }
+
           return { id, ...data }
         });
-        return b;
+
+        return budgetList;
       });
 
       testList.subscribe(list => {
@@ -71,6 +90,7 @@ export class BudgetviewComponent implements OnInit {
       });
 
     });
+
   }
 
   ngOnInit() {
@@ -214,7 +234,7 @@ export class BudgetviewComponent implements OnInit {
   }
 
   focus(item) {
-    item.original = item.planned;
+    item.original = item.allocations[this.selectedMonth].planned;
   }
 
   log(event) {
@@ -242,18 +262,16 @@ export class BudgetviewComponent implements OnInit {
   }
 
   blur(item) {
-    if (item.planned != item.original) {
-      let catBalance: number = 0;
-      item.balance += parseFloat(item.planned) - parseFloat(item.original);
-      // update the category balance
-      // this.db.object('categories/' + this.activeBudget + '/' + item.$key).update({ balance: item.balance });
-      // update next months previous balance
-      let nextMonth = moment().add(1, 'months').format("YYYYMM");
-      let nextMonthRef = 'allocations/' + this.activeBudget + '/' + nextMonth + '/' + item.$key;
+    let planned : number = item.allocations[this.selectedMonth].planned;
+    let ref = 'budgets/' + this.activeBudget + '/categories/' + item.id;
 
-      // this.db.object(nextMonthRef).update({ previousBalance: item.balance });
-      // update the item with the planned and balance.
-      this.allocations.update(item.$key, { "planned": item.planned, "balance": item.balance });
+    if (planned != item.original) {
+      item.balance = (item.balance - item.original) + planned;
+
+      delete(item.original);
+      delete(item.id);     
+
+      this.db.doc(ref).update(item);
     }
   }
 }
