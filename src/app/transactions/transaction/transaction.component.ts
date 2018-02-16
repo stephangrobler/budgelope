@@ -35,7 +35,7 @@ export class TransactionComponent implements OnInit {
   category: Category;
   userId: string;
   amount: number;
-  activeBudget: string;
+  activeBudget: Budget;
   type: string;
   transactionId: string;
   item: AngularFirestoreDocument<any>;
@@ -58,6 +58,20 @@ export class TransactionComponent implements OnInit {
     private af: AngularFireAuth
 
   ) {
+    af.authState.subscribe((user) => {
+      if (!user) {
+        return;
+      }
+      let profile = db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
+        db.doc<Budget>('budgets/'+profile.activeBudget).valueChanges().subscribe(budget => {
+          budget.id = profile.activeBudget;
+          console.log(budget);
+          return this.activeBudget = budget;
+        });
+      });
+    });
+
+
     this.newTransaction = new Transaction({
       date: new Date()
     });
@@ -167,8 +181,9 @@ export class TransactionComponent implements OnInit {
       acc,
       cat,
       payee,
+      this.activeBudget,
       this.userId,
-      this.activeBudget
+      this.activeBudget.id,
     );
   }
 

@@ -11,6 +11,7 @@ import * as moment from 'moment';
 
 import { Account } from '../../shared/account';
 import { Category } from '../../shared/category';
+import { Budget } from '../../shared/budget';
 import { BudgetService } from '../../core/budget.service';
 import { UserService } from '../../shared/user.service';
 
@@ -26,7 +27,7 @@ export class BudgetviewComponent implements OnInit {
   allocations: AngularFireList<any>;
   accounts: AngularFireList<Account[]>;
   userId: string;
-  activeBudget: string;
+  activeBudget: Budget;
 
   selectedMonth: any = moment();
   nextMonth: any = moment().add(1, 'months');
@@ -53,7 +54,7 @@ export class BudgetviewComponent implements OnInit {
       if (!user) {
         return;
       }
-      this.activeBudget = 'pPkN7QxRdyyvG4Jy2hr6';
+      this.activeBudget = budgetService.getActiveBudget();
 
       let ref = 'budgets/pPkN7QxRdyyvG4Jy2hr6/categories';
       let testList = db.collection<Category[]>(ref).snapshotChanges().map(budget => {
@@ -269,7 +270,7 @@ export class BudgetviewComponent implements OnInit {
       item.balance = (item.balance - item.original) + planned;
 
       delete(item.original);
-      delete(item.id);     
+      delete(item.id);
 
       this.db.doc(ref).update(item);
     }

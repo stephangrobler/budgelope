@@ -10,7 +10,8 @@ export class BudgetService {
 
   constructor() { }
 
-  getActiveBudget() {
+
+  getActiveBudget() : Budget {
     if (null == this.activeBudget) {
       let currentUser = firebase.auth().currentUser;
       // get the activebudget from the user object

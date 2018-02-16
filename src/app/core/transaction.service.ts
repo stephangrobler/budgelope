@@ -7,6 +7,7 @@ import { Transaction } from '../shared/transaction';
 import { Account } from '../shared/account';
 import { Category } from '../shared/category';
 import { Payee } from '../shared/payee';
+import { Budget } from '../shared/budget';
 
 @Injectable()
 export class TransactionService {
@@ -28,16 +29,31 @@ export class TransactionService {
    * @param  {string} budgetId    [description]
    * @return {[type]}             [description]
    */
-  createTransaction(transaction: Transaction, account: Account, category: Category, payee: Payee, userId: string, budgetId: string) {
+  createTransaction(
+    transaction: Transaction,
+    account: Account,
+    category: Category,
+    payee: Payee,
+    budget: Budget,
+
+    userId: string,
+    budgetId: string
+  ) {
     let items = this.db.collection<Transaction>('budgets/' + budgetId + '/transactions'),
       catStore = this.db.doc<Category>('budgets/' + budgetId + '/categories/' + category.id),
-      accStore = this.db.doc<Account>('budgets/' + budgetId + '/accounts/' + account.id);
+      accStore = this.db.doc<Account>('budgets/' + budgetId + '/accounts/' + account.id),
+      shortDate = moment(transaction.date).format("YYYYMM"),
 
+      budgetStore = this.db.doc<Budget>('budgets/' + budgetId);
+      
     // ensure value is negative if it is an expense.
     if (transaction.in > 0) {
       transaction.amount = Math.abs(transaction.in);
+      budget.balance += transaction.in;
+      budget.allocations[shortDate].income += transaction.in;
     } else {
       transaction.amount = -Math.abs(transaction.out);
+      budget.allocations[shortDate].expense += transaction.out;
     }
 
     let transactionItem = new Transaction({
@@ -62,7 +78,7 @@ export class TransactionService {
 
       accStore.update(account);
       catStore.update(category);
-
+      budgetStore.update(budget);
 
       // updateObj['accounts/' + budgetId + '/' + transaction.account.$key + '/balance'] = accBalance;
       // updateObj['categories/' + budgetId + '/' + transaction.category.$key + '/balance'] = catBalance;
