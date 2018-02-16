@@ -5,15 +5,15 @@
             <h2></h2>
           </div>
 
-          <mat-card>
+          <mat-card *ngIf="activeBudget">
             <mat-card-title>
               {{ this.selectedMonth }}
             </mat-card-title>
             <mat-card-content>
               <mat-list>
-                <mat-list-item>Available : {{ totalAvailable | number: '1.2'}}</mat-list-item>
-                <mat-list-item>Income : {{ totalIncome | number: '1.2'}}</mat-list-item>
-                <mat-list-item>Expense : {{ totalExpense | number: '1.2'}}</mat-list-item>
+                <mat-list-item>Available : {{ activeBudget.balance | number: '1.2'}}</mat-list-item>
+                <mat-list-item>Income : {{ activeBudget.allocations[selectedMonth].income | number: '1.2'}}</mat-list-item>
+                <mat-list-item>Expense : {{ activeBudget.allocations[selectedMonth].expense | number: '1.2'}}</mat-list-item>
               </mat-list>
             </mat-card-content>
           </mat-card>

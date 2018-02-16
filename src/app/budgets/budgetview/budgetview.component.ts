@@ -54,7 +54,14 @@ export class BudgetviewComponent implements OnInit {
       if (!user) {
         return;
       }
-      this.activeBudget = budgetService.getActiveBudget();
+      // get active budget TODO: move to service :P
+      let profile = db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
+        db.doc<Budget>('budgets/' + profile.activeBudget).valueChanges().subscribe(budget => {
+          budget.id = profile.activeBudget;
+
+          return this.activeBudget = budget;
+        });
+      });
 
       let ref = 'budgets/pPkN7QxRdyyvG4Jy2hr6/categories';
       let testList = db.collection<Category[]>(ref).snapshotChanges().map(budget => {
@@ -263,14 +270,14 @@ export class BudgetviewComponent implements OnInit {
   }
 
   blur(item) {
-    let planned : number = item.allocations[this.selectedMonth].planned;
+    let planned: number = item.allocations[this.selectedMonth].planned;
     let ref = 'budgets/' + this.activeBudget + '/categories/' + item.id;
 
     if (planned != item.original) {
       item.balance = (item.balance - item.original) + planned;
 
-      delete(item.original);
-      delete(item.id);
+      delete (item.original);
+      delete (item.id);
 
       this.db.doc(ref).update(item);
     }

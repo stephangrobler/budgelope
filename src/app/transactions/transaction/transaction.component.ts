@@ -65,7 +65,7 @@ export class TransactionComponent implements OnInit {
       let profile = db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
         db.doc<Budget>('budgets/'+profile.activeBudget).valueChanges().subscribe(budget => {
           budget.id = profile.activeBudget;
-          console.log(budget);
+
           return this.activeBudget = budget;
         });
       });
