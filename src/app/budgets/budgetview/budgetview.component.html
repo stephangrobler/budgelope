@@ -1,68 +1,57 @@
+<div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="center none" style="padding: 0 20px">
+  <div fxFlex="100">
+    <div class="page-header">
+      <h2></h2>
+    </div>
 
-    <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="center none" style="padding: 0 20px">
-      <div fxFlex="100">
-          <div class="page-header">
-            <h2></h2>
-          </div>
+    <mat-card *ngIf="activeBudget">
+      <mat-card-title>
+        {{ this.selectedMonth }}
+      </mat-card-title>
+      <mat-card-content>
+        <mat-list>
+          <mat-list-item>Available : {{ activeBudget.balance | number: '1.2'}}</mat-list-item>
+          <mat-list-item>Income : {{ activeBudget.allocations[selectedMonth].income | number: '1.2'}}</mat-list-item>
+          <mat-list-item>Expense : {{ activeBudget.allocations[selectedMonth].expense | number: '1.2'}}</mat-list-item>
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
 
-          <mat-card *ngIf="activeBudget">
-            <mat-card-title>
-              {{ this.selectedMonth }}
-            </mat-card-title>
-            <mat-card-content>
-              <mat-list>
-                <mat-list-item>Available : {{ activeBudget.balance | number: '1.2'}}</mat-list-item>
-                <mat-list-item>Income : {{ activeBudget.allocations[selectedMonth].income | number: '1.2'}}</mat-list-item>
-                <mat-list-item>Expense : {{ activeBudget.allocations[selectedMonth].expense | number: '1.2'}}</mat-list-item>
-              </mat-list>
-            </mat-card-content>
-          </mat-card>
+    <!-- header -->
+    <br>
+    <mat-card class="budget-view">
+      <mat-card-content>
+        <a mat-fab [routerLink]="['/category/add']">
+          <mat-icon>add</mat-icon>
+        </a>
 
-          <!-- header -->
-          <br>
-          <mat-card class="budget-view">
-            <mat-card-content>
-              <a mat-fab [routerLink]="['/category/add']">
-                <mat-icon>add</mat-icon>
-              </a>
-
-              <mat-list>
-                <div class="ngx-dnd-container">
-                <ngx-dnd-container [model]="sortList" (drop)="log($event)" class="sucker">
-                  <ng-template let-item="model" let-template="template">
-                    <mat-list-item *ngIf="item.type != 'income'" [ngClass]="{'header': checkIsHeader(item)}">
-                      <div class="name">
-                        <a mat-icon-button [routerLink]="['/category/'+item.$key]">
-                          <mat-icon color="primary">edit</mat-icon>
-                        </a> {{item.name}}
-                      </div>
-                      <div class="planned-input text-right">
-                        <mat-form-field *ngIf="item.allocations && item.parent != ''">
-                          <input matInput
-                            type="number"
-                            name="planned"
-                            class="text-right"
-                            [(ngModel)]="item.allocations[selectedMonth].planned"
-                            (blur)="blur(item)"
-                            (focus)="focus(item)">
-                        </mat-form-field>
-                      </div>
-                      <div  class="actual text-right">
-                        <span *ngIf="item.allocations">
+        <mat-list>
+            <div [dragula]='"order-bag"' [dragulaModel]='sortList'>
+              <div *ngFor="let item of sortList">
+                <mat-list-item *ngIf="item.type != 'income'" [ngClass]="{'header': checkIsHeader(item)}">
+                  <div class="name">
+                    <a mat-icon-button [routerLink]="['/category/'+item.$key]">
+                      <mat-icon color="primary">edit</mat-icon>
+                    </a> {{item.name}}
+                  </div>
+                  <div class="planned-input text-right">
+                    <mat-form-field *ngIf="item.allocations && item.parent != ''">
+                      <input matInput type="number" name="planned" class="text-right" [(ngModel)]="item.allocations[selectedMonth].planned" (blur)="blur(item)" (focus)="focus(item)" tabindex="">
+                    </mat-form-field>
+                  </div>
+                  <div class="actual text-right">
+                    <span *ngIf="item.allocations">
                         {{item.allocations[selectedMonth].actual | number:'1.2'}}
                         </span>
-                      </div>
-                      <div class="balance text-right" *ngIf="item.parent != ''">
-                        {{item.balance | number:'1.2'}}
-                      </div>
-
-                    </mat-list-item>
-
-                  </ng-template>
-                </ngx-dnd-container>
-                </div>
-              </mat-list>
-            </mat-card-content>
-          </mat-card>
-      </div>
-    </div>
+                  </div>
+                  <div class="balance text-right" *ngIf="item.parent != ''">
+                    {{item.balance | number:'1.2'}}
+                  </div>
+                </mat-list-item>
+              </div>
+            </div>
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

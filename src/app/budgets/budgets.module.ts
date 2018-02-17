@@ -4,8 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import {MatListModule, MatIconModule} from '@angular/material';
 import {MatGridListModule, MatCardModule, MatInputModule, MatButtonModule, MatSidenavModule} from '@angular/material';
-import { NgxDnDModule } from '@swimlane/ngx-dnd';
-
+import { DragulaModule } from 'ng2-dragula';
 import { BudgetsRoutingModule } from './budgets-routing.module';
 import { BudgetsComponent } from './budgets.component';
 import { BudgetComponent } from './budget/budget.component';
@@ -29,7 +28,7 @@ import { TransactionModule } from '../transactions/transactions.module';
     MatButtonModule,
     MatInputModule,
     MatSidenavModule,
-    NgxDnDModule,
+    DragulaModule,
     TransactionModule
   ],
   declarations: [

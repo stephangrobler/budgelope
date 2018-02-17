@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angularfire2/database';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
+
+import { DragulaService } from 'ng2-dragula';
+
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
@@ -46,9 +49,16 @@ export class BudgetviewComponent implements OnInit {
     private db: AngularFirestore,
     private budgetService: BudgetService,
     private userService: UserService,
-    private auth: AngularFireAuth
+    private auth: AngularFireAuth,
+    private dragulaService: DragulaService
   ) {
     this.selectedMonth = moment().format("YYYYMM");
+    dragulaService.drop.subscribe((value) => {
+      console.log(`drop: ${value[0]}`);
+      // this.onDrop(value.slice(1));
+      let [e, el] = value.slice(1);
+      console.log(e, el);
+    });
 
     auth.authState.subscribe((user) => {
       if (!user) {
