@@ -26,12 +26,12 @@ export class BudgetComponent implements OnInit {
   }
 
   saveBudget(){
-    this.budget = new Budget(
-      this.budgetName,
-      new Date(),
-      false,
-      this.theUserId
-    );
+    // this.budget = new Budget(
+    //   this.budgetName,
+    //   new Date(),
+    //   false,
+    //   this.theUserId
+    // );
     this.budgetService.createBudget(this.budget);
   }
 

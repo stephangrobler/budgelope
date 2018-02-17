@@ -271,15 +271,20 @@ export class BudgetviewComponent implements OnInit {
 
   blur(item) {
     let planned: number = item.allocations[this.selectedMonth].planned;
-    let ref = 'budgets/' + this.activeBudget + '/categories/' + item.id;
+    let ref = 'budgets/' + this.activeBudget.id + '/categories/' + item.id,
+      budgetRef = 'budgets/' + this.activeBudget.id;
 
     if (planned != item.original) {
       item.balance = (item.balance - item.original) + planned;
+
+      // update the budget available balance
+      this.activeBudget.balance = (this.activeBudget.balance - planned) + item.original;
 
       delete (item.original);
       delete (item.id);
 
       this.db.doc(ref).update(item);
+      this.db.doc(budgetRef).update(this.activeBudget);
     }
   }
 }
