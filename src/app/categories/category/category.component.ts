@@ -78,6 +78,10 @@ export class CategoryComponent implements OnInit {
     });
   }
 
+  copyCategories(){
+    this.categoryService.copyCategories('pPkN7QxRdyyvG4Jy2hr6', 'default');
+  }
+
   saveCategory() {
     let ref = 'budgets/'+this.activeBudget+'/categories';
 

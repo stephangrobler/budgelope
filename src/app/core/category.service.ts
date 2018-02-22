@@ -1,20 +1,20 @@
 import { Injectable } from '@angular/core';
 import { Category } from '../shared/category';
-import { AngularFireDatabase } from 'angularfire2/database';
+import { AngularFirestore } from 'angularfire2/firestore';
 import * as firebase from 'firebase';
 import * as moment from 'moment';
 
 @Injectable()
 export class CategoryService {
   constructor(
-    private db: AngularFireDatabase
+    private db: AngularFirestore
   ) {  }
 
 
   createCategory(budgetId: string, category: Category){
-    let dbRef = this.db.list('categories/' + budgetId);
-    let newCat = dbRef.push(category);
-    let categoryId = newCat.key;
+    let dbRef = this.db.collection('categories/' + budgetId);
+    let newCat = dbRef.add(category);
+    let categoryId = "newCat.key";
     // create a allocation
     // current allocation
     let currentDate = new Date();
@@ -46,7 +46,7 @@ export class CategoryService {
 
   updateCategory(budgetId: string, category: Category){
     // update main category
-    let dbRef = this.db.object('categories/' + budgetId + '/' + category.$key);
+    let dbRef = this.db.doc('categories/' + budgetId + '/' + category.$key);
     let categoryId = category.$key;
     console.log(category);
     // update allocations
@@ -77,6 +77,20 @@ export class CategoryService {
 
   }
 
+  copyCategories(fromBudgetId: string, toBudgetId: string){
+    let fromStore = 'budgets/' + fromBudgetId + '/categories',
+        toStore = 'budgets/' + toBudgetId + '/categories';
+
+    this.db.collection<Category>(fromStore).valueChanges().forEach(cat => {
+      cat.forEach(function(item){
+        item.balance = 0;
+        item.allocations = {};
+        delete(item.id);
+        this.db.collection(toStore).add(item);
+      }, this);
+    });
+
+  }
 
 
 }

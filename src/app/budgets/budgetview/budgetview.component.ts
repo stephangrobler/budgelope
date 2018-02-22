@@ -53,11 +53,9 @@ export class BudgetviewComponent implements OnInit {
     private dragulaService: DragulaService
   ) {
     this.selectedMonth = moment().format("YYYYMM");
-    dragulaService.drop.subscribe((value) => {
-      console.log(`drop: ${value[0]}`);
-      // this.onDrop(value.slice(1));
-      let [e, el] = value.slice(1);
-      console.log(e, el);
+    dragulaService.setOptions('order-bag', {})
+    dragulaService.dropModel.subscribe((value) => {
+      this.updateCategoryOrder(this.sortList, this.activeBudget.id);
     });
 
     auth.authState.subscribe((user) => {
@@ -68,51 +66,61 @@ export class BudgetviewComponent implements OnInit {
       let profile = db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
         db.doc<Budget>('budgets/' + profile.activeBudget).valueChanges().subscribe(budget => {
           budget.id = profile.activeBudget;
-
+          this.getCategories(profile.activeBudget);
           return this.activeBudget = budget;
         });
       });
-
-      let ref = 'budgets/pPkN7QxRdyyvG4Jy2hr6/categories';
-      let testList = db.collection<Category[]>(ref).snapshotChanges().map(budget => {
-        let budgetList: any = budget.map(b => {
-          let thisRef = ref + '/' + b.payload.doc.id + '/categories';
-
-          const data = b.payload.doc.data() as Category;
-          const catRef = db.collection<Category>(thisRef).snapshotChanges();
-
-          const id = b.payload.doc.id;
-
-          // ensure there are allocations for the current month and add if not
-          if (!data.allocations) {
-            data.allocations = {};
-            data.allocations[this.selectedMonth] = {
-              planned: 0,
-              actual: 0
-            };
-          } else if (data.allocations && !data.allocations[this.selectedMonth]) {
-            data.allocations[this.selectedMonth] = {
-              planned: 0,
-              actual: 0
-            };
-          }
-
-          return { id, ...data }
-        });
-
-        return budgetList;
-      });
-
-      testList.subscribe(list => {
-        this.sortList = list;
-      });
-
     });
-
   }
 
   ngOnInit() {
 
+  }
+
+  updateCategoryOrder(categories: Category[], budgetId: string): void {
+    let ref = 'budgets/' + budgetId + '/categories/';
+    categories.forEach(function(category, index) {
+      let newOrder = ('000' + (index + 1).toString()).slice(-3);
+      // check to see if it is neccessary to update the category
+      if (category.sortingOrder != newOrder){
+        category.sortingOrder = newOrder;
+        this.db.doc(ref + category.id).update(category);
+        console.log('updating: ', category.name);
+      }
+    }, this);
+  }
+
+  getCategories(budgetId: string): void {
+    let ref = 'budgets/' + budgetId + '/categories';
+    let testList = this.db.collection<Category[]>(ref, ref => ref.orderBy('sortingOrder')).snapshotChanges().map(budget => {
+      let budgetList: any = budget.map(b => {
+        let thisRef = ref + '/' + b.payload.doc.id + '/categories';
+        const data = b.payload.doc.data() as Category;
+        const catRef = this.db.collection<Category>(thisRef).snapshotChanges();
+        const id = b.payload.doc.id;
+
+        // ensure there are allocations for the current month and add if not
+        if (!data.allocations) {
+          data.allocations = {};
+          data.allocations[this.selectedMonth] = {
+            planned: 0,
+            actual: 0
+          };
+        } else if (data.allocations && !data.allocations[this.selectedMonth]) {
+          data.allocations[this.selectedMonth] = {
+            planned: 0,
+            actual: 0
+          };
+        }
+        return { id, ...data }
+      });
+
+      return budgetList;
+    });
+
+    testList.subscribe(list => {
+      this.sortList = list;
+    });
   }
 
   checkIsHeader(item) {
