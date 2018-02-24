@@ -5,7 +5,7 @@
         <h1>Transactions</h1>
         <app-transaction></app-transaction>
       </div>
-      <mat-table #table [dataSource]="dataSource">
+      <mat-table #table [dataSource]="dataSource" ng-if="budgetId != ''">
         <ng-container matColumnDef="date">
           <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
           <mat-cell *matCellDef="let transaction">{{transaction.date | date: 'MMM d, y'}}</mat-cell>

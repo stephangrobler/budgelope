@@ -53,10 +53,7 @@ export class BudgetviewComponent implements OnInit {
     private dragulaService: DragulaService
   ) {
     this.selectedMonth = moment().format("YYYYMM");
-    dragulaService.setOptions('order-bag', {})
-    dragulaService.dropModel.subscribe((value) => {
-      this.updateCategoryOrder(this.sortList, this.activeBudget.id);
-    });
+
 
     auth.authState.subscribe((user) => {
       if (!user) {
@@ -66,6 +63,12 @@ export class BudgetviewComponent implements OnInit {
       let profile = db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
         db.doc<Budget>('budgets/' + profile.activeBudget).valueChanges().subscribe(budget => {
           budget.id = profile.activeBudget;
+          if (!budget.allocations[this.selectedMonth]){
+            budget.allocations[this.selectedMonth] = {
+              "income": 0,
+              "expense": 0
+            };
+          }
           this.getCategories(profile.activeBudget);
           return this.activeBudget = budget;
         });
@@ -74,7 +77,14 @@ export class BudgetviewComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.dragulaService.setOptions('order-bag', {})
+    this.dragulaService.dropModel.subscribe((value) => {
+      this.updateCategoryOrder(this.sortList, this.activeBudget.id);
+    });
+  }
 
+  ngOnDestroy() {
+    this.dragulaService.destroy('order-bag');
   }
 
   updateCategoryOrder(categories: Category[], budgetId: string): void {

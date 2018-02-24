@@ -15,8 +15,9 @@ export class TransactionService {
     private db: AngularFirestore
   ) { }
 
-  getTransactions() {
-    return this.db.collection<Transaction>('/budgets/pPkN7QxRdyyvG4Jy2hr6/transactions', ref => ref.orderBy('date', 'desc')).valueChanges();
+  getTransactions(budgetId: string) {
+    let transRef = '/budgets/' + budgetId + '/transactions';
+    return this.db.collection<Transaction>(transRef, ref => ref.orderBy('date', 'desc')).valueChanges();
   }
   /**
    * Creates a new transaction and updates the relevant paths with the correct
@@ -45,7 +46,7 @@ export class TransactionService {
       shortDate = moment(transaction.date).format("YYYYMM"),
 
       budgetStore = this.db.doc<Budget>('budgets/' + budgetId);
-      
+
     // ensure value is negative if it is an expense.
     if (transaction.in > 0) {
       transaction.amount = Math.abs(transaction.in);
