@@ -8,10 +8,10 @@ import * as moment from 'moment';
 export class CategoryService {
   constructor(
     private db: AngularFirestore
-  ) {  }
+  ) { }
 
 
-  createCategory(budgetId: string, category: Category){
+  createCategory(budgetId: string, category: Category) {
     let dbRef = this.db.collection('categories/' + budgetId);
     let newCat = dbRef.add(category);
     let categoryId = "newCat.key";
@@ -44,7 +44,7 @@ export class CategoryService {
 
   }
 
-  updateCategory(budgetId: string, category: Category){
+  updateCategory(budgetId: string, category: Category) {
     // update main category
     let dbRef = this.db.doc('categories/' + budgetId + '/' + category.$key);
     let categoryId = category.$key;
@@ -73,24 +73,30 @@ export class CategoryService {
     });
   }
 
-  deleteCategory(budgetId: string, category: Category){
+  deleteCategory(budgetId: string, category: Category) {
 
   }
 
-  copyCategories(fromBudgetId: string, toBudgetId: string){
+  copyCategories(fromBudgetId: string, toBudgetId: string) {
     let fromStore = 'budgets/' + fromBudgetId + '/categories',
-        toStore = 'budgets/' + toBudgetId + '/categories';
+      toStore = 'budgets/' + toBudgetId + '/categories';
+    let collections = this.db.collection<Category>(fromStore).snapshotChanges().map(actions => {
+      return actions.map(cat => {
+        const data = cat.payload.doc.data() as Category;
+        const id = cat.payload.doc.id;
+        data.balance = 0;
+        data.allocations = {};
+        data.parentId = '';
 
-    this.db.collection<Category>(fromStore).valueChanges().forEach(cat => {
-      cat.forEach(function(item){
-        item.balance = 0;
-        item.allocations = {};
+        return { id, ...data };
+      });
+    }).subscribe(cats => {
+      cats.forEach(item => {
+        let doc = this.db.collection(toStore).doc(item.id);
         delete(item.id);
-        this.db.collection(toStore).add(item);
-      }, this);
+        doc.set(item);
+      }, this)
     });
 
   }
-
-
 }

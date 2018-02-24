@@ -5,7 +5,7 @@ import { AngularFireAuth } from 'angularfire2/auth';
 
 import { UserService } from '../../shared/user.service';
 import { Account } from '../../shared/account';
-import { AccountService } from '../accountShared/account.service';
+import { AccountService } from '../../core/account.service';
 import { BudgetService } from '../../core/budget.service';
 import { Budget } from '../../shared/budget';
 

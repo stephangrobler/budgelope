@@ -4,7 +4,6 @@ import { RouterModule, Routes } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { AccountComponent } from './account/account.component';
-import { AccountService } from './accountShared/account.service';
 import { AccountListComponent } from './account-list/account-list.component';
 import { SharedModule } from '../shared/shared.module';
 
@@ -22,9 +21,7 @@ import { SharedModule } from '../shared/shared.module';
 
     AccountComponent,
     AccountListComponent
-  ],
-  providers: [
-    AccountService
   ]
+
 })
 export class AccountsModule { }

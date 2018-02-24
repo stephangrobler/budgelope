@@ -9,6 +9,7 @@ import { AngularFireAuth } from 'angularfire2/auth';
 import { Category } from '../../shared/category';
 import { CategoryService } from '../../core/category.service';
 import { UserService } from '../../shared/user.service';
+import { BudgetService } from '../../core/budget.service';
 
 export interface CategoryId extends Category { id: string };
 
@@ -30,6 +31,7 @@ export class CategoryComponent implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
+    private budgetService: BudgetService,
     private categoryService: CategoryService,
     private userService: UserService,
     private auth: AngularFireAuth,
@@ -45,6 +47,7 @@ export class CategoryComponent implements OnInit {
       if (!user) {
         return;
       }
+      this.theUserId = user.uid;
       let ref = 'users/' + user.uid;
       console.log(ref);
 
@@ -79,7 +82,8 @@ export class CategoryComponent implements OnInit {
   }
 
   copyCategories(){
-    this.categoryService.copyCategories('pPkN7QxRdyyvG4Jy2hr6', 'default');
+    // this.categoryService.copyCategories('pPkN7QxRdyyvG4Jy2hr6', 'default');
+    this.budgetService.freshStart('pPkN7QxRdyyvG4Jy2hr6', this.theUserId );
   }
 
   saveCategory() {
