@@ -72,6 +72,10 @@ export class BudgetService {
 
         // create new budget
         cBudget.allocations = {};
+        cBudget.allocations[moment().format("YYYYMM")] = {
+          "income":0,
+          "expense":0
+        }
         cBudget.balance = 0;
         delete(cBudget.id);
 
@@ -79,8 +83,8 @@ export class BudgetService {
 
         budgetStore.add(cBudget).then(function(docRef) {
           // rename old budget
-          t.name = t.name + ' - FRESH START '+ moment().format('YYYY-MM-DD hh:mm:ss');
-          budgetStore.doc(currentBudgetId).update(t);
+          let newName: string = t.name + ' - FRESH START '+ moment().format('YYYY-MM-DD hh:mm:ss');
+          budgetStore.doc(currentBudgetId).update({'name' : newName});
 
           // set user active budget
           // copy categories

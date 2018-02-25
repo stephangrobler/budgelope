@@ -5,7 +5,7 @@
         <h1>Transactions</h1>
         <app-transaction></app-transaction>
       </div>
-      <mat-table #table [dataSource]="dataSource" ng-if="budgetId != ''">
+      <mat-table #table [dataSource]="dataSource">
         <ng-container matColumnDef="date">
           <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
           <mat-cell *matCellDef="let transaction">{{transaction.date | date: 'MMM d, y'}}</mat-cell>
@@ -24,11 +24,11 @@
         </ng-container>
         <ng-container matColumnDef="out">
           <mat-header-cell *matHeaderCellDef>Out</mat-header-cell>
-          <mat-cell *matCellDef="let transaction">{{transaction.out}}</mat-cell>
+          <mat-cell *matCellDef="let transaction" style="text-align: right">{{transaction.out | number: '1.2' }}</mat-cell>
         </ng-container>
         <ng-container matColumnDef="in">
           <mat-header-cell *matHeaderCellDef>In</mat-header-cell>
-          <mat-cell *matCellDef="let transaction">{{transaction.in}}</mat-cell>
+          <mat-cell *matCellDef="let transaction" style="text-align: right">{{transaction.in | number: '1.2'}}</mat-cell>
         </ng-container>
         <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
         <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>

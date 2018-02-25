@@ -8,7 +8,7 @@
         <a mat-list-item routerLink="/transactions?accountId={{account.id}}"
           *ngFor="let account of accounts | async"
           routerLinkActive="active" style="font-size: 80%; height: 32px;">
-          {{account.name}} <br>
+          <div>{{account.name}}</div>
           <span class="small">{{account.balance | currency: 'ZAR' : 'symbol-narrow'}}</span>
         </a>
       </mat-nav-list>
