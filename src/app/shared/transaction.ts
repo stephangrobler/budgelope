@@ -16,6 +16,7 @@ export class Transaction{
   cleared: boolean;
 
   constructor(transactionData?: any){
+
     if (transactionData) {
       this.id = transactionData.id ? transactionData.id : null ;
       this.categoryId = transactionData.categoryId ? transactionData.categoryId : null ;
@@ -33,20 +34,4 @@ export class Transaction{
     }
   }
 
-  toObject() : any {
-    return {
-      "id": this.id,
-      "categoryId": this.categoryId,
-      "category": this.category,
-      "accountId": this.accountId,
-      "account": this.account,
-      "payeeId": this.payeeId,
-      "payee": this.payee,
-      "in": this.in,
-      "out": this.out,
-      "type": this.type,
-      "cleared": this.cleared,
-      "date": this.date,
-    }
-  }
 }

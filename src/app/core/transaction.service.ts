@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from 'angularfire2/firestore';
+import { Observable } from 'rxjs/Observable';
 import * as firebase from 'firebase';
 import * as moment from 'moment';
 
@@ -15,10 +16,119 @@ export class TransactionService {
     private db: AngularFirestore
   ) { }
 
-  getTransactions(budgetId: string) {
+  /**
+   * Get all transactions with the id of the transactions
+   * @param  budgetId Current active budget for the user id
+   * @return          the observable for the transactions.
+   */
+  getTransactions(budgetId: string): Observable<Transaction[]> {
     let transRef = '/budgets/' + budgetId + '/transactions';
-    return this.db.collection<Transaction>(transRef, ref => ref.orderBy('date', 'desc')).valueChanges();
+
+    return this.db.collection<Transaction>(
+      transRef,
+      ref => ref.orderBy('date', 'desc')
+    ).snapshotChanges().map(actions => {
+      let stuff = actions.map(a => {
+        const data = a.payload.doc.data() as Transaction;
+        const id = a.payload.doc.id;
+        data.id = id;
+        return { id, ...data };
+      });
+      return stuff;
+    });
   }
+
+  updateTransaction(
+    transactionId: string,
+    transaction: Transaction,
+    account: Account,
+    category: Category,
+    budget: Budget
+  ) {
+    let transactionStore = this.db.collection<Transaction>('budgets/' + budget.id + '/transactions'),
+      currentDoc = transactionStore.doc<Transaction>(transactionId).valueChanges(),
+      shortDate = moment(transaction.date).format("YYYYMM");
+
+
+    // ensure value is negative if it is an expense.
+    if (transaction.in > 0) {
+      transaction.amount = Math.abs(transaction.in);
+      // budget.balance += transaction.in;
+      // budget.allocations[shortDate].income += transaction.in;
+    } else {
+      transaction.amount = -Math.abs(transaction.out);
+      // budget.allocations[shortDate].expense += transaction.out;
+    }
+
+    currentDoc.take(1).subscribe(currentTransaction => {
+
+      // update accounts if changes were made to it
+      if (account && account.id != currentTransaction.accountId) {
+        //load original account to reset values.
+        let accountRef = 'budgets/' + budget.id + '/accounts/' + currentTransaction.accountId;
+        this.db.doc<Account>(accountRef)
+          .valueChanges()
+          .take(1)
+          .subscribe(currentAccount => {
+            // update currentAccount and update balance on new account
+            currentAccount.balance -= transaction.amount;
+            this.db.doc(accountRef).update(currentAccount);
+          });
+        transaction.account = account.name;
+        transaction.accountId = account.id;
+        account.balance += transaction.amount;
+        this.db.doc('budgets/' + budget.id + '/accounts/' + account.id).update(account);
+      }
+      // update category if not the same as previous category
+      if (category && category.id != currentTransaction.categoryId) {
+        let categoryRef = 'budgets/' + budget.id + '/categories';
+        this.db.doc<Category>(categoryRef + '/' + currentTransaction.categoryId).valueChanges()
+          .take(1).subscribe(currentCategory => {
+            currentCategory.balance -= transaction.amount;
+            this.db.doc(categoryRef + '/' + currentTransaction.categoryId).update(currentCategory);
+          });
+        transaction.category = category.name;
+        transaction.categoryId = category.id;
+        category.balance += transaction.amount;
+        this.db.doc(categoryRef + '/' + category.id).update(category);
+      }
+      // update amount if not the same as current transaction
+      if (transaction.amount != currentTransaction.amount) {
+        if (transaction.in > 0){
+          budget.balance -= currentTransaction.in;
+          budget.allocations[shortDate].income -= currentTransaction.in;
+
+          budget.balance += transaction.in;
+          budget.allocations[shortDate].income += transaction.in;
+        } else if (transaction.out > 0){
+
+          account.balance -= currentTransaction.amount;
+          category.balance -= currentTransaction.amount;
+          category.allocations[shortDate].actual -= currentTransaction.amount;
+
+
+          account.balance += transaction.amount;
+          category.balance += transaction.amount;
+          category.allocations[shortDate].actual += transaction.amount;
+
+          budget.allocations[shortDate].expense -= currentTransaction.out;
+          budget.allocations[shortDate].expense += transaction.out;
+        }
+      };
+      transactionStore.doc(transactionId).update(transaction).then(docRef => {
+        this.db.doc('budgets/' + budget.id + '/accounts/' + account.id).update(account);
+        this.db.doc('budgets/' + budget.id + '/categories/' + currentTransaction.categoryId).update(category);
+
+      });
+    });
+
+
+
+
+  }
+
+
+
   /**
    * Creates a new transaction and updates the relevant paths with the correct
    * data sets
@@ -57,7 +167,7 @@ export class TransactionService {
       budget.allocations[shortDate].expense += transaction.out;
     }
 
-    let transactionItem = new Transaction({
+    let transactionItem: any = {
       categoryId: transaction.categoryId,
       category: transaction.category,
       accountId: transaction.accountId,
@@ -69,41 +179,18 @@ export class TransactionService {
       payee: transaction.payee,
       date: transaction.date,
       timestamp: firebase.database.ServerValue.TIMESTAMP
-    });
+    };
 
 
-    items.add(transactionItem.toObject()).then(response => {
+    items.add(transactionItem).then(response => {
 
       account.balance += transaction.amount;
       category.balance += transaction.amount;
+      category.allocations[shortDate].actual += transaction.amount;
 
       accStore.update(account);
       catStore.update(category);
       budgetStore.update(budget);
-
-      // updateObj['accounts/' + budgetId + '/' + transaction.account.$key + '/balance'] = accBalance;
-      // updateObj['categories/' + budgetId + '/' + transaction.category.$key + '/balance'] = catBalance;
-      //
-      // this.db.object('/').update(updateObj);
-      //
-      // let allocationupdate = this.db.object<any>(allocRef);
-      // allocationupdate.valueChanges().take(1).subscribe(alloc => {
-      //   this.db.object<any>(allocRef).update({
-      //     actual: alloc.actual + parseFloat(transaction.amount),
-      //     balance: catBalance
-      //   }).then((result) => {
-      //     console.log('successfull update allocation ', allocRef, alloc);
-      //   });
-      // });
-
-      // let allocationNextupdate = this.db.object<any>(allocNextRef);
-      // allocationNextupdate.valueChanges().take(1).subscribe(alloc2 => {
-      //   this.db.object(allocNextRef).update({
-      //     previousBalance: catBalance
-      //   }).then((result) => {
-      //     console.log('successfull update allocation 2 ', allocNextRef, alloc2);
-      //   });
-      // });
 
       alert('Transaction saved');
     });

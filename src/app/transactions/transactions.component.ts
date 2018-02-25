@@ -22,6 +22,8 @@ export class TransactionsComponent implements OnInit {
   dataSource: TransactionDataSource;
   newTransaction: Transaction;
 
+  selectedTransaction: Transaction;
+
 
   constructor(
     private transService: TransactionService,
@@ -47,6 +49,10 @@ export class TransactionsComponent implements OnInit {
   }
 
   ngOnInit() {
+  }
+
+  selectedRow(row){
+    this.selectedTransaction = row;
   }
 }
 

@@ -59,6 +59,13 @@ export class BudgetService {
     })
   }
 
+  /**
+   * Creates a new budget with current accounts and categories of existing budget
+   * to start a new with tracking etc
+   * @param  currentBudgetId The id of the budget needed to copy
+   * @param  userId          the user id which to update the active budget to
+   * @return                 nothing
+   */
   freshStart(currentBudgetId: string, userId: string) {
     // get current budget and store id
     let budgetStore  = this.db.collection('budgets'),

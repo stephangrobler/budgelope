@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, OnChanges, Input, SimpleChange } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { AngularFireAuth } from 'angularfire2/auth';
@@ -39,7 +39,7 @@ export class TransactionComponent implements OnInit {
   type: string;
   transactionId: string;
   item: AngularFirestoreDocument<any>;
-  accounts: Observable<any>;
+  accounts: Observable<Account[]>;
   categories: CategoryId[];
   newTransaction: Transaction;
 
@@ -69,8 +69,6 @@ export class TransactionComponent implements OnInit {
         });
       });
     });
-
-
     this.newTransaction = new Transaction({
       date: new Date()
     });
@@ -113,15 +111,17 @@ export class TransactionComponent implements OnInit {
           this.transaction = new Transaction();
         }
         // get the budget accounts
-        this.accounts = this.db.collection<any>('budgets/' + profile.activeBudget + '/accounts').snapshotChanges()
+        this.accounts = this.db.collection<Account>('budgets/' + profile.activeBudget + '/accounts').snapshotChanges()
           .map(actions => {
-            return actions.map(a => {
+            let accounts = actions.map(a => {
               const data = a.payload.doc.data() as Account;
               const id = a.payload.doc.id;
               return { id, ...data };
             });
+            return accounts;
           });
-        this.db.collection<Category[]>('budgets/' + profile.activeBudget + '/categories').snapshotChanges()
+
+        this.db.collection<Category>('budgets/' + profile.activeBudget + '/categories').snapshotChanges()
           .map(actions => {
             return actions.map(a => {
               const data = a.payload.doc.data() as CategoryId;
@@ -134,32 +134,43 @@ export class TransactionComponent implements OnInit {
         // this.db.object('allocations/' + moment().format("YYYYMM"))
       });
     });
+  }
+
+  ngOnChanges(changes: {[propKey: string]: SimpleChange}){
+    if (changes.transaction.currentValue){
+      this.newTransaction = changes.transaction.currentValue;
+      this.category = this.categories.filter(item => {
+        return item.id == this.newTransaction.categoryId;
+      })[0];
+      this.catCtrl.setValue(this.category);
 
 
+    }
   }
 
   saveTransaction() {
-    this.create();
+    if (this.newTransaction.id != null){
+      console.log('updating ', this.newTransaction.id);
+      this.update();
+    } else {
+      console.log('creating...');
+      this.create();
+    }
   }
 
   update() {
-    let account: any = this.transaction.account;
-    let category: any = this.catCtrl.value;
-    this.item.update({
-      categoryId: category.$key,
-      category: category.name,
-      accountId: this.transaction.account,
-      account: this.transaction.account,
-      amount: this.transaction.amount,
-      type: this.transaction.type,
-      payee: this.transaction.payee
-    }).then(response => {
-      alert('transaction update successfull');
-      this.updateAccount(account);
-    }).catch(error => {
-      alert('there was an error updating the transaction.');
-      console.log('ERROR:', error);
-    });
+    let cat: Category = this.catCtrl.value;
+    let acc: Account = this.selectedAccount;
+    let payee: Payee = new Payee();
+
+
+    this.transactionService.updateTransaction(
+      this.newTransaction.id,
+      this.newTransaction,
+      acc,
+      cat,
+      this.activeBudget
+    );
   }
 
   create() {
