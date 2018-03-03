@@ -4,7 +4,7 @@ import * as firebase from 'firebase';
 
 import { Budget } from '../../shared/budget';
 import { BudgetService } from '../../core/budget.service';
-import { UserService } from '../../shared/user.service';
+import { UserService } from '../../core/user.service';
 
 @Component({
   selector: 'budget-form',

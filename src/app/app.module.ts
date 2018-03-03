@@ -17,14 +17,13 @@ import { HomeComponent } from './home/home.component';
 import { ErrorComponent } from './error/error.component';
 import { LoginComponent } from './login/login.component';
 import { SignUpComponent } from './signup/signup.component';
-import { UserService } from './shared/user.service';
 import { AppRoutingModule } from './shared/app.routing';
 import { AccountsModule } from './accounts/accounts.module';
 import { CategoriesModule } from './categories/categories.module';
 import { SharedModule } from './shared/shared.module';
 import { BudgetsModule } from './budgets/budgets.module';
 import { TransactionModule } from './transactions/transactions.module';
-import { CoreModule } from './core/core.module';;
+import { CoreModule } from './core/core.module';
 
 @NgModule({
   declarations: [
@@ -62,7 +61,6 @@ import { CoreModule } from './core/core.module';;
     CoreModule
   ],
   providers: [
-    UserService
   ],
   bootstrap: [AppComponent]
 })

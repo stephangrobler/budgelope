@@ -94,13 +94,13 @@ export class TransactionService {
       }
       // update amount if not the same as current transaction
       if (transaction.amount != currentTransaction.amount) {
-        if (transaction.in > 0){
+        if (transaction.in > 0) {
           budget.balance -= currentTransaction.in;
           budget.allocations[shortDate].income -= currentTransaction.in;
 
           budget.balance += transaction.in;
           budget.allocations[shortDate].income += transaction.in;
-        } else if (transaction.out > 0){
+        } else if (transaction.out > 0) {
 
           account.balance -= currentTransaction.amount;
           category.balance -= currentTransaction.amount;
@@ -118,14 +118,10 @@ export class TransactionService {
       transactionStore.doc(transactionId).update(transaction).then(docRef => {
         this.db.doc('budgets/' + budget.id + '/accounts/' + account.id).update(account);
         this.db.doc('budgets/' + budget.id + '/categories/' + currentTransaction.categoryId).update(category);
-
       });
     });
-
-
-
-
   }
+
 
 
 
@@ -157,6 +153,13 @@ export class TransactionService {
 
       budgetStore = this.db.doc<Budget>('budgets/' + budgetId);
 
+    if (!budget.allocations[shortDate]) {
+      budget.allocations[shortDate] = {
+        expense: 0,
+        income: 0
+      }
+    }
+
     // ensure value is negative if it is an expense.
     if (transaction.in > 0) {
       transaction.amount = Math.abs(transaction.in);
@@ -167,32 +170,28 @@ export class TransactionService {
       budget.allocations[shortDate].expense += transaction.out;
     }
 
-    let transactionItem: any = {
-      categoryId: transaction.categoryId,
-      category: transaction.category,
-      accountId: transaction.accountId,
-      account: transaction.account,
-      amount: transaction.amount,
-      in: transaction.in,
-      out: transaction.out,
-      type: transaction.type,
-      payee: transaction.payee,
-      date: transaction.date,
-      timestamp: firebase.database.ServerValue.TIMESTAMP
-    };
+    transaction.account = account.name;
+    transaction.accountId = account.id;
+    transaction.categoryId = category.id;
+    transaction.category = category.name;
 
+    return new Promise((resolve, reject) => {
+      items.add(transaction.toObject).then(response => {
+        account.balance += transaction.amount;
+        category.balance += transaction.amount;
+        if (!category.allocations[shortDate]) {
+          category.allocations[shortDate] = {
+            'actual': 0,
+            'planned': 0
+          }
+        }
+        category.allocations[shortDate].actual += transaction.amount;
+        accStore.update(account);
+        catStore.update(category);
+        budgetStore.update(budget);
+        resolve(response);
 
-    items.add(transactionItem).then(response => {
-
-      account.balance += transaction.amount;
-      category.balance += transaction.amount;
-      category.allocations[shortDate].actual += transaction.amount;
-
-      accStore.update(account);
-      catStore.update(category);
-      budgetStore.update(budget);
-
-      alert('Transaction saved');
+      });
     });
 
 

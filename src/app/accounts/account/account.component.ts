@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { AngularFireDatabase, AngularFireObject } from 'angularfire2/database';
 
-import { UserService } from '../../shared/user.service';
+import { UserService } from '../../core/user.service';
 import { AccountService } from '../../core/account.service';
 import { Account } from '../../shared/account';
 import { BudgetService } from '../../core/budget.service';

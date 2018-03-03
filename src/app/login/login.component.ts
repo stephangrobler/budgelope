@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import { AngularFireAuth } from 'angularfire2/auth';
 import * as firebase from 'firebase/app';
-import { UserService } from '../shared/user.service';
+import { UserService } from '../core/user.service';
 import { MatGridListModule, MatButtonModule } from '@angular/material';
 
 

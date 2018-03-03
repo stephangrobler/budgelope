@@ -16,7 +16,7 @@ import { Account } from '../../shared/account';
 import { Category } from '../../shared/category';
 import { Budget } from '../../shared/budget';
 import { BudgetService } from '../../core/budget.service';
-import { UserService } from '../../shared/user.service';
+import { UserService } from '../../core/user.service';
 
 
 @Component({

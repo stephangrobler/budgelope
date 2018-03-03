@@ -34,4 +34,20 @@ export class Transaction{
     }
   }
 
+  get toObject(): any {
+    return {
+      categoryId: this.categoryId,
+      category: this.category,
+      accountId: this.accountId,
+      account: this.account,
+      payeeId: this.payeeId,
+      payee: this.payee,
+      amount: this.account,
+      in: this.in,
+      out: this.out,
+      date: this.date,
+      type: this.type, // income or expense
+      cleared: this.cleared
+    };
+  }
 }

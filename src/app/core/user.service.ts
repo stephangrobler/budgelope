@@ -8,7 +8,7 @@ import {
 import { environment } from '../../environments/environment';
 import * as firebase from 'firebase';
 
-import { Account } from './account';
+import { Account } from '../shared/account';
 
 @Injectable()
 export class UserService implements CanActivate {

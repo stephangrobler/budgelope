@@ -3,7 +3,7 @@ import * as firebase from 'firebase';
 
 
 
-import { UserService } from './shared/user.service';
+import { UserService } from './core/user.service';
 
 
 @Component({

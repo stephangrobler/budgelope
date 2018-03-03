@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as firebase from 'firebase';
+import { Observable } from 'rxjs/Observable';
 import { Account } from '../shared/account';
 import { AngularFirestore } from 'angularfire2/firestore';
 
@@ -9,6 +10,18 @@ export class AccountService {
     private db: AngularFirestore
   ) {
 
+  }
+
+  getAccounts(budgetId: string): Observable<Account[]> {
+    return this.db.collection<Account>('budgets/' + budgetId + '/accounts').snapshotChanges()
+      .map(actions => {
+        let accounts = actions.map(a => {
+          const data = a.payload.doc.data() as Account;
+          const id = a.payload.doc.id;
+          return { id, ...data };
+        });
+        return accounts;
+      });
   }
 
   createAccount(account: Account) {
@@ -49,10 +62,10 @@ export class AccountService {
       });
 
     }).subscribe(accounts => {
-      accounts.forEach(function(item){
+      accounts.forEach(function(item) {
         let store = this.db.collection('budgets/' + toBudgetId + '/accounts').doc(item.id);
         item.balance = 0;
-        delete(item.id);
+        delete (item.id);
         store.set(item);
       }, this);
     })

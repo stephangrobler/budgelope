@@ -8,7 +8,7 @@ import { DataSource } from '@angular/cdk/collections';
 import { Transaction } from '../shared/transaction';
 import { TransactionService } from '../core/transaction.service';
 import { BudgetService } from '../core/budget.service';
-import { UserService } from '../shared/user.service';
+import { UserService } from '../core/user.service';
 import { TransactionComponent } from './transaction/transaction.component';
 
 @Component({

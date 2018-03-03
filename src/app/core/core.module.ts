@@ -5,6 +5,7 @@ import { CategoryService } from './category.service';
 import { TransactionService } from './transaction.service';
 import { AccountService } from './account.service';
 import { AnalyticsService } from './analytics.service';
+import { UserService } from './user.service';
 
 @NgModule({
   imports: [],
@@ -14,7 +15,8 @@ import { AnalyticsService } from './analytics.service';
     CategoryService,
     TransactionService,
     AccountService,
-    AnalyticsService
+    AnalyticsService,
+    UserService
   ]
 })
 export class CoreModule { }

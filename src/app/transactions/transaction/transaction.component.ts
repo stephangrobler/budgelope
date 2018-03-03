@@ -4,6 +4,8 @@ import { Router, ActivatedRoute, Params } from '@angular/router';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angularfire2/database';
 import { AngularFirestore, AngularFirestoreDocument, AngularFirestoreCollection } from 'angularfire2/firestore';
+
+import { MatSnackBar } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 import * as moment from 'moment';
 import 'rxjs/add/operator/startWith';
@@ -15,8 +17,9 @@ import { Budget } from '../../shared/budget';
 import { Payee } from '../../shared/payee';
 import { Category, CategoryId } from '../../shared/category';
 import { BudgetService } from '../../core/budget.service';
-import { UserService } from '../../shared/user.service';
+import { UserService } from '../../core/user.service';
 import { TransactionService } from '../../core/transaction.service';
+import { AccountService } from '../../core/account.service';
 
 
 @Component({
@@ -52,10 +55,12 @@ export class TransactionComponent implements OnInit {
     private userService: UserService,
     private budgetService: BudgetService,
     private transactionService: TransactionService,
+    private accountService: AccountService,
     private router: Router,
     private route: ActivatedRoute,
     private db: AngularFirestore,
-    private af: AngularFireAuth
+    private af: AngularFireAuth,
+    public snackBar : MatSnackBar
 
   ) {
     af.authState.subscribe((user) => {
@@ -111,15 +116,7 @@ export class TransactionComponent implements OnInit {
           this.transaction = new Transaction();
         }
         // get the budget accounts
-        this.accounts = this.db.collection<Account>('budgets/' + profile.activeBudget + '/accounts').snapshotChanges()
-          .map(actions => {
-            let accounts = actions.map(a => {
-              const data = a.payload.doc.data() as Account;
-              const id = a.payload.doc.id;
-              return { id, ...data };
-            });
-            return accounts;
-          });
+        this.accounts = this.accountService.getAccounts(profile.activeBudget);
 
         this.db.collection<Category>('budgets/' + profile.activeBudget + '/categories').snapshotChanges()
           .map(actions => {
@@ -194,7 +191,15 @@ export class TransactionComponent implements OnInit {
       this.activeBudget,
       this.userId,
       this.activeBudget.id,
-    );
+    ).then(response => {
+      this.openSnackBar('Created transaction successfully');
+    });
+  }
+
+  openSnackBar(message: string){
+    this.snackBar.open(message, 'DISMISS', {
+      duration: 2000
+    });
   }
 
   updateAccount(account: any) {
