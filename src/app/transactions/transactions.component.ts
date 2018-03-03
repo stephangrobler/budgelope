@@ -33,6 +33,7 @@ export class TransactionsComponent implements OnInit {
     private db: AngularFirestore,
     private af: AngularFireAuth
   ) {
+
     af.authState.subscribe((user) => {
       if (!user) {
         return;

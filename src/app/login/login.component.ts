@@ -23,7 +23,7 @@ export class LoginComponent implements OnInit {
     // check if a user is authentication and redirect to budget view else login
     afAuth.authState.subscribe((user) => {
       if (!user){
-        return;
+        // return;
       } else {
         // this.router.navigate(['/']);
       }
@@ -31,7 +31,9 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    console.log('running login');
+  }
 
   login(loginEmail: string, loginPassword: string){
     this.userSVC.login(this.email, this.password1);
@@ -51,6 +53,6 @@ export class LoginComponent implements OnInit {
   }
 
   cancel(){
-    this.router.navigate(['/']);
+    this.router.navigate(['/login']);
   }
 }

@@ -84,7 +84,9 @@ export class BudgetviewComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this.dragulaService.destroy('order-bag');
+    if (this.dragulaService.find('order-bag') !== undefined){
+      this.dragulaService.destroy('order-bag');      
+    }
   }
 
   updateCategoryOrder(categories: Category[], budgetId: string): void {

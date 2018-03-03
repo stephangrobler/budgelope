@@ -19,23 +19,23 @@ export class HomeComponent implements OnInit {
     private router: Router,
     afAuth: AngularFireAuth
   ) {
-
     afAuth.authState.subscribe((user) => {
       if (!user) {
         this.router.navigate(['/login']);
         return;
       } else {
-        // this.router.navigate(['./budgetview']);
+        this.router.navigate(['./app/budget']);
         let profile = this.db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
           // get accounts
           this.accounts = this.db.collection<any>('budgets/' + profile.activeBudget + '/accounts').valueChanges();
-          
+
         });
       }
     });
   }
 
   ngOnInit() {
+    console.log('running home');
     this._analytics.pageView('/');
   }
 }

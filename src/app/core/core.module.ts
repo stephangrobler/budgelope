@@ -6,6 +6,7 @@ import { TransactionService } from './transaction.service';
 import { AccountService } from './account.service';
 import { AnalyticsService } from './analytics.service';
 import { UserService } from './user.service';
+import { AuthGuardService } from './auth-guard.service';
 
 @NgModule({
   imports: [],
@@ -16,7 +17,8 @@ import { UserService } from './user.service';
     TransactionService,
     AccountService,
     AnalyticsService,
-    UserService
+    UserService,
+    AuthGuardService
   ]
 })
 export class CoreModule { }
