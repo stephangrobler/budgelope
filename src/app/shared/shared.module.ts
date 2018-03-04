@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatToolbarModule, MatButtonModule, MatIconModule} from '@angular/material';
+import { AppRoutingModule } from './app.routing';
 
 import { NavComponent } from './navbar.component';
 import { AuthGuardService } from '../core/auth-guard.service';
@@ -15,7 +16,8 @@ import { AuthGuardService } from '../core/auth-guard.service';
     BrowserAnimationsModule,
     MatToolbarModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    AppRoutingModule
   ],
   exports: [
     NavComponent

@@ -18,8 +18,8 @@ const appRoutes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   {
     path: 'app', component: HomeComponent, canActivate: [AuthGuardService], children: [
-      { path: '', redirectTo: 'budget', pathMatch: 'full' },
       { path: "budget", component: BudgetviewComponent },
+      { path: "budget/:month", component: BudgetviewComponent },
       { path: 'transactions', component: TransactionsComponent },
       { path: 'accounts', component: AccountListComponent },
     ]
@@ -30,7 +30,7 @@ const appRoutes: Routes = [
 
 @NgModule({
   imports: [
-    RouterModule.forRoot( appRoutes, { enableTracing: true })
+    RouterModule.forRoot( appRoutes )
   ],
   exports: [
     RouterModule

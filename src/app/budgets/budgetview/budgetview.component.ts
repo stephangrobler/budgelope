@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angularfire2/database';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
+import {Router, ActivatedRoute, ParamMap } from '@angular/router';
 
 import { DragulaService } from 'ng2-dragula';
 
@@ -9,6 +10,7 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/take';
+import 'rxjs/add/operator/switchMap';
 
 import * as moment from 'moment';
 
@@ -33,6 +35,7 @@ export class BudgetviewComponent implements OnInit {
   activeBudget: Budget;
 
   selectedMonth: any = moment();
+  displayMonth: any;
   nextMonth: any = moment().add(1, 'months');
   monthDisplay: Date;
 
@@ -50,9 +53,10 @@ export class BudgetviewComponent implements OnInit {
     private budgetService: BudgetService,
     private userService: UserService,
     private auth: AngularFireAuth,
-    private dragulaService: DragulaService
+    private dragulaService: DragulaService,
+    private route: ActivatedRoute,
+    private router: Router
   ) {
-    this.selectedMonth = moment().format("YYYYMM");
 
 
     auth.authState.subscribe((user) => {
@@ -77,15 +81,27 @@ export class BudgetviewComponent implements OnInit {
   }
 
   ngOnInit() {
+    // drag and drop bag setup
     this.dragulaService.setOptions('order-bag', {})
     this.dragulaService.dropModel.subscribe((value) => {
       this.updateCategoryOrder(this.sortList, this.activeBudget.id);
     });
+
+    // if the month is specified, use that, else use the current month
+    if (this.route.snapshot.paramMap.get('month')){
+      this.selectedMonth = this.route.snapshot.paramMap.get('month');
+      this.displayMonth = moment(this.selectedMonth+'01').format('MMMM YYYY');
+    } else {
+      this.selectedMonth = moment().format("YYYYMM");
+      this.displayMonth = moment(this.selectedMonth+'01').format('MMMM YYYY');
+    }
+
+
   }
 
   ngOnDestroy() {
     if (this.dragulaService.find('order-bag') !== undefined){
-      this.dragulaService.destroy('order-bag');      
+      this.dragulaService.destroy('order-bag');
     }
   }
 

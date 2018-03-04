@@ -12,16 +12,13 @@ export class AuthGuardService implements CanActivate{
   constructor(private auth: AngularFireAuth, private router: Router) { }
 
   canActivate(): Observable<boolean>{
-    this.router.navigate['/login'];    
+    this.router.navigate['/login'];
     return this.auth.authState
     .take(1)
     .map(state => !!state)
     .do(authenticated => {
-      console.log(authenticated);
       if (!authenticated) {
-        console.log('not logged in, redirecting...');
-        console.log(this.router.config);
-        this.router.navigate['login'];
+        this.router.navigate(['/login']);
       }
     });
   }

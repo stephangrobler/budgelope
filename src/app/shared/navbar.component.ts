@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import * as firebase from 'firebase';
+import * as moment from 'moment';
 
 import { UserService } from '../core/user.service';
 import { BudgetService } from '../core/budget.service';
@@ -39,6 +40,12 @@ export class NavComponent implements OnInit {
 
   logout() {
     this.userService.logout();
+  }
+
+  gotoBudget() {
+    let shortDate = moment().format('YYYYMM');
+    console.log('wtf');
+    this.router.navigate(['/app/budget/'+ shortDate]);
   }
 
 
