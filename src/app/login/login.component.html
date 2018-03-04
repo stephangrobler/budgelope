@@ -1,8 +1,8 @@
 <navi-bar></navi-bar>
 
-<div fxLayout="row" fxLayoutGap="10px">
-  <div fxFlex="33"></div>
-  <div fxFlex="33" fxFlexOffset="33" fxFlexAlign="center">
+<div class="flex-container">
+  <div class="flex-object w33"></div>
+  <div class="flex-object w33">
     <h1>Login</h1>
     <div style="margin-bottom: 50px;">
       <button mat-raised-button color="primary" (click)="googleLogin()" style="width:100%">Login with Google</button>
@@ -18,18 +18,18 @@
         <input matInput type="password" class="form-control" id="password" placeholder="Password" [(ngModel)]="password1" name="password1" #pwd1="ngModel">
 
       </mat-form-field>
-      <div fxLayout="row" fxLayoutGap="10px">
-        <div fxFlex="33">
+      <div class="flex-container space-around">
+        <div class="flex-object w33">
           <button type="button" mat-raised-button color="primary" (click)="login()" style="width:100%">
             Login
           </button>
         </div>
-        <div fxFlex="33" >
+        <div class="flex-object w33" >
           <button type="button" mat-raised-button color="warn" (click)="signUp()" style="width:100%">
             Sign Up
           </button>
         </div>
-        <div fxFlex="33">
+        <div class="flex-object w33">
           <button type="button" mat-raised-button color="basic" (click)="cancel()" style="width:100%">
             Cancel
           </button>
@@ -37,6 +37,6 @@
       </div>
 
     </form>  </div>
-  <div fxFlex="33"></div>
+  <div class="flex-object w33"></div>
 
 </div>

@@ -6,6 +6,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatToolbarModule, MatButtonModule, MatIconModule} from '@angular/material';
 
 import { NavComponent } from './navbar.component';
+import { AuthGuardService } from '../core/auth-guard.service';
 
 @NgModule({
   imports: [
@@ -23,6 +24,7 @@ import { NavComponent } from './navbar.component';
     NavComponent
   ],
   providers: [
+    AuthGuardService
 
   ]
 })

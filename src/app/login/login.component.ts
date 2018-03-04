@@ -20,31 +20,21 @@ export class LoginComponent implements OnInit {
     private router: Router,
     public afAuth: AngularFireAuth
   ) {
-    // check if a user is authentication and redirect to budget view else login
-    afAuth.authState.subscribe((user) => {
-      if (!user){
-        // return;
-      } else {
-        // this.router.navigate(['/']);
-      }
-      console.log(user);
-    });
+
   }
 
   ngOnInit() {
-    console.log('running login');
+
   }
 
   login(loginEmail: string, loginPassword: string){
     this.userSVC.login(this.email, this.password1);
-    this.userSVC.verifyUser();
   }
 
   googleLogin() {
     this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then((user) => {
-      console.log(user.user.providerData[0]);
 
-      this.router.navigate(['/']);
+      this.router.navigate(['/app/budget']);
     });
   }
 

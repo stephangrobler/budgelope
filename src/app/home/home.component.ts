@@ -21,7 +21,7 @@ export class HomeComponent implements OnInit {
   ) {
     afAuth.authState.subscribe((user) => {
       if (!user) {
-        this.router.navigate(['/login']);
+        this.router.navigate(['./login']);
         return;
       } else {
         this.router.navigate(['./app/budget']);
