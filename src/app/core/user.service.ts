@@ -2,9 +2,12 @@ import { Injectable } from '@angular/core';
 import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { AngularFireAuth } from 'angularfire2/auth';
+import { AngularFirestore } from 'angularfire2/firestore';
 import * as firebase from 'firebase/app';
 
 import { Account } from '../shared/account';
+import { BudgetService } from '../core/budget.service';
+import { CategoryService } from '../core/category.service';
 
 @Injectable()
 export class UserService implements CanActivate {
@@ -13,8 +16,15 @@ export class UserService implements CanActivate {
   authUser: any;
 
 
-  constructor(private router: Router, private afAuth: AngularFireAuth) {
+  constructor(
+    private router: Router,
+    private afAuth: AngularFireAuth,
+    private db : AngularFirestore,
+    private categoryService: CategoryService,
+    private budgetService: BudgetService
+  ) {
     // firebase.initializeApp(environment.firebase);
+
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
@@ -31,7 +41,8 @@ export class UserService implements CanActivate {
 
   register(email: string, password: string) {
     this.afAuth.auth.createUserWithEmailAndPassword(email, password).then((user) => {
-      this.setupProfile(user.uid);
+      console.log(user);
+      this.setupProfile(user);
     })
       .catch(function(error) {
         alert(`${error.message} Please try again!`);
@@ -46,10 +57,8 @@ export class UserService implements CanActivate {
   }
 
   login(loginEmail: string, loginPassword: string) {
-    this.afAuth.auth.signInWithEmailAndPassword(loginEmail, loginPassword)
-      .catch(function(error) {
-        alert(`${error.message} Unable to login. Try again.`);
-      })
+    return this.afAuth.auth.signInWithEmailAndPassword(loginEmail, loginPassword)
+
   }
 
   logout() {
@@ -65,10 +74,34 @@ export class UserService implements CanActivate {
 
   }
 
-  setupProfile(uid: string) {
-    if (!uid){
+  /**
+   * Sets up a profile and starter budget for a new user
+   * @param  user User object
+   * @return      [description]
+   */
+  setupProfile(user: any) {
+    if (!user){
       return;
     }
+    let userStore = this.db.collection<any[]>('users');
+    // create a new user document to store
+    let userDoc = {
+      // name: user.
+      "name": user.displayName,
+      "availableBudgets": [],
+      "activeBudget": ''
+    }
+
+    userStore.doc(user.uid).set(userDoc).then(docRef => {
+      // create a dummy budget to start with
+      this.budgetService.freshStart('default', user.uid);
+
+    });
+    //
+    // take to account screen to start new account
+    // pPkN7QxRdyyvG4Jy2hr6
+    // Exvs2cw8MFHfj4fi40Wn
+
   }
 
 }

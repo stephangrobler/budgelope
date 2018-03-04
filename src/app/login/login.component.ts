@@ -28,12 +28,18 @@ export class LoginComponent implements OnInit {
   }
 
   login(loginEmail: string, loginPassword: string){
-    this.userSVC.login(this.email, this.password1);
+    let router = this.router;
+    this.userSVC.login(this.email, this.password1).then(function(user){
+      router.navigate(['/app/budget']);
+    })
+    .catch(function(error) {
+      alert(`${error.message} Unable to login. Try again.`);
+    });
   }
 
   googleLogin() {
     this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then((user) => {
-
+      // check if the user has a profile
       this.router.navigate(['/app/budget']);
     });
   }

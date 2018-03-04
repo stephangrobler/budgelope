@@ -15,9 +15,9 @@ export class BudgetService {
   activeBudget: Budget;
 
   constructor(
-    private db : AngularFirestore,
-    private categoryService : CategoryService,
-    private accountService : AccountService
+    private db: AngularFirestore,
+    private categoryService: CategoryService,
+    private accountService: AccountService
   ) { }
 
 
@@ -35,11 +35,11 @@ export class BudgetService {
         bRef.once('value', (bSnap) => {
           tmpObj = bSnap.val();
           this.activeBudget = new Budget({
-            "name" : tmpObj.name,
-            "date" : new Date(),
-            "active" : tmpObj.active,
-            "test" : null,
-            "id" : tmpObj.id
+            "name": tmpObj.name,
+            "date": new Date(),
+            "active": tmpObj.active,
+            "test": null,
+            "id": tmpObj.id
           });
         });
       });
@@ -68,42 +68,44 @@ export class BudgetService {
    */
   freshStart(currentBudgetId: string, userId: string) {
     // get current budget and store id
-    let budgetStore  = this.db.collection('budgets'),
+    let budgetStore = this.db.collection('budgets'),
+        userStore = this.db.collection('users'),
       cBudget: Budget,
       newBudget: Budget = new Budget();
 
-      budgetStore.doc<Budget>(currentBudgetId).valueChanges().take(1).subscribe(t => {
-        cBudget = t;
-        let categoryService = this.categoryService,
-            accountService = this.accountService;
+    budgetStore.doc<Budget>(currentBudgetId).valueChanges().take(1).subscribe(t => {
+      cBudget = t;
+      let categoryService = this.categoryService,
+        accountService = this.accountService;
 
-        // create new budget
-        cBudget.allocations = {};
-        cBudget.allocations[moment().format("YYYYMM")] = {
-          "income":0,
-          "expense":0
-        }
-        cBudget.balance = 0;
-        delete(cBudget.id);
+      // create new budget
+      cBudget.allocations = {};
+      cBudget.allocations[moment().format("YYYYMM")] = {
+        "income": 0,
+        "expense": 0
+      }
+      cBudget.balance = 0;
+      delete (cBudget.id);
 
+      budgetStore.add(cBudget).then(function(docRef) {
+        // rename old budget if not default
+        if (currentBudgetId != 'default') {
 
-
-        budgetStore.add(cBudget).then(function(docRef) {
-          // rename old budget
-          let newName: string = t.name + ' - FRESH START '+ moment().format('YYYY-MM-DD hh:mm:ss');
-          budgetStore.doc(currentBudgetId).update({'name' : newName});
-
-          // set user active budget
-          // copy categories
-          categoryService.copyCategories(currentBudgetId, docRef.id);
+          let newName: string = t.name + ' - FRESH START ' + moment().format('YYYY-MM-DD hh:mm:ss');
+          budgetStore.doc(currentBudgetId).update({ 'name': newName });
           accountService.copyAccounts(currentBudgetId, docRef.id);
+        }
 
+        // set user active budget
+        userStore.doc(userId).update({activeBudget: docRef.id});
 
-          // copy accounts
-          // copy payees
+        // copy categories
+        categoryService.copyCategories(currentBudgetId, docRef.id);
 
-        });
+        // copy payees
+
       });
+    });
 
 
 
