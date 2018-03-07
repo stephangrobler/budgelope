@@ -5,11 +5,13 @@
         <mat-card-content>
           <div class="flex-container row wrap space-around">
             <div class="flex-object w33 h60 p5">
-              <mat-select placeholder="Account" [(ngModel)]="selectedAccount" name="account" style="margin-bottom: 20px">
-                <mat-option [value]="account" *ngFor="let account of accounts | async">
-                  {{account.name}}
-                </mat-option>
-              </mat-select>
+              <mat-form-field>
+                <mat-select placeholder="Account" [(ngModel)]="selectedAccount" name="account">
+                  <mat-option [value]="account" *ngFor="let account of accounts">
+                    {{account.name}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
             </div>
             <div class="flex-object w33 h60 p5">
               <mat-form-field>

@@ -42,7 +42,7 @@ export class TransactionComponent implements OnInit {
   type: string;
   transactionId: string;
   item: AngularFirestoreDocument<any>;
-  accounts: Observable<Account[]>;
+  accounts: Account[];
   categories: CategoryId[];
   newTransaction: Transaction;
 
@@ -60,7 +60,7 @@ export class TransactionComponent implements OnInit {
     private route: ActivatedRoute,
     private db: AngularFirestore,
     private af: AngularFireAuth,
-    public snackBar : MatSnackBar
+    public snackBar: MatSnackBar
 
   ) {
     af.authState.subscribe((user) => {
@@ -68,7 +68,7 @@ export class TransactionComponent implements OnInit {
         return;
       }
       let profile = db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
-        db.doc<Budget>('budgets/'+profile.activeBudget).valueChanges().subscribe(budget => {
+        db.doc<Budget>('budgets/' + profile.activeBudget).valueChanges().subscribe(budget => {
           budget.id = profile.activeBudget;
           return this.activeBudget = budget;
         });
@@ -116,7 +116,7 @@ export class TransactionComponent implements OnInit {
           this.transaction = new Transaction();
         }
         // get the budget accounts
-        this.accounts = this.accountService.getAccounts(profile.activeBudget);
+        this.accountService.getAccounts(profile.activeBudget).subscribe(accounts => this.accounts = accounts);
 
         this.db.collection<Category>('budgets/' + profile.activeBudget + '/categories').snapshotChanges()
           .map(actions => {
@@ -133,20 +133,21 @@ export class TransactionComponent implements OnInit {
     });
   }
 
-  ngOnChanges(changes: {[propKey: string]: SimpleChange}){
-    if (changes.transaction.currentValue){
+  ngOnChanges(changes: { [propKey: string]: SimpleChange }) {
+    if (changes.transaction.currentValue) {
       this.newTransaction = changes.transaction.currentValue;
       this.category = this.categories.filter(item => {
         return item.id == this.newTransaction.categoryId;
       })[0];
       this.catCtrl.setValue(this.category);
-
-
+      this.selectedAccount = this.accounts.filter(account => {
+        return account.id == this.newTransaction.accountId;
+      })[0];
     }
   }
 
   saveTransaction() {
-    if (this.newTransaction.id != null){
+    if (this.newTransaction.id != null) {
       console.log('updating ', this.newTransaction.id);
       this.update();
     } else {
@@ -196,7 +197,7 @@ export class TransactionComponent implements OnInit {
     });
   }
 
-  openSnackBar(message: string){
+  openSnackBar(message: string) {
     this.snackBar.open(message, 'DISMISS', {
       duration: 2000
     });
