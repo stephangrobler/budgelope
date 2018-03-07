@@ -3,17 +3,22 @@ import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from
 import { environment } from '../../environments/environment';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFirestore } from 'angularfire2/firestore';
+import { Observable } from 'rxjs/Rx';
 import * as firebase from 'firebase/app';
+
+import 'rxjs/add/operator/mergeMap';
 
 import { Account } from '../shared/account';
 import { BudgetService } from '../core/budget.service';
 import { CategoryService } from '../core/category.service';
 
+export class User { public name: string};
+
 @Injectable()
 export class UserService implements CanActivate {
-  userLoggedIn: boolean = false;
-  loggedInUser: any;
-  authUser: any;
+  authenticated: boolean = false;
+  authUser: firebase.User;
+  profile$: Observable<User>;
 
 
   constructor(
@@ -24,7 +29,8 @@ export class UserService implements CanActivate {
     private budgetService: BudgetService
   ) {
     // firebase.initializeApp(environment.firebase);
-
+    this.getProfile$();
+    this.verifyUser();
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
@@ -33,7 +39,7 @@ export class UserService implements CanActivate {
   }
 
   verifyLogin(url: string): boolean {
-    if (this.userLoggedIn) { return true; }
+    if (this.authenticated) { return true; }
 
     this.router.navigate(['/login']);
     return false;
@@ -51,18 +57,21 @@ export class UserService implements CanActivate {
 
   verifyUser() {
     this.afAuth.authState.subscribe(user => {
-      this.loggedInUser = user;
-      this.userLoggedIn = true;
+      console.log('user subscribed');
+      this.authUser = user;
+      this.authenticated = true;
     });
   }
 
   login(loginEmail: string, loginPassword: string) {
-    return this.afAuth.auth.signInWithEmailAndPassword(loginEmail, loginPassword)
+    return this.afAuth.auth.signInWithEmailAndPassword(loginEmail, loginPassword).then(() =>{
+      this.getProfile$();
+    })
 
   }
 
   logout() {
-    this.userLoggedIn = false;
+    this.authenticated = false;
     this.afAuth.auth.signOut().then(function() {
       alert(`Logged out!`);
     }, function(error) {
@@ -70,8 +79,10 @@ export class UserService implements CanActivate {
     });
   }
 
-  getProfile(uid: string){
-
+  getProfile$(): Observable<User>{
+    return this.afAuth.authState.flatMap(user => {
+      return this.db.doc<User>('user/'+user.uid).valueChanges();
+    });
   }
 
   /**

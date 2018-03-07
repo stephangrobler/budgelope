@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AngularFireDatabase, AngularFireList } from 'angularfire2/database';
+import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
 
 import { UserService } from '../../core/user.service';
@@ -14,7 +14,7 @@ import { Budget } from '../../shared/budget';
 })
 export class AccountListComponent implements OnInit {
   theUser: string;
-  accounts: AngularFireList<Account>;
+  accounts: any;
   activeBudget: string;
 
   constructor(
@@ -22,14 +22,14 @@ export class AccountListComponent implements OnInit {
     private accountService: AccountService,
     private budgetService: BudgetService,
     private router: Router,
-    private db:AngularFireDatabase,
+    private db:AngularFirestore,
     private afAuth: AngularFireAuth
   ) {
     afAuth.authState.subscribe((user) => {
       if (!user) {
         return;
       }
-      let profile = db.object<any>('users/' + user.uid).valueChanges().subscribe(profile => {
+      let profile = db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
         this.loadAccounts(profile.activeBudget);
       });
     });
@@ -42,8 +42,8 @@ export class AccountListComponent implements OnInit {
   }
 
   loadAccounts(budgetId: string){
-    let accRef = 'accounts/' + budgetId;
-    this.accounts = this.db.list<Account>(accRef);
+    let accRef = 'budgets/'+budgetId+'/accounts';
+    this.accounts = this.accountService.getAccounts(budgetId);
   }
 
   editAccount(single: Account){

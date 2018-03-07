@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import { AngularFireAuth } from 'angularfire2/auth';
 import * as firebase from 'firebase/app';
 import { UserService } from '../core/user.service';
+import { BudgetService } from '../core/budget.service';
 import { MatGridListModule, MatButtonModule } from '@angular/material';
 
 
@@ -18,13 +19,17 @@ export class LoginComponent implements OnInit {
   constructor(
     private userSVC: UserService,
     private router: Router,
-    public afAuth: AngularFireAuth
+    public afAuth: AngularFireAuth,
+    private budgetService: BudgetService
   ) {
 
   }
 
   ngOnInit() {
 
+    if (this.userSVC.authenticated){
+      this.router.navigate(['/app/budget']);
+    }
   }
 
   login(loginEmail: string, loginPassword: string){
@@ -39,6 +44,7 @@ export class LoginComponent implements OnInit {
 
   googleLogin() {
     this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then((user) => {
+      this.userSVC.getProfile$();
       // check if the user has a profile
       this.router.navigate(['/app/budget']);
     });

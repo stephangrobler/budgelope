@@ -33,16 +33,15 @@ export class AccountComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.thisUser = this.userService.loggedInUser;
+    this.thisUser = this.userService.authUser.uid;;
     this.route.params.forEach((params: Params) => {
       this.accountId = params["id"];
     });
-    this.activeBudget = this.budgetService.getActiveBudget();
+    this.budgetService.getActiveBudget$().subscribe(p => console.log('budget', p));
     if (this.accountId != "add"){
       this.item = this.db.object<any>('accounts/'+this.activeBudget.id +'/'+this.accountId);
       this.item.valueChanges().subscribe(acc => { this.account = acc });
     }
-    console.log('account', this.account);
   }
 
 

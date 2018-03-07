@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import * as firebase from 'firebase';
 import * as moment from 'moment';
 import { AngularFirestore } from 'angularfire2/firestore';
+import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/take';
+import 'rxjs/add/operator/mergeMap';
 
 import { Budget } from '../shared/budget';
 import { CategoryService } from './category.service';
@@ -12,39 +14,22 @@ import { AccountService } from './account.service'
 @Injectable()
 export class BudgetService {
 
-  activeBudget: Budget;
+  activeBudget$: Observable<Budget>;
 
   constructor(
     private db: AngularFirestore,
     private categoryService: CategoryService,
     private accountService: AccountService
-  ) { }
+  ) {
+
+  }
 
 
-  getActiveBudget(): Budget {
-    if (null == this.activeBudget) {
-      let currentUser = firebase.auth().currentUser;
-      // get the activebudget from the user object
-      let dbRef = firebase.database().ref('users/' + currentUser.uid + '/activeBudget');
-      let tmpObj: any = {};
-
-      dbRef.once('value').then((snapshot) => {
-        let tmp: string[] = snapshot.val();
-        let bRef = firebase.database().ref('budgets/' + tmp);
-
-        bRef.once('value', (bSnap) => {
-          tmpObj = bSnap.val();
-          this.activeBudget = new Budget({
-            "name": tmpObj.name,
-            "date": new Date(),
-            "active": tmpObj.active,
-            "test": null,
-            "id": tmpObj.id
-          });
-        });
-      });
-    }
-    return this.activeBudget;
+  getActiveBudget$(): Observable<Budget> {
+    let currentUser = firebase.auth().currentUser;
+    // get the activebudget from the user object
+    return this.db.doc<any>('users/' + currentUser.uid).valueChanges()
+      .flatMap(user => this.db.doc<Budget>('budgets/' + user.activeBudget).valueChanges());
   }
 
   createBudget(budget: Budget) {
@@ -69,7 +54,7 @@ export class BudgetService {
   freshStart(currentBudgetId: string, userId: string) {
     // get current budget and store id
     let budgetStore = this.db.collection('budgets'),
-        userStore = this.db.collection('users'),
+      userStore = this.db.collection('users'),
       cBudget: Budget,
       newBudget: Budget = new Budget();
 
@@ -97,7 +82,7 @@ export class BudgetService {
         }
 
         // set user active budget
-        userStore.doc(userId).update({activeBudget: docRef.id});
+        userStore.doc(userId).update({ activeBudget: docRef.id });
 
         // copy categories
         categoryService.copyCategories(currentBudgetId, docRef.id);

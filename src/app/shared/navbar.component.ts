@@ -15,7 +15,7 @@ import { Budget } from './budget';
 })
 
 export class NavComponent implements OnInit {
-  theUser: string;
+  theUser: firebase.User;
   theBudget: Budget;
   budgets: Budget[];
 
@@ -27,7 +27,8 @@ export class NavComponent implements OnInit {
 
   ngOnInit() {
     this.userService.verifyUser();
-    this.theUser = this.userService.loggedInUser;
+    this.theUser = this.userService.authUser;
+
     // check to see if the user is authenticated
     // firebase.auth().onAuthStateChanged((user) => {
     //   if (user) {
@@ -44,7 +45,6 @@ export class NavComponent implements OnInit {
 
   gotoBudget() {
     let shortDate = moment().format('YYYYMM');
-    console.log('wtf');
     this.router.navigate(['/app/budget/'+ shortDate]);
   }
 

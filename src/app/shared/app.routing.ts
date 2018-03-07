@@ -22,6 +22,7 @@ const appRoutes: Routes = [
       { path: "budget/:month", component: BudgetviewComponent },
       { path: 'transactions', component: TransactionsComponent },
       { path: 'accounts', component: AccountListComponent },
+      { path: 'account/:id', component: AccountComponent },
     ]
   },
   { path: 'signup', component: SignUpComponent },
