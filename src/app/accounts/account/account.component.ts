@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { AngularFireDatabase, AngularFireObject } from 'angularfire2/database';
+import { AngularFirestore } from 'angularfire2/firestore';
 
 import { UserService } from '../../core/user.service';
 import { AccountService } from '../../core/account.service';
@@ -21,7 +21,7 @@ export class AccountComponent implements OnInit {
   accountId: any;
   accountType: string;
   activeBudget: Budget;
-  item: AngularFireObject<any>;
+
 
   constructor(
     private accountService: AccountService,
@@ -29,7 +29,7 @@ export class AccountComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private budgetService: BudgetService,
-    private db:AngularFireDatabase
+    private db: AngularFirestore
   ) { }
 
   ngOnInit() {
@@ -37,16 +37,20 @@ export class AccountComponent implements OnInit {
     this.route.params.forEach((params: Params) => {
       this.accountId = params["id"];
     });
-    this.budgetService.getActiveBudget$().subscribe(p => console.log('budget', p));
-    if (this.accountId != "add"){
-      this.item = this.db.object<any>('accounts/'+this.activeBudget.id +'/'+this.accountId);
-      this.item.valueChanges().subscribe(acc => { this.account = acc });
-    }
+    this.budgetService.getActiveBudget$().subscribe(budget => {
+      this.activeBudget = budget
+      if (this.accountId != "add") {
+        let accRef = 'budgets/' + this.activeBudget.id + '/accounts/' + this.accountId;
+        this.db.doc<Account>(accRef).valueChanges().subscribe(account => this.account = account);
+      } else {
+        this.account = new Account();
+      }
+    });
   }
 
 
-  saveAccount(){
-    if (this.accountId != "add"){
+  saveAccount() {
+    if (this.accountId != "add") {
       this.editAccount();
     } else {
       this.createAccount();
@@ -54,25 +58,12 @@ export class AccountComponent implements OnInit {
   }
 
   editAccount() {
-    if (!this.account.balance){
-      this.item.update({
-        name: this.account.name,
-        balance: this.account.balance
-      });
-    } else {
-      this.item.update({
-        name: this.account.name,
-        startingBalance: this.account.balance
-      });
-    }
-
+    let accountRef = 'budgets/' + this.activeBudget.id + '/accounts/' + this.accountId;
+    this.db.doc<Account>(accountRef).update(this.account);
   }
 
   createAccount() {
-    this.account = new Account();
-    this.account.name = this.accName;
-    this.account.balance = this.accStartingBalance;
-    this.accountService.createAccount(this.account);
+    this.accountService.createAccount(this.activeBudget, this.account);
   }
 
   cancel() {

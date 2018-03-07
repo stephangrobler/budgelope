@@ -2,12 +2,15 @@ import { Injectable } from '@angular/core';
 import * as firebase from 'firebase';
 import { Observable } from 'rxjs/Observable';
 import { Account } from '../shared/account';
+import { Budget } from '../shared/budget';
 import { AngularFirestore } from 'angularfire2/firestore';
+import { TransactionService } from './transaction.service';
 
 @Injectable()
 export class AccountService {
   constructor(
-    private db: AngularFirestore
+    private db: AngularFirestore,
+    private transactionService: TransactionService
   ) {
 
   }
@@ -24,13 +27,11 @@ export class AccountService {
       });
   }
 
-  createAccount(account: Account) {
-    // let dbRef = firebase.database().ref('accounts/' + account);
-    // let newAccount = dbRef.push();
-    // newAccount.set({
-    //   name: account.name,
-    //   balance: account.balance,
-    //   id: newAccount.key
+  createAccount(budget: Budget, account: Account) {
+    let accountStore = this.db.collection<Account>('budgets/'+budget.id+'/accounts');
+    // add account then add starting account balance transaction to update the budget
+    // accountStore.add(account).then(docRef => {
+    //   this.transactionService.createStartingBalance(account, budget);
     // });
   }
 

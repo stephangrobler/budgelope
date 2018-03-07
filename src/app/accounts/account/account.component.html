@@ -13,11 +13,9 @@
         </div>
         <div class="form-group">
           <label for="">Starting Balance</label>
-          <input type="text" class="form-control" id="" placeholder="" [(ngModel)]="account.startingBalance" name="accStartingBalance" #accCurrent="ngModel">
+          <input type="text" class="form-control" id="" placeholder="" [(ngModel)]="account.balance" name="accStartingBalance" #accCurrent="ngModel">
           <p class="help-block"></p>
         </div>
-
-
         <div class="btn-toolbar" role="toolbar">
             <div class="btn-group btn-group-sm">
               <button type="button" class="btn btn-success" (click)="saveAccount()">

@@ -17,7 +17,7 @@
         <tbody>
           <tr *ngFor="let account of accounts | async">
             <td>{{ account.name }}</td>
-            <td>{{ account.balance | currency:'ZAR':true }}</td>
+            <td>{{ account.balance | currency:'ZAR':'symbol-narrow' }}</td>
             <td>
               <a (click)="editAccount(account)" class="btn btn-warning">
                 <span class="glyphicon glyphicon-pencil"></span>

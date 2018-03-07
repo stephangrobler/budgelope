@@ -122,7 +122,9 @@ export class TransactionService {
     });
   }
 
+  createStartingBalance(account: Account, budget: Budget){
 
+  }
 
 
   /**
