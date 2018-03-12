@@ -1,5 +1,5 @@
 <div *ngIf="newTransaction" class="flex-container column">
-  <div fxFlex="33" fxFlexOffset="33">
+  <div class="flex-object">
     <form class="form">
       <mat-card class="transaction-card">
         <mat-card-content>
@@ -20,13 +20,15 @@
                 <mat-datepicker #picker></mat-datepicker>
               </mat-form-field>
             </div>
-            <div class="w33 h60 p5">
+            <div class="flex-object w33 h60 p5">
               <mat-form-field>
                 <input matInput placeholder="Payee" value="" type="text" [(ngModel)]="newTransaction.payee" name="payee">
               </mat-form-field>
             </div>
-            <div class="w50 h60 p5">
-              <mat-form-field style="width:98%; ">
+          </div>
+          <div class="flex-container row wrap space-around" *ngFor="let category of transactionCategories">
+            <div class="flex-object w50 h60 p5">
+              <mat-form-field style="width:98%;">
                 <input type="text" matInput placeholder="Category" [matAutocomplete]="auto" [formControl]="catCtrl">
               </mat-form-field>
               <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
@@ -35,18 +37,16 @@
                 </mat-option>
               </mat-autocomplete>
             </div>
-
-            <div class="w25 h60 p5">
+            <div class="flex-object w25 h60 p5">
               <mat-form-field>
                 <input matInput placeholder="Out" value="" type="number" [(ngModel)]="newTransaction.out" name="out">
               </mat-form-field>
             </div>
-            <div class="w25 h60 p5">
+            <div class="flex-object w25 h60 p5">
               <mat-form-field>
                 <input matInput placeholder="In" value="" type="number" [(ngModel)]="newTransaction.in" name="in">
               </mat-form-field>
             </div>
-
           </div>
         </mat-card-content>
         <mat-card-actions>
@@ -56,6 +56,9 @@
           <button mat-raised-button color="warn" type="button" (click)="cancel()">
               Cancel
             </button>
+            <button mat-raised-button color="error" type="button" (click)="addCategory()">
+                Split
+              </button>
           <mat-checkbox [(ngModel)]="newTransaction.cleared" name="cleared" [align]="end">
             Cleared
           </mat-checkbox>

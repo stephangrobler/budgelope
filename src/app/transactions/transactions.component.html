@@ -1,6 +1,5 @@
-<div fxLayout="row" fxLayoutGap="10" class="flex-container row space-around">
-  <div class="row">
-    <div class="col-xs-12">
+<div class="flex-container row space-around">
+  <div class="flex-object">
       <div class="page-header">
         <h1>Transactions</h1>
         <app-transaction [transaction]="selectedTransaction" ></app-transaction>
@@ -33,7 +32,5 @@
         <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
         <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectedRow(row)"></mat-row>
       </mat-table>
-
-    </div>
   </div>
 </div>

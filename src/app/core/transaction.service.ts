@@ -176,6 +176,16 @@ export class TransactionService {
     transaction.accountId = account.id;
     transaction.categoryId = category.id;
     transaction.category = category.name;
+    // start of split transactions.
+    if (transaction.categories === null){
+      transaction.categories = {};
+    }
+    transaction.categories[category.id] = {
+      category: category.name,
+      balance: transaction.amount
+    };
+
+    console.log('transaction', transaction);
 
     return new Promise((resolve, reject) => {
       items.add(transaction.toObject).then(response => {

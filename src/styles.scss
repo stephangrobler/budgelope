@@ -83,7 +83,7 @@ router-outlet.router-flex + * {
 
 .flex-container {
   display: flex;
-  flex: 1 1 auto;
+
   padding: 0 10px;
   .column {
     flex-direction: column;
@@ -104,6 +104,7 @@ router-outlet.router-flex + * {
 }
 
 .flex-object {
+  flex: 1 1 auto;
   .h60 {
     height: 60px;
   }

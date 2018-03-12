@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Category } from '../shared/category';
+import { Category, CategoryId } from '../shared/category';
 import { AngularFirestore } from 'angularfire2/firestore';
 import * as firebase from 'firebase';
 import * as moment from 'moment';
+
+import { Observable } from 'rxjs/Observable';
 
 @Injectable()
 export class CategoryService {
@@ -10,6 +12,16 @@ export class CategoryService {
     private db: AngularFirestore
   ) { }
 
+  getCategories(budgetId: string): Observable<CategoryId[]>{
+    return this.db.collection<Category>('budgets/' + budgetId + '/categories').snapshotChanges()
+      .map(actions => {
+        return actions.map(a => {
+          const data = a.payload.doc.data() as CategoryId;
+          const id = a.payload.doc.id;
+          return { id, ...data };
+        });
+      });
+  }
 
   createCategory(budgetId: string, category: Category) {
     let dbRef = this.db.collection('categories/' + budgetId);

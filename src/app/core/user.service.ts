@@ -9,16 +9,16 @@ import * as firebase from 'firebase/app';
 import 'rxjs/add/operator/mergeMap';
 
 import { Account } from '../shared/account';
+import { Profile } from '../shared/profile';
 import { BudgetService } from '../core/budget.service';
 import { CategoryService } from '../core/category.service';
 
-export class User { public name: string};
 
 @Injectable()
 export class UserService implements CanActivate {
   authenticated: boolean = false;
   authUser: firebase.User;
-  profile$: Observable<User>;
+  profile$: Observable<Profile>;
 
 
   constructor(
@@ -79,9 +79,9 @@ export class UserService implements CanActivate {
     });
   }
 
-  getProfile$(): Observable<User>{
+  getProfile$(): Observable<Profile>{
     return this.afAuth.authState.flatMap(user => {
-      return this.db.doc<User>('user/'+user.uid).valueChanges();
+      return this.db.doc<Profile>('users/'+user.uid).valueChanges();
     });
   }
 

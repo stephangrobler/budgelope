@@ -11,6 +11,7 @@ import * as moment from 'moment';
 import 'rxjs/add/operator/startWith';
 import 'rxjs/add/operator/map';
 
+import { Profile } from '../../shared/profile';
 import { Transaction } from '../../shared/transaction';
 import { Account } from '../../shared/account';
 import { Budget } from '../../shared/budget';
@@ -20,6 +21,7 @@ import { BudgetService } from '../../core/budget.service';
 import { UserService } from '../../core/user.service';
 import { TransactionService } from '../../core/transaction.service';
 import { AccountService } from '../../core/account.service';
+import { CategoryService } from '../../core/category.service';
 
 
 @Component({
@@ -45,7 +47,7 @@ export class TransactionComponent implements OnInit {
   accounts: Account[];
   categories: CategoryId[];
   newTransaction: Transaction;
-
+  transactionCategories: any;
   selectedAccount: Account;
 
   catCtrl: FormControl;
@@ -56,6 +58,7 @@ export class TransactionComponent implements OnInit {
     private budgetService: BudgetService,
     private transactionService: TransactionService,
     private accountService: AccountService,
+    private categoryService: CategoryService,
     private router: Router,
     private route: ActivatedRoute,
     private db: AngularFirestore,
@@ -63,17 +66,7 @@ export class TransactionComponent implements OnInit {
     public snackBar: MatSnackBar
 
   ) {
-    af.authState.subscribe((user) => {
-      if (!user) {
-        return;
-      }
-      let profile = db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
-        db.doc<Budget>('budgets/' + profile.activeBudget).valueChanges().subscribe(budget => {
-          budget.id = profile.activeBudget;
-          return this.activeBudget = budget;
-        });
-      });
-    });
+
     this.newTransaction = new Transaction({
       date: new Date()
     });
@@ -99,37 +92,34 @@ export class TransactionComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.af.authState.subscribe((user) => {
-      if (!user) {
-        return;
-      }
-      let profile = this.db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
-        this.activeBudget = profile.activeBudget;
-
-        this.route.params.forEach((params: Params) => {
-          this.transactionId = params["id"];
-        });
-        if (this.transactionId != "add") {
-          this.item = this.db.doc<any>('budgets/' + profile.activeBudget + '/transactions/' + this.transactionId);
-          this.item.valueChanges().subscribe(transaction => { this.transaction = transaction });
-        } else {
-          this.transaction = new Transaction();
-        }
-        // get the budget accounts
-        this.accountService.getAccounts(profile.activeBudget).subscribe(accounts => this.accounts = accounts);
-
-        this.db.collection<Category>('budgets/' + profile.activeBudget + '/categories').snapshotChanges()
-          .map(actions => {
-            return actions.map(a => {
-              const data = a.payload.doc.data() as CategoryId;
-              const id = a.payload.doc.id;
-              return { id, ...data };
-            });
-          }).subscribe(categories => {
-            this.categories = categories;
-          });
-        // this.db.object('allocations/' + moment().format("YYYYMM"))
+    this.userService.getProfile$().subscribe(profile => {
+      this.budgetService.getActiveBudget$().subscribe(budget => {
+        this.activeBudget = budget;
       });
+
+      this.route.params.forEach((params: Params) => {
+        this.transactionId = params["id"];
+      });
+      if (this.transactionId != "add") {
+        this.item = this.db.doc<any>('budgets/' + profile.activeBudget + '/transactions/' + this.transactionId);
+        this.item.valueChanges().subscribe(transaction => { this.transaction = transaction });
+      } else {
+        this.transaction = new Transaction();
+      }
+      // get the budget accounts
+      this.accountService.getAccounts(profile.activeBudget).subscribe(accounts => this.accounts = accounts);
+
+      this.categoryService.getCategories(profile.activeBudget).subscribe(categories => {
+        this.categories = categories;
+      });
+
+      this.transactionCategories = [
+        {
+          category: "",
+          in: 0,
+          out: 0
+        }
+      ];
     });
   }
 
@@ -144,6 +134,15 @@ export class TransactionComponent implements OnInit {
         return account.id == this.newTransaction.accountId;
       })[0];
     }
+  }
+
+  addCategory(){
+    // take current category as main
+    this.transactionCategories.push({
+      category: "",
+      in: 0,
+      out: 0
+    });
   }
 
   saveTransaction() {
@@ -174,6 +173,7 @@ export class TransactionComponent implements OnInit {
   create() {
     // console.log(this.catCtrl.value);
     let cat: Category = this.catCtrl.value;
+
     this.newTransaction.categoryId = cat.id;
     this.newTransaction.category = cat.name;
 
@@ -193,6 +193,7 @@ export class TransactionComponent implements OnInit {
       this.userId,
       this.activeBudget.id,
     ).then(response => {
+      console.log('Document Ref:', response);
       this.openSnackBar('Created transaction successfully');
     });
   }
@@ -203,20 +204,11 @@ export class TransactionComponent implements OnInit {
     });
   }
 
-  updateAccount(account: any) {
-    let accItem = this.db.doc('/accounts/' + this.activeBudget + '/' + account.$key);
-    let balance = account.balance;
-    if (this.transaction.type == 'expense') {
-      balance -= this.transaction.amount;
-    } else if (this.transaction.type == 'income') {
-      balance += this.transaction.amount;
-    }
-    accItem.update({ "balance": balance }).then(response => {
-      alert('account updated from ' + account.balance + ' to ' + balance);
-    })
-  }
-
   cancel() {
-    this.router.navigate(['/budgetview/transactions']);
+    this.newTransaction = new Transaction({
+      date: new Date()
+    });
+    this.selectedAccount = null;
+    this.catCtrl.setValue(null);
   }
 }
