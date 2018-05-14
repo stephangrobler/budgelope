@@ -12,6 +12,8 @@ import { Budget } from '../shared/budget';
 
 @Injectable()
 export class TransactionService {
+  transactions: Transaction[];
+
   constructor(
     private db: AngularFirestore
   ) { }
@@ -74,7 +76,7 @@ export class TransactionService {
             currentAccount.balance -= transaction.amount;
             this.db.doc(accountRef).update(currentAccount);
           });
-        transaction.account = account.name;
+        transaction.account = account;
         transaction.accountId = account.id;
         account.balance += transaction.amount;
         this.db.doc('budgets/' + budget.id + '/accounts/' + account.id).update(account);
@@ -87,7 +89,7 @@ export class TransactionService {
             currentCategory.balance -= transaction.amount;
             this.db.doc(categoryRef + '/' + currentTransaction.categoryId).update(currentCategory);
           });
-        transaction.category = category.name;
+        transaction.category = category;
         transaction.categoryId = category.id;
         category.balance += transaction.amount;
         this.db.doc(categoryRef + '/' + category.id).update(category);
@@ -140,17 +142,13 @@ export class TransactionService {
    */
   createTransaction(
     transaction: Transaction,
-    account: Account,
-    category: Category,
-    payee: Payee,
     budget: Budget,
-
     userId: string,
     budgetId: string
   ) {
     let items = this.db.collection<Transaction>('budgets/' + budgetId + '/transactions'),
-      catStore = this.db.doc<Category>('budgets/' + budgetId + '/categories/' + category.id),
-      accStore = this.db.doc<Account>('budgets/' + budgetId + '/accounts/' + account.id),
+      catStore = this.db.doc<Category>('budgets/' + budgetId + '/categories/' + transaction.category.id),
+      accStore = this.db.doc<Account>('budgets/' + budgetId + '/accounts/' + transaction.account.id),
       shortDate = moment(transaction.date).format("YYYYMM"),
 
       budgetStore = this.db.doc<Budget>('budgets/' + budgetId);
@@ -172,37 +170,33 @@ export class TransactionService {
       budget.allocations[shortDate].expense += transaction.out;
     }
 
-    transaction.account = account.name;
-    transaction.accountId = account.id;
-    transaction.categoryId = category.id;
-    transaction.category = category.name;
     // start of split transactions.
     if (transaction.categories === null){
-      transaction.categories = {};
+      transaction.categories = [];
     }
-    transaction.categories[category.id] = {
-      category: category.name,
-      balance: transaction.amount
-    };
-
-    console.log('transaction', transaction);
+    // transaction.categories[category.id] = {
+    //   category: category.name,
+    //   balance: transaction.amount
+    // };
+    //
+    // remove the category allocations, as it can be huge
+    transaction.category.allocations = {};
 
     return new Promise((resolve, reject) => {
-      items.add(transaction.toObject).then(response => {
-        account.balance += transaction.amount;
-        category.balance += transaction.amount;
-        if (!category.allocations[shortDate]) {
-          category.allocations[shortDate] = {
+      items.add(transaction).then(response => {
+        transaction.account.balance += transaction.amount;
+        transaction.category.balance += transaction.amount;
+        if (!transaction.category.allocations[shortDate]) {
+          transaction.category.allocations[shortDate] = {
             'actual': 0,
             'planned': 0
           }
         }
-        category.allocations[shortDate].actual += transaction.amount;
-        accStore.update(account);
-        catStore.update(category);
+        transaction.category.allocations[shortDate].actual += transaction.amount;
+        accStore.update(transaction.account);
+        catStore.update(transaction.category);
         budgetStore.update(budget);
         resolve(response);
-
       });
     });
 

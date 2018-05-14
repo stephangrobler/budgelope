@@ -1,12 +1,12 @@
-<div *ngIf="newTransaction" class="flex-container column">
+<div class="flex-container column">
   <div class="flex-object">
-    <form class="form">
+    <form class="form" [formGroup]="transactionForm" (ngSubmit)="onSubmit()">
       <mat-card class="transaction-card">
         <mat-card-content>
           <div class="flex-container row wrap space-around">
             <div class="flex-object w33 h60 p5">
               <mat-form-field>
-                <mat-select placeholder="Account" [(ngModel)]="selectedAccount" name="account">
+                <mat-select placeholder="Account" name="account" formControlName="account">
                   <mat-option [value]="account" *ngFor="let account of accounts">
                     {{account.name}}
                   </mat-option>
@@ -15,42 +15,37 @@
             </div>
             <div class="flex-object w33 h60 p5">
               <mat-form-field>
-                <input matInput [matDatepicker]="picker" placeholder="Choose a date" [(ngModel)]="newTransaction.date" name="date">
+                <input matInput [matDatepicker]="picker" placeholder="Choose a date" name="date" formControlName="date">
                 <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                 <mat-datepicker #picker></mat-datepicker>
               </mat-form-field>
             </div>
             <div class="flex-object w33 h60 p5">
               <mat-form-field>
-                <input matInput placeholder="Payee" value="" type="text" [(ngModel)]="newTransaction.payee" name="payee">
+                <input matInput placeholder="Payee" value="" type="text" name="payee" formControlName="payee">
               </mat-form-field>
             </div>
             <div class="flex-object w25 h60 p5">
               <mat-form-field>
-                <input matInput placeholder="Out" value="" type="number" [(ngModel)]="newTransaction.out" name="out">
+                <input matInput placeholder="Out" value="" type="number" name="out" formControlName="out">
               </mat-form-field>
             </div>
             <div class="flex-object w25 h60 p5">
               <mat-form-field>
-                <input matInput placeholder="In" value="" type="number" [(ngModel)]="newTransaction.in" name="in">
+                <input matInput placeholder="In" value="" type="number" name="in" formControlName="in">
               </mat-form-field>
             </div>
           </div>
-          <div class="flex-container row wrap space-around" *ngFor="let item of transactionCategories;">
+          <div class="flex-container row wrap space-around">
             <div class="flex-object w50 h60 p5">
               <mat-form-field style="width:98%;">
-                <input type="text" matInput placeholder="Category" [matAutocomplete]="auto" [formControl]="catCtrl">
+                <input type="text" matInput placeholder="Category" [matAutocomplete]="auto" [formControlName]="'category'">
               </mat-form-field>
               <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
-                <mat-option *ngFor="let category of filteredCategories | async" [value]="item.category">
+                <mat-option *ngFor="let category of filteredCategories | async" [value]="category">
                   <span *ngIf="category.parent">{{category.parent}} ></span>{{category.name}}
                 </mat-option>
               </mat-autocomplete>
-            </div>
-            <div class="flex-object w25 h60 p5">
-              <mat-form-field>
-                <input matInput placeholder="Out" value="" type="number" [(ngModel)]="item.amount" name="out">
-              </mat-form-field>
             </div>
           </div>
         </mat-card-content>
@@ -65,7 +60,7 @@
             <button mat-raised-button color="error" type="button" (click)="addCategory()">
                 Split
               </button>
-          <mat-checkbox [(ngModel)]="newTransaction.cleared" name="cleared" [align]="end">
+          <mat-checkbox name="cleared" [align]="end" formControlName="cleared">
             Cleared
           </mat-checkbox>
         </mat-card-actions>

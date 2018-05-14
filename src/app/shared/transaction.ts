@@ -1,12 +1,13 @@
 import { Category } from './category';
+import { Account } from './account';
 
 export class Transaction{
   id?: string;
   categoryId: string;
-  category: string;
-  categories: any; // object with category id for keys
+  category: Category;
+  categories: Category[]; // object with category id for keys
   accountId: string;
-  account: string;
+  account: Account;
   payeeId: string;
   payee: string;
   amount: number;
