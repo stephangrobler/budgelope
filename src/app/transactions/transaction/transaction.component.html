@@ -25,18 +25,6 @@
                 <input matInput placeholder="Payee" value="" type="text" [(ngModel)]="newTransaction.payee" name="payee">
               </mat-form-field>
             </div>
-          </div>
-          <div class="flex-container row wrap space-around" *ngFor="let category of transactionCategories">
-            <div class="flex-object w50 h60 p5">
-              <mat-form-field style="width:98%;">
-                <input type="text" matInput placeholder="Category" [matAutocomplete]="auto" [formControl]="catCtrl">
-              </mat-form-field>
-              <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
-                <mat-option *ngFor="let category of filteredCategories | async" [value]="category">
-                  <span *ngIf="category.parent">{{category.parent}} ></span>{{category.name}}
-                </mat-option>
-              </mat-autocomplete>
-            </div>
             <div class="flex-object w25 h60 p5">
               <mat-form-field>
                 <input matInput placeholder="Out" value="" type="number" [(ngModel)]="newTransaction.out" name="out">
@@ -48,7 +36,25 @@
               </mat-form-field>
             </div>
           </div>
+          <div class="flex-container row wrap space-around" *ngFor="let item of transactionCategories;">
+            <div class="flex-object w50 h60 p5">
+              <mat-form-field style="width:98%;">
+                <input type="text" matInput placeholder="Category" [matAutocomplete]="auto" [formControl]="catCtrl">
+              </mat-form-field>
+              <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+                <mat-option *ngFor="let category of filteredCategories | async" [value]="item.category">
+                  <span *ngIf="category.parent">{{category.parent}} ></span>{{category.name}}
+                </mat-option>
+              </mat-autocomplete>
+            </div>
+            <div class="flex-object w25 h60 p5">
+              <mat-form-field>
+                <input matInput placeholder="Out" value="" type="number" [(ngModel)]="item.amount" name="out">
+              </mat-form-field>
+            </div>
+          </div>
         </mat-card-content>
+        <app-transaction-category></app-transaction-category>
         <mat-card-actions>
           <button mat-raised-button color="primary" type="button" (click)="saveTransaction()">
               Save Transaction
