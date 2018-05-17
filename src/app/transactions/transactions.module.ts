@@ -10,7 +10,6 @@ import { SharedModule } from '../shared/shared.module';
 
 import { TransactionsComponent } from './transactions.component';
 import { TransactionComponent } from './transaction/transaction.component';
-import { TransactionCategoryComponent } from './transaction-category/transaction-category.component';
 
 @NgModule({
   imports: [
@@ -33,7 +32,6 @@ import { TransactionCategoryComponent } from './transaction-category/transaction
   declarations: [
     TransactionsComponent,
     TransactionComponent,
-    TransactionCategoryComponent,
   ],
   providers: []
 })
