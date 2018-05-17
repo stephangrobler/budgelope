@@ -15,11 +15,11 @@
         </ng-container>
         <ng-container matColumnDef="account">
           <mat-header-cell *matHeaderCellDef>Account</mat-header-cell>
-          <mat-cell *matCellDef="let transaction">{{transaction.account}}</mat-cell>
+          <mat-cell *matCellDef="let transaction">{{transaction.accountName}}</mat-cell>
         </ng-container>
         <ng-container matColumnDef="category">
           <mat-header-cell *matHeaderCellDef>Category</mat-header-cell>
-          <mat-cell *matCellDef="let transaction">{{transaction.category}}</mat-cell>
+          <mat-cell *matCellDef="let transaction">{{transaction.categoryName}}</mat-cell>
         </ng-container>
         <ng-container matColumnDef="out">
           <mat-header-cell *matHeaderCellDef>Out</mat-header-cell>

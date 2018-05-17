@@ -103,12 +103,12 @@ export class TransactionComponent implements OnInit {
     let amount = '';
 
     this.transactionForm = new FormGroup({
-      'account': new FormControl(null),
-      'date': new FormControl(null),
-      'payee': new FormControl(null),
+      'account': new FormControl(null, [Validators.required]),
+      'date': new FormControl(null, Validators.required),
+      'payee': new FormControl(null, Validators.required),
       'in': new FormControl(null),
       'out': new FormControl(null),
-      'category': new FormControl(null),
+      'category': new FormControl(null, Validators.required),
       'cleared': new FormControl(null)
     });
 
@@ -133,13 +133,12 @@ export class TransactionComponent implements OnInit {
 
   saveTransaction() {
     console.log(this.transactionForm);
-
     if (this.transactionId != null) {
       console.log('updating ', this.transactionId);
-      this.update(this.transactionForm.value);
+      // this.update(this.transactionForm);
     } else {
       console.log('creating...');
-      this.create(this.transactionForm.value);
+      this.create(this.transactionForm);
     }
   }
 
@@ -158,10 +157,18 @@ export class TransactionComponent implements OnInit {
     );
   }
 
-  create(transaction: Transaction) {
+  create(form: FormGroup) {
+    let transaction = new Transaction(form.value);
+    transaction.accountId = form.value.account.id;
+    transaction.accountName = form.value.account.name;
+    transaction.categoryId = form.value.category.id;
+    transaction.categoryName = form.value.category.name;
     console.log('transaction', transaction);
+
     this.transactionService.createTransaction(
       transaction,
+      form.value.account,
+      form.value.category,
       this.activeBudget,
       this.userId,
       this.activeBudget.id,

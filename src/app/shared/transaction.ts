@@ -4,10 +4,10 @@ import { Account } from './account';
 export class Transaction{
   id?: string;
   categoryId: string;
-  category: Category;
-  categories: Category[]; // object with category id for keys
+  categoryName: string;
+  categories: any[]; // object with category id for keys
   accountId: string;
-  account: Account;
+  accountName: string;
   payeeId: string;
   payee: string;
   amount: number;
@@ -22,10 +22,10 @@ export class Transaction{
     if (transactionData) {
       this.id = transactionData.id ? transactionData.id : null ;
       this.categoryId = transactionData.categoryId ? transactionData.categoryId : null ;
-      this.category = transactionData.category ? transactionData.category : null ;
+      this.categoryName = transactionData.category ? transactionData.category : null ;
       this.categories = transactionData.categories ? transactionData.categories: null;
       this.accountId = transactionData.accountId ? transactionData.accountId : null ;
-      this.account = transactionData.account ? transactionData.account : null ;
+      this.accountName = transactionData.account ? transactionData.account : null ;
       this.payeeId = transactionData.payeeId ? transactionData.payeeId : null ;
       this.payee = transactionData.payee ? transactionData.payee : null ;
       this.amount = transactionData.amount ? transactionData.amount : null ;
@@ -40,13 +40,13 @@ export class Transaction{
   get toObject(): any {
     return {
       categoryId: this.categoryId,
-      category: this.category,
+      categoryName: this.categoryName,
       categories: this.categories,
       accountId: this.accountId,
-      account: this.account,
+      accountName: this.accountName,
       payeeId: this.payeeId,
       payee: this.payee,
-      amount: this.account,
+      amount: this.amount,
       in: this.in,
       out: this.out,
       date: this.date,
