@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angularfire2/database';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
-import {Router, ActivatedRoute, ParamMap } from '@angular/router';
+import {Router, ActivatedRoute, ParamMap, Params } from '@angular/router';
 
 import { DragulaService } from 'ng2-dragula';
 
@@ -37,6 +37,7 @@ export class BudgetviewComponent implements OnInit {
   selectedMonth: any = moment();
   displayMonth: any;
   nextMonth: any = moment().add(1, 'months');
+  prevMonth: any = moment().subtract(1, 'months');
   monthDisplay: Date;
 
   sortList: any;
@@ -88,15 +89,21 @@ export class BudgetviewComponent implements OnInit {
     });
 
     // if the month is specified, use that, else use the current month
-    if (this.route.snapshot.paramMap.get('month')){
-      this.selectedMonth = this.route.snapshot.paramMap.get('month');
-      this.displayMonth = moment(this.selectedMonth+'01').format('MMMM YYYY');
-    } else {
-      this.selectedMonth = moment().format("YYYYMM");
-      this.displayMonth = moment(this.selectedMonth+'01').format('MMMM YYYY');
-    }
+    this.route.params.subscribe((params: Params)=> {
+      let month = +params['month'].substr(-2, 2);
+      console.log('month', month);
+      if (params['month']){
+        this.selectedMonth = params['month'];
 
-
+        this.nextMonth = moment().month(month - 1).add(1, 'months');
+        this.prevMonth = moment().month(month - 1).subtract(1, 'months');
+        console.log(this.nextMonth, this.prevMonth);
+        this.displayMonth = moment(this.selectedMonth+'01').format('MMMM YYYY');
+      } else {
+        this.selectedMonth = moment().format("YYYYMM");
+        this.displayMonth = moment(this.selectedMonth+'01').format('MMMM YYYY');
+      }
+    })
   }
 
   ngOnDestroy() {
@@ -151,6 +158,14 @@ export class BudgetviewComponent implements OnInit {
     });
   }
 
+  onNextMonth(){
+    this.router.navigate(['/app/budget', this.nextMonth.format('YYYYMM')]);
+  }
+
+  onPrevMonth(){
+    this.router.navigate(['/app/budget', this.prevMonth.format('YYYYMM')]);
+
+  }
   checkIsHeader(item) {
     return item.parent == '';
   }

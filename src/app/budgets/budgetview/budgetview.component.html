@@ -15,6 +15,15 @@
           <mat-list-item>Expense : {{ activeBudget.allocations[selectedMonth].expense | number: '1.2'}}</mat-list-item>
         </mat-list>
       </mat-card-content>
+      <mat-card-actions>
+
+            <button mat-raised-button color="basic" type="button" (click)="onPrevMonth()">
+              Previous Month
+            </button>
+          <button mat-raised-button color="basic" type="button" (click)="onNextMonth()">
+              Next Month
+            </button>
+      </mat-card-actions>
     </mat-card>
 
     <!-- header -->
