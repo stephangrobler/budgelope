@@ -159,20 +159,6 @@ export class BudgetviewComponent implements OnInit {
         const data = b.payload.doc.data() as Category;
         const catRef = this.db.collection<Category>(thisRef).snapshotChanges();
         const id = b.payload.doc.id;
-
-        // ensure there are allocations for the current month and add if not
-        // if (!data.allocations) {
-        //   data.allocations = {};
-        //   data.allocations[this.selectedMonth] = {
-        //     planned: 0,
-        //     actual: 0
-        //   };
-        // } else if (data.allocations && !data.allocations[this.selectedMonth]) {
-        //   data.allocations[this.selectedMonth] = {
-        //     planned: 0,
-        //     actual: 0
-        //   };
-        // }
         return { id, ...data }
       });
 
@@ -180,7 +166,6 @@ export class BudgetviewComponent implements OnInit {
     });
 
     testList.subscribe(list => {
-      console.log(list);
       this.checkAllocations(list, this.selectedMonth);
       this.sortList = list;
     });

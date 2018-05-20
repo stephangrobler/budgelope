@@ -4,6 +4,7 @@ import { AnalyticsService } from '../core/analytics.service';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { Observable } from 'rxjs/Observable';
 import { AngularFireAuth } from 'angularfire2/auth';
+import * as moment from 'moment';
 
 @Component({
   templateUrl: 'home.component.html',
@@ -12,6 +13,7 @@ import { AngularFireAuth } from 'angularfire2/auth';
 export class HomeComponent implements OnInit {
   items: Observable<any[]>;
   accounts: Observable<Account[]>;
+  currentMonth: string;
 
   constructor(
     private _analytics: AnalyticsService,
@@ -19,6 +21,7 @@ export class HomeComponent implements OnInit {
     private router: Router,
     afAuth: AngularFireAuth
   ) {
+    this.currentMonth = moment().format('YYYYMM');
     afAuth.authState.subscribe((user) => {
       if (!user) {
         this.router.navigate(['./login']);

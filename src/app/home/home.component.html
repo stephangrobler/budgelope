@@ -2,7 +2,7 @@
 <mat-sidenav-container class="">
   <mat-sidenav class="side-nav" mode="side" opened>
     <mat-nav-list>
-      <a mat-list-item routerLink="/app/budget" routerLinkActive="active"> Budget </a>
+      <a mat-list-item [routerLink]="['/app/budget', currentMonth]" routerLinkActive="active"> Budget </a>
       <a mat-list-item routerLink="/app/accounts" routerLinkActive="active"> Accounts </a>
       <mat-nav-list>
         <a mat-list-item routerLink="/app/transactions?accountId={{account.id}}"
