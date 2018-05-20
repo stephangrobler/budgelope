@@ -91,17 +91,26 @@ export class BudgetviewComponent implements OnInit {
     // if the month is specified, use that, else use the current month
     this.route.params.subscribe((params: Params)=> {
       let month = +params['month'].substr(-2, 2);
-      console.log('month', month);
+
       if (params['month']){
         this.selectedMonth = params['month'];
-
         this.nextMonth = moment().month(month - 1).add(1, 'months');
         this.prevMonth = moment().month(month - 1).subtract(1, 'months');
-        console.log(this.nextMonth, this.prevMonth);
         this.displayMonth = moment(this.selectedMonth+'01').format('MMMM YYYY');
       } else {
         this.selectedMonth = moment().format("YYYYMM");
         this.displayMonth = moment(this.selectedMonth+'01').format('MMMM YYYY');
+      }
+
+      if (this.sortList){
+        this.checkAllocations(this.sortList, this.selectedMonth);
+      }
+
+      if (this.activeBudget && !this.activeBudget.allocations[this.selectedMonth]){
+        this.activeBudget.allocations[this.selectedMonth] = {
+          "income": 0,
+          "expense": 0
+        };
       }
     })
   }
@@ -125,6 +134,23 @@ export class BudgetviewComponent implements OnInit {
     }, this);
   }
 
+  checkAllocations(categories: Category[], month: string){
+    categories.forEach(category => {
+      if (!category.allocations) {
+        category.allocations = {};
+        category.allocations[month] = {
+          planned: 0,
+          actual: 0
+        };
+      } else if (category.allocations && !category.allocations[month]) {
+        category.allocations[month] = {
+          planned: 0,
+          actual: 0
+        };
+      }
+    });
+  }
+
   getCategories(budgetId: string): void {
     let ref = 'budgets/' + budgetId + '/categories';
     let testList = this.db.collection<Category[]>(ref, ref => ref.orderBy('sortingOrder')).snapshotChanges().map(budget => {
@@ -135,18 +161,18 @@ export class BudgetviewComponent implements OnInit {
         const id = b.payload.doc.id;
 
         // ensure there are allocations for the current month and add if not
-        if (!data.allocations) {
-          data.allocations = {};
-          data.allocations[this.selectedMonth] = {
-            planned: 0,
-            actual: 0
-          };
-        } else if (data.allocations && !data.allocations[this.selectedMonth]) {
-          data.allocations[this.selectedMonth] = {
-            planned: 0,
-            actual: 0
-          };
-        }
+        // if (!data.allocations) {
+        //   data.allocations = {};
+        //   data.allocations[this.selectedMonth] = {
+        //     planned: 0,
+        //     actual: 0
+        //   };
+        // } else if (data.allocations && !data.allocations[this.selectedMonth]) {
+        //   data.allocations[this.selectedMonth] = {
+        //     planned: 0,
+        //     actual: 0
+        //   };
+        // }
         return { id, ...data }
       });
 
@@ -154,6 +180,8 @@ export class BudgetviewComponent implements OnInit {
     });
 
     testList.subscribe(list => {
+      console.log(list);
+      this.checkAllocations(list, this.selectedMonth);
       this.sortList = list;
     });
   }
