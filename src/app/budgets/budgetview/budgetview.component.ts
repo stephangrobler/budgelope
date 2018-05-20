@@ -91,11 +91,12 @@ export class BudgetviewComponent implements OnInit {
     // if the month is specified, use that, else use the current month
     this.route.params.subscribe((params: Params)=> {
       let month = +params['month'].substr(-2, 2);
+      let year = +params['month'].substr(0,4);
 
       if (params['month']){
         this.selectedMonth = params['month'];
-        this.nextMonth = moment().month(month - 1).add(1, 'months');
-        this.prevMonth = moment().month(month - 1).subtract(1, 'months');
+        this.nextMonth = moment().year(year).month(month - 1).add(1, 'months');
+        this.prevMonth = moment().year(year).month(month - 1).subtract(1, 'months');
         this.displayMonth = moment(this.selectedMonth+'01').format('MMMM YYYY');
       } else {
         this.selectedMonth = moment().format("YYYYMM");
