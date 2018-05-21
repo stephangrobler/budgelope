@@ -2,11 +2,15 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {MatToolbarModule, MatButtonModule, MatIconModule} from '@angular/material';
-import { AppRoutingModule } from './app.routing';
+import { MatToolbarModule, MatGridListModule, MatButtonModule, MatInputModule, MatNativeDateModule,
+  MatListModule, MatCardModule, MatIconModule, MatSidenavModule, MatTableModule, MatCheckboxModule,
+  MatRadioModule, MatDatepickerModule, MatSelectModule, MatAutocompleteModule, MatSnackBarModule } from '@angular/material';
 
-import { NavComponent } from './navbar.component';
+import { } from '@angular/material';
+
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import { AppRoutingModule } from './app-routing.module';
+
 import { AuthGuardService } from '../core/auth-guard.service';
 
 @NgModule({
@@ -15,19 +19,45 @@ import { AuthGuardService } from '../core/auth-guard.service';
     CommonModule,
     BrowserAnimationsModule,
     MatToolbarModule,
+    MatGridListModule,
+    MatNativeDateModule,
+    MatListModule,
+    MatSidenavModule,
+    MatTableModule,
+    MatCheckboxModule,
+    MatInputModule,
+    MatRadioModule,
+    MatDatepickerModule,
+    MatSelectModule,
+    MatCardModule,
     MatButtonModule,
     MatIconModule,
+    MatAutocompleteModule,
+    MatSnackBarModule,
     AppRoutingModule
   ],
   exports: [
-    NavComponent
+    MatTableModule,
+    MatSnackBarModule,
+    MatAutocompleteModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatRadioModule,
+    MatCheckboxModule,
+    MatToolbarModule,
+    MatGridListModule,
+    MatButtonModule,
+    MatNativeDateModule,
+    MatListModule,
+    MatCardModule,
+    MatIconModule,
+    MatInputModule,
+    MatSidenavModule,
   ],
   declarations: [
-    NavComponent
   ],
   providers: [
     AuthGuardService
-
   ]
 })
 export class SharedModule { }

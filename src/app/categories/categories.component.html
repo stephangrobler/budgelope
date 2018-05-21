@@ -1,4 +1,3 @@
-<navi-bar></navi-bar>
 <div class="container">
   <div class="row">
     <div class="col-xs-12">
@@ -16,7 +15,7 @@
           <tr *ngFor="let category of categories | async">
             <td>
               <span *ngIf="category.parent == ''"><b>{{category.name}}</b></span>
-              <span *ngIf="category.parent != ''">{{category.name}}</span>              
+              <span *ngIf="category.parent != ''">{{category.name}}</span>
             </td>
             <td class="text-right">{{category.balance | number:'1.2'}}</td>
           </tr>
