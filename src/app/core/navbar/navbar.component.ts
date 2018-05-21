@@ -26,17 +26,9 @@ export class NavComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.userService.verifyUser();
-    this.theUser = this.userService.authUser;
-
-    // check to see if the user is authenticated
-    // firebase.auth().onAuthStateChanged((user) => {
-    //   if (user) {
-    //     this.theBudget = this.budgetService.getActiveBudget();
-    //     this.userService.verifyUser();
-    //     this.theUser = this.userService.loggedInUser;
-    //   }
-    // });
+    this.userService.verifyUser().subscribe(user => {
+      this.theUser = user;
+    });
   }
 
   logout() {
@@ -47,7 +39,4 @@ export class NavComponent implements OnInit {
     let shortDate = moment().format('YYYYMM');
     this.router.navigate(['/app/budget/'+ shortDate]);
   }
-
-
-
 }

@@ -56,18 +56,13 @@ export class UserService implements CanActivate {
   }
 
   verifyUser() {
-    this.afAuth.authState.subscribe(user => {
-      console.log('user subscribed');
-      this.authUser = user;
-      this.authenticated = true;
-    });
+    return this.afAuth.authState;
   }
 
   login(loginEmail: string, loginPassword: string) {
     return this.afAuth.auth.signInWithEmailAndPassword(loginEmail, loginPassword).then(() =>{
       this.getProfile$();
     })
-
   }
 
   logout() {
