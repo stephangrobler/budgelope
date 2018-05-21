@@ -7,7 +7,7 @@ import { LoginComponent } from '../login/login.component';
 import { SignUpComponent } from '../signup/signup.component';
 import { AccountListComponent } from '../accounts/account-list/account-list.component';
 import { AccountComponent } from '../accounts/account/account.component';
-import { AuthGuardService } from '../core/auth-guard.service';
+import { AuthGuardService } from './auth-guard.service';
 
 import { BudgetviewComponent } from '../budgets/budgetview/budgetview.component';
 import { TransactionComponent } from '../transactions/transaction/transaction.component';

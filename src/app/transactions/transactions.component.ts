@@ -6,9 +6,9 @@ import { AngularFireAuth } from 'angularfire2/auth';
 import { MatTableDataSource } from '@angular/material';
 import { DataSource } from '@angular/cdk/collections';
 import { Transaction } from '../shared/transaction';
-import { TransactionService } from '../core/transaction.service';
-import { BudgetService } from '../core/budget.service';
-import { UserService } from '../core/user.service';
+import { TransactionService } from './transaction.service';
+import { BudgetService } from '../budgets/budget.service';
+import { UserService } from '../shared/user.service';
 import { TransactionComponent } from './transaction/transaction.component';
 
 @Component({

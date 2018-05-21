@@ -4,12 +4,12 @@ import { CommonModule } from '@angular/common';
 import { NavComponent } from './navbar/navbar.component';
 import { HomeComponent } from './home/home.component';
 import { AppRoutingModule } from '../shared/app-routing.module';
-import { BudgetService } from './budget.service';
-import { CategoryService } from './category.service';
-import { TransactionService } from './transaction.service';
-import { AccountService } from './account.service';
+import { BudgetService } from '../budgets/budget.service';
+import { CategoryService } from '../categories/category.service';
+import { TransactionService } from '../transactions/transaction.service';
+import { AccountService } from '../accounts/account.service';
 import { AnalyticsService } from './analytics.service';
-import { UserService } from './user.service';
+import { UserService } from '../shared/user.service';
 import { SharedModule } from '../shared/shared.module';
 
 @NgModule({

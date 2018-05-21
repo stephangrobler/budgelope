@@ -7,9 +7,9 @@ import 'rxjs/add/operator/map';
 import { AngularFireAuth } from 'angularfire2/auth';
 
 import { Category } from '../../shared/category';
-import { CategoryService } from '../../core/category.service';
-import { UserService } from '../../core/user.service';
-import { BudgetService } from '../../core/budget.service';
+import { CategoryService } from '../category.service';
+import { UserService } from '../../shared/user.service';
+import { BudgetService } from '../../budgets/budget.service';
 
 export interface CategoryId extends Category { id: string };
 

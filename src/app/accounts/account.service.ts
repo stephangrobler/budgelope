@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import { Account } from '../shared/account';
 import { Budget } from '../shared/budget';
 import { AngularFirestore } from 'angularfire2/firestore';
-import { TransactionService } from './transaction.service';
+import { TransactionService } from '../transactions/transaction.service';
 
 @Injectable()
 export class AccountService {

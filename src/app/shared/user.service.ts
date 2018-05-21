@@ -10,8 +10,8 @@ import 'rxjs/add/operator/mergeMap';
 
 import { Account } from '../shared/account';
 import { Profile } from '../shared/profile';
-import { BudgetService } from '../core/budget.service';
-import { CategoryService } from '../core/category.service';
+import { BudgetService } from '../budgets/budget.service';
+import { CategoryService } from '../categories/category.service';
 
 
 @Injectable()

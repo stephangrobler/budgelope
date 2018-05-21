@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { AngularFirestore } from 'angularfire2/firestore';
 
-import { UserService } from '../../core/user.service';
-import { AccountService } from '../../core/account.service';
+import { UserService } from '../../shared/user.service';
+import { AccountService } from '../account.service';
 import { Account } from '../../shared/account';
-import { BudgetService } from '../../core/budget.service';
+import { BudgetService } from '../../budgets/budget.service';
 import { Budget } from '../../shared/budget';
 
 @Component({

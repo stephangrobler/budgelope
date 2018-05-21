@@ -3,8 +3,8 @@ import { Router } from '@angular/router';
 import * as firebase from 'firebase';
 
 import { Budget } from '../../shared/budget';
-import { BudgetService } from '../../core/budget.service';
-import { UserService } from '../../core/user.service';
+import { BudgetService } from '../budget.service';
+import { UserService } from '../../shared/user.service';
 
 @Component({
   selector: 'budget-form',

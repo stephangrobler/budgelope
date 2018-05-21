@@ -11,7 +11,7 @@ import { } from '@angular/material';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 
-import { AuthGuardService } from '../core/auth-guard.service';
+import { AuthGuardService } from './auth-guard.service';
 
 @NgModule({
   imports: [

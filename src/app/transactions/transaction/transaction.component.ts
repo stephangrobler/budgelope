@@ -17,11 +17,11 @@ import { Account } from '../../shared/account';
 import { Budget } from '../../shared/budget';
 import { Payee } from '../../shared/payee';
 import { Category, CategoryId } from '../../shared/category';
-import { BudgetService } from '../../core/budget.service';
-import { UserService } from '../../core/user.service';
-import { TransactionService } from '../../core/transaction.service';
-import { AccountService } from '../../core/account.service';
-import { CategoryService } from '../../core/category.service';
+import { BudgetService } from '../../budgets/budget.service';
+import { UserService } from '../../shared/user.service';
+import { TransactionService } from '../transaction.service';
+import { AccountService } from '../../accounts/account.service';
+import { CategoryService } from '../../categories/category.service';
 
 
 @Component({

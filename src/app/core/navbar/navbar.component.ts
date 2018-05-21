@@ -3,8 +3,8 @@ import { Router } from '@angular/router';
 import * as firebase from 'firebase';
 import * as moment from 'moment';
 
-import { UserService } from '../user.service';
-import { BudgetService } from '../budget.service';
+import { UserService } from '../../shared/user.service';
+import { BudgetService } from '../../budgets/budget.service';
 import { Budget } from '../../shared/budget';
 
 

@@ -3,10 +3,10 @@ import { Router } from '@angular/router';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
 
-import { UserService } from '../../core/user.service';
+import { UserService } from '../../shared/user.service';
 import { Account } from '../../shared/account';
-import { AccountService } from '../../core/account.service';
-import { BudgetService } from '../../core/budget.service';
+import { AccountService } from '../account.service';
+import { BudgetService } from '../../budgets/budget.service';
 import { Budget } from '../../shared/budget';
 
 @Component({

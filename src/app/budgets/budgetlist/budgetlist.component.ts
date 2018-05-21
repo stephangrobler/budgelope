@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import * as firebase from 'firebase';
 
 import { Budget } from '../../shared/budget';
-import { UserService } from '../../core/user.service';
+import { UserService } from '../../shared/user.service';
 
 
 @Component({
@@ -29,7 +29,7 @@ export class BudgetListComponent implements OnInit {
       let bList: any[] = [];
 
       // loop through to get all the users budgets
-      Object.keys(tmp).forEach((key) => {        
+      Object.keys(tmp).forEach((key) => {
         let bRef = firebase.database().ref('budgets/'+key);
         bRef.once('value', (bSnap) => {
           bList.push(bSnap.val());

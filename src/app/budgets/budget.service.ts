@@ -7,8 +7,8 @@ import 'rxjs/add/operator/take';
 import 'rxjs/add/operator/mergeMap';
 
 import { Budget } from '../shared/budget';
-import { CategoryService } from './category.service';
-import { AccountService } from './account.service'
+import { CategoryService } from '../categories/category.service';
+import { AccountService } from '../accounts/account.service'
 
 
 @Injectable()
