@@ -132,7 +132,6 @@ export class TransactionComponent implements OnInit {
   }
 
   saveTransaction() {
-    console.log(this.transactionForm);
     if (this.transactionId != null) {
       console.log('updating ', this.transactionId);
       // this.update(this.transactionForm);
@@ -174,6 +173,7 @@ export class TransactionComponent implements OnInit {
       this.activeBudget.id,
     ).then(response => {
       console.log('Document Ref:', response);
+      this.transactionForm.reset();
       this.openSnackBar('Created transaction successfully');
     });
   }
