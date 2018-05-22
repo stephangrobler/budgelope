@@ -1,36 +1,38 @@
-<div class="flex-container row space-around">
-  <div class="flex-object">
-      <div class="page-header">
-        <h1>Transactions</h1>
-        <app-transaction ></app-transaction>
-      </div>
-      <mat-table #table [dataSource]="dataSource">
-        <ng-container matColumnDef="date">
-          <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
-          <mat-cell *matCellDef="let transaction">{{transaction.date | date: 'MMM d, y'}}</mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="payee">
-          <mat-header-cell *matHeaderCellDef>Payee</mat-header-cell>
-          <mat-cell *matCellDef="let transaction">{{transaction.payee}}</mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="account">
-          <mat-header-cell *matHeaderCellDef>Account</mat-header-cell>
-          <mat-cell *matCellDef="let transaction">{{transaction.accountName}}</mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="category">
-          <mat-header-cell *matHeaderCellDef>Category</mat-header-cell>
-          <mat-cell *matCellDef="let transaction">{{transaction.categoryName}}</mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="out">
-          <mat-header-cell *matHeaderCellDef>Out</mat-header-cell>
-          <mat-cell *matCellDef="let transaction" style="text-align: right">{{transaction.out | number: '1.2' }}</mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="in">
-          <mat-header-cell *matHeaderCellDef>In</mat-header-cell>
-          <mat-cell *matCellDef="let transaction" style="text-align: right">{{transaction.in | number: '1.2'}}</mat-cell>
-        </ng-container>
-        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectedRow(row)"></mat-row>
-      </mat-table>
-  </div>
+<div fxLayout="column" fxLayoutGap="10px" fxFlexFill style="padding: 10px">
+    <div class="page-header">
+      <h1>Transactions</h1>
+      <app-transaction></app-transaction>
+    </div>
+    <mat-card>
+      <mat-card-content>
+        <mat-table #table [dataSource]="dataSource">
+          <ng-container matColumnDef="date">
+            <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
+            <mat-cell *matCellDef="let transaction">{{transaction.date | date: 'MMM d, y'}}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="payee">
+            <mat-header-cell *matHeaderCellDef>Payee</mat-header-cell>
+            <mat-cell *matCellDef="let transaction">{{transaction.payee}}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="account">
+            <mat-header-cell *matHeaderCellDef>Account</mat-header-cell>
+            <mat-cell *matCellDef="let transaction">{{transaction.accountName}}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="category">
+            <mat-header-cell *matHeaderCellDef>Category</mat-header-cell>
+            <mat-cell *matCellDef="let transaction">{{transaction.categoryName}}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="out">
+            <mat-header-cell *matHeaderCellDef>Out</mat-header-cell>
+            <mat-cell *matCellDef="let transaction" style="text-align: right">{{transaction.out | number: '1.2' }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="in">
+            <mat-header-cell *matHeaderCellDef>In</mat-header-cell>
+            <mat-cell *matCellDef="let transaction" style="text-align: right">{{transaction.in | number: '1.2'}}</mat-cell>
+          </ng-container>
+          <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectedRow(row)"></mat-row>
+        </mat-table>
+      </mat-card-content>
+    </mat-card>
 </div>
