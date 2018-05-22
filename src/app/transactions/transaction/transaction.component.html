@@ -1,44 +1,32 @@
-<div class="flex-container column">
-  <div class="flex-object">
+<div >
+  <div>
     <form class="form" [formGroup]="transactionForm" (ngSubmit)="onSubmit()">
       <mat-card class="transaction-card">
         <mat-card-content>
-          <div class="flex-container row wrap space-around">
-            <div class="flex-object w33 h60 p5">
-              <mat-form-field>
+          <div fxLayout="row" fxLayoutGap="10px" fxFlexFill>
+
+              <mat-form-field fxFlex="33">
                 <mat-select placeholder="Account" name="account" formControlName="account">
                   <mat-option [value]="account" *ngFor="let account of accounts">
                     {{account.name}}
                   </mat-option>
                 </mat-select>
               </mat-form-field>
-            </div>
-            <div class="flex-object w33 h60 p5">
-              <mat-form-field>
+
+              <mat-form-field fxFlex="33">
                 <input matInput [matDatepicker]="picker" placeholder="Choose a date" name="date" formControlName="date">
                 <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                 <mat-datepicker #picker></mat-datepicker>
               </mat-form-field>
-            </div>
-            <div class="flex-object w33 h60 p5">
-              <mat-form-field>
+
+              <mat-form-field fxFlex="33">
                 <input matInput placeholder="Payee" value="" type="text" name="payee" formControlName="payee">
               </mat-form-field>
-            </div>
-            <div class="flex-object w25 h60 p5">
-              <mat-form-field>
-                <input matInput placeholder="Out" value="" type="number" name="out" formControlName="out">
-              </mat-form-field>
-            </div>
-            <div class="flex-object w25 h60 p5">
-              <mat-form-field>
-                <input matInput placeholder="In" value="" type="number" name="in" formControlName="in">
-              </mat-form-field>
-            </div>
+
           </div>
-          <div class="flex-container row wrap space-around">
-            <div class="flex-object w50 h60 p5">
-              <mat-form-field style="width:98%;">
+          <div fxLayout="row" fxLayoutGap="10px" fxFlexFill>
+
+              <mat-form-field fxFlex="50">
                 <input type="text" matInput placeholder="Category" [matAutocomplete]="auto" [formControlName]="'category'">
               </mat-form-field>
               <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
@@ -46,7 +34,15 @@
                   <span *ngIf="category.parent">{{category.parent}} ></span>{{category.name}}
                 </mat-option>
               </mat-autocomplete>
-            </div>
+
+              <mat-form-field fxFlex="25">
+                <input matInput placeholder="Out" value="" type="number" name="out" formControlName="out">
+              </mat-form-field>
+
+              <mat-form-field fxFlex="25">
+                <input matInput placeholder="In" value="" type="number" name="in" formControlName="in">
+              </mat-form-field>
+
           </div>
         </mat-card-content>
         <mat-checkbox name="cleared" [align]="end" formControlName="cleared">

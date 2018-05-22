@@ -6,7 +6,7 @@ import { MatToolbarModule, MatGridListModule, MatButtonModule, MatInputModule, M
   MatListModule, MatCardModule, MatIconModule, MatSidenavModule, MatTableModule, MatCheckboxModule,
   MatRadioModule, MatDatepickerModule, MatSelectModule, MatAutocompleteModule, MatSnackBarModule } from '@angular/material';
 
-import { } from '@angular/material';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
@@ -18,6 +18,7 @@ import { AuthGuardService } from './auth-guard.service';
     RouterModule,
     CommonModule,
     BrowserAnimationsModule,
+    FlexLayoutModule,
     MatToolbarModule,
     MatGridListModule,
     MatNativeDateModule,
@@ -37,6 +38,7 @@ import { AuthGuardService } from './auth-guard.service';
     AppRoutingModule
   ],
   exports: [
+    FlexLayoutModule,
     MatTableModule,
     MatSnackBarModule,
     MatAutocompleteModule,
