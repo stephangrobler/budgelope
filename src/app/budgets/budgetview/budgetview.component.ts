@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angularfire2/database';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
-import {Router, ActivatedRoute, ParamMap, Params } from '@angular/router';
+import { Router, ActivatedRoute, ParamMap, Params } from '@angular/router';
 
 import { DragulaService } from 'ng2-dragula';
 
@@ -68,7 +68,7 @@ export class BudgetviewComponent implements OnInit {
       let profile = db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
         db.doc<Budget>('budgets/' + profile.activeBudget).valueChanges().subscribe(budget => {
           budget.id = profile.activeBudget;
-          if (!budget.allocations[this.selectedMonth]){
+          if (!budget.allocations[this.selectedMonth]) {
             budget.allocations[this.selectedMonth] = {
               "income": 0,
               "expense": 0
@@ -83,31 +83,36 @@ export class BudgetviewComponent implements OnInit {
 
   ngOnInit() {
     // drag and drop bag setup
-    this.dragulaService.setOptions('order-bag', {})
+    this.dragulaService.setOptions('order-bag', {
+      moves: function(el, container, handle) {
+        console.log('handle', handle);
+        return handle.className.indexOf('handle') > -1;
+      }
+    });
     this.dragulaService.dropModel.subscribe((value) => {
       this.updateCategoryOrder(this.sortList, this.activeBudget.id);
     });
 
     // if the month is specified, use that, else use the current month
-    this.route.params.subscribe((params: Params)=> {
+    this.route.params.subscribe((params: Params) => {
       let month = +params['month'].substr(-2, 2);
-      let year = +params['month'].substr(0,4);
+      let year = +params['month'].substr(0, 4);
 
-      if (params['month']){
+      if (params['month']) {
         this.selectedMonth = params['month'];
         this.nextMonth = moment().year(year).month(month - 1).add(1, 'months');
         this.prevMonth = moment().year(year).month(month - 1).subtract(1, 'months');
-        this.displayMonth = moment(this.selectedMonth+'01').format('MMMM YYYY');
+        this.displayMonth = moment(this.selectedMonth + '01').format('MMMM YYYY');
       } else {
         this.selectedMonth = moment().format("YYYYMM");
-        this.displayMonth = moment(this.selectedMonth+'01').format('MMMM YYYY');
+        this.displayMonth = moment(this.selectedMonth + '01').format('MMMM YYYY');
       }
 
-      if (this.sortList){
+      if (this.sortList) {
         this.checkAllocations(this.sortList, this.selectedMonth);
       }
 
-      if (this.activeBudget && !this.activeBudget.allocations[this.selectedMonth]){
+      if (this.activeBudget && !this.activeBudget.allocations[this.selectedMonth]) {
         this.activeBudget.allocations[this.selectedMonth] = {
           "income": 0,
           "expense": 0
@@ -117,7 +122,7 @@ export class BudgetviewComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    if (this.dragulaService.find('order-bag') !== undefined){
+    if (this.dragulaService.find('order-bag') !== undefined) {
       this.dragulaService.destroy('order-bag');
     }
   }
@@ -127,7 +132,7 @@ export class BudgetviewComponent implements OnInit {
     categories.forEach(function(category, index) {
       let newOrder = ('000' + (index + 1).toString()).slice(-3);
       // check to see if it is neccessary to update the category
-      if (category.sortingOrder != newOrder){
+      if (category.sortingOrder != newOrder) {
         category.sortingOrder = newOrder;
         this.db.doc(ref + category.id).update(category);
         console.log('updating: ', category.name);
@@ -135,7 +140,7 @@ export class BudgetviewComponent implements OnInit {
     }, this);
   }
 
-  checkAllocations(categories: Category[], month: string){
+  checkAllocations(categories: Category[], month: string) {
     categories.forEach(category => {
       if (!category.allocations) {
         category.allocations = {};
@@ -172,11 +177,11 @@ export class BudgetviewComponent implements OnInit {
     });
   }
 
-  onNextMonth(){
+  onNextMonth() {
     this.router.navigate(['/app/budget', this.nextMonth.format('YYYYMM')]);
   }
 
-  onPrevMonth(){
+  onPrevMonth() {
     this.router.navigate(['/app/budget', this.prevMonth.format('YYYYMM')]);
 
   }

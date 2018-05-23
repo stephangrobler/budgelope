@@ -5,30 +5,11 @@
   color: mat-contrast($candy-app-accent,500) !important;
 }
 
+.handle {
+  cursor: move;
+}
+
 .budget-view {
-  .side-nav {
-    width: 200px;
-  }
-  .name {
-    order: 1;
-    width: 40%;
-  }
-
-  .planned-input {
-    order: 2;
-    width: 20%;
-  }
-
-  .actual {
-    order: 3;
-    width: 20%;
-  }
-
-  .balance {
-    order: 4;
-    width: 20%;
-  }
-
   /deep/ .ngx-dnd-container {
       border: none !important;
       padding: 0;
