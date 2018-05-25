@@ -1,63 +1,71 @@
-<div fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center none">
-  <div style="padding: 10px;">
-    <mat-card *ngIf="activeBudget">
-      <mat-card-title>
-        {{ this.displayMonth }}
-      </mat-card-title>
-      <mat-card-content>
-        <mat-list>
-          <mat-list-item>Available : {{ activeBudget.balance | number: '1.2'}}</mat-list-item>
-          <mat-list-item>Income : {{ activeBudget.allocations[selectedMonth].income | number: '1.2'}}</mat-list-item>
-          <mat-list-item>Expense : {{ activeBudget.allocations[selectedMonth].expense | number: '1.2'}}</mat-list-item>
-        </mat-list>
-      </mat-card-content>
-      <mat-card-actions>
+<div fxLayout="column" fxLayoutGap="10px" fxLayoutAlign="center none">
 
-        <button mat-raised-button color="basic" type="button" (click)="onPrevMonth()">
-              Previous Month
-            </button>
-        <button mat-raised-button color="basic" type="button" (click)="onNextMonth()">
-              Next Month
-            </button>
-      </mat-card-actions>
-    </mat-card>
+  <mat-card *ngIf="activeBudget">
+    <mat-card-title>
+      {{ this.displayMonth }}
+      <button mat-icon-button [matMenuTriggerFor]="menu">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #menu="matMenu" >
+        <button mat-menu-item *ngFor="let budget of budgetList; index as i" (click)="onBudgetActivate(budget.id)">
 
-    <!-- header -->
-    <br>
-    <mat-card class="budget-view">
-      <mat-card-content>
-        <a mat-fab [routerLink]="['/category/add']">
-          <mat-icon>add</mat-icon>
-        </a>
+          <span>{{budget.name}}</span>
+        </button>
+      </mat-menu>
+    </mat-card-title>
+    <mat-card-content>
+      <mat-list>
+        <mat-list-item>Available : {{ activeBudget.balance | number: '1.2'}}</mat-list-item>
+        <mat-list-item>Income : {{ activeBudget.allocations[selectedMonth].income | number: '1.2'}}</mat-list-item>
+        <mat-list-item>Expense : {{ activeBudget.allocations[selectedMonth].expense | number: '1.2'}}</mat-list-item>
+      </mat-list>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-raised-button color="basic" type="button" (click)="onPrevMonth()">
+        Previous Month
+      </button>
+      <button mat-raised-button color="basic" type="button" (click)="onNextMonth()">
+        Next Month
+      </button>
+    </mat-card-actions>
+  </mat-card>
 
-        <mat-list>
-          <div [dragula]='"order-bag"' [dragulaModel]='sortList'>
-            <div *ngFor="let item of sortList">
-              <mat-list-item *ngIf="item.type != 'income'" [ngClass]="{'header': checkIsHeader(item)}">
-                <div fxLayout="row" fxLayoutGap="10px" fxFlexFill fxLayoutAlign="center center">
-                  <div fxFlex="40" fxFlexAlign="center" >
-                    <mat-icon color="primary" class="handle">drag_indicator</mat-icon>
-                    {{item.name}}
-                  </div>
-                  <div class="planned-input text-right" fxFlex="25">
-                    <mat-form-field *ngIf="item.allocations && item.parent != ''">
-                      <input matInput type="number" name="planned" class="text-right" [(ngModel)]="item.allocations[selectedMonth].planned" (blur)="blur(item)" (focus)="focus(item)" tabindex="">
-                    </mat-form-field>
-                  </div>
-                  <div class="actual text-right" fxFlex="15">
-                    <span *ngIf="item.allocations">
+  <!-- header -->
+  <br>
+  <mat-card class="budget-view">
+    <mat-card-content>
+      <a mat-fab [routerLink]="['/category/add']">
+        <mat-icon>add</mat-icon>
+      </a>
+
+      <mat-list>
+        <div [dragula]='"order-bag"' [dragulaModel]='sortList'>
+          <div *ngFor="let item of sortList">
+            <mat-list-item *ngIf="item.type != 'income'" [ngClass]="{'header': checkIsHeader(item)}">
+              <div fxLayout="row" fxLayoutGap="10px" fxFlexFill fxLayoutAlign="center center">
+                <div fxFlex="40" fxFlexAlign="center">
+                  <mat-icon color="primary" class="handle">drag_indicator</mat-icon>
+                  {{item.name}}
+                </div>
+                <div class="planned-input text-right" fxFlex="25">
+                  <mat-form-field *ngIf="item.allocations && item.parent != ''">
+                    <input matInput type="number" name="planned" class="text-right" [(ngModel)]="item.allocations[selectedMonth].planned" (blur)="blur(item)" (focus)="focus(item)" tabindex="">
+                  </mat-form-field>
+                </div>
+                <div class="actual text-right" fxFlex="15">
+                  <span *ngIf="item.allocations">
                         {{item.allocations[selectedMonth].actual | number:'1.2'}}
                         </span>
-                  </div>
-                  <div class="balance text-right" *ngIf="item.parent != ''" fxFlex="15">
-                    {{item.balance | number:'1.2'}}
-                  </div>
                 </div>
-              </mat-list-item>
-            </div>
+                <div class="balance text-right" *ngIf="item.parent != ''" fxFlex="15">
+                  {{item.balance | number:'1.2'}}
+                </div>
+              </div>
+            </mat-list-item>
           </div>
-        </mat-list>
-      </mat-card-content>
-    </mat-card>
-  </div>
+        </div>
+      </mat-list>
+    </mat-card-content>
+  </mat-card>
+
 </div>

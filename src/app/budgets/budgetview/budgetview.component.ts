@@ -49,6 +49,8 @@ export class BudgetviewComponent implements OnInit {
   totalBudgeted: number = 0;
   totalAvailable: number = 0;
 
+  budgetList: any[];
+
   constructor(
     private db: AngularFirestore,
     private budgetService: BudgetService,
@@ -64,10 +66,22 @@ export class BudgetviewComponent implements OnInit {
       if (!user) {
         return;
       }
+      this.userId = user.uid;
+
       // get active budget TODO: move to service :P
       let profile = db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
+        this.budgetList = [];
+        for (let i in profile.availableBudgets){
+          let budget = {
+            id: i,
+            name: profile.availableBudgets[i].name
+          };
+          this.budgetList.push(budget);
+        }
+
         db.doc<Budget>('budgets/' + profile.activeBudget).valueChanges().subscribe(budget => {
           budget.id = profile.activeBudget;
+
           if (!budget.allocations[this.selectedMonth]) {
             budget.allocations[this.selectedMonth] = {
               "income": 0,
@@ -125,6 +139,10 @@ export class BudgetviewComponent implements OnInit {
     if (this.dragulaService.find('order-bag') !== undefined) {
       this.dragulaService.destroy('order-bag');
     }
+  }
+
+  onBudgetActivate(id : string){
+    this.db.doc<any>('users/' + this.userId).update({activeBudget: id});
   }
 
   updateCategoryOrder(categories: Category[], budgetId: string): void {
