@@ -183,13 +183,14 @@ export class TransactionService {
     // };
     //
     // remove the category allocations, as it can be huge
-    category.allocations = {};
-
+    // category.allocations = {};
     return new Promise((resolve, reject) => {
       items.add(transaction.toObject).then(response => {
         account.balance += transaction.amount;
         category.balance += transaction.amount;
+
         if (!category.allocations[shortDate]) {
+          console.log('resetting allocattions for ', shortDate);
           category.allocations[shortDate] = {
             'actual': 0,
             'planned': 0

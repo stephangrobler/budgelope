@@ -162,7 +162,6 @@ export class TransactionComponent implements OnInit {
     transaction.accountName = form.value.account.name;
     transaction.categoryId = form.value.category.id;
     transaction.categoryName = form.value.category.name;
-    console.log('transaction', transaction);
 
     this.transactionService.createTransaction(
       transaction,
@@ -172,7 +171,6 @@ export class TransactionComponent implements OnInit {
       this.userId,
       this.activeBudget.id,
     ).then(response => {
-      console.log('Document Ref:', response);
       this.transactionForm.reset();
       this.openSnackBar('Created transaction successfully');
     });
