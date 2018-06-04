@@ -1,39 +1,43 @@
-<div >
+<div>
   <div>
     <form class="form" [formGroup]="transactionForm" (ngSubmit)="onSubmit()">
       <mat-card class="transaction-card">
         <mat-card-content>
           <div fxLayout="row" fxLayoutGap="10px" fxFlexFill>
 
-              <mat-form-field fxFlex="33">
-                <mat-select placeholder="Account" name="account" formControlName="account">
-                  <mat-option [value]="account" *ngFor="let account of accounts">
-                    {{account.name}}
+            <mat-form-field fxFlex="20">
+              <mat-select placeholder="Account" name="account" formControlName="account" required>
+                <mat-option>--</mat-option>
+                <mat-option [value]="account" *ngFor="let account of accounts">
+                  {{account.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field fxFlex="20">
+              <input matInput [matDatepicker]="picker" placeholder="Choose a date" name="date" formControlName="date">
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field fxFlex="60">
+              <input matInput placeholder="Payee" value="" type="text" name="payee" formControlName="payee" required>
+            </mat-form-field>
+
+          </div>
+
+          <div formArrayName="categories">
+            <div fxLayout="row" fxLayoutGap="10px" fxFlexFill
+                *ngFor="let categoryControl of getControls(); let i = index"
+                [formGroupName]="i">
+              <mat-form-field fxFlex="50">
+                <mat-select placeholder="Category" required formControlName="category">
+                  <mat-option>--</mat-option>
+                  <mat-option *ngFor="let category of categories" [value]="category">
+                    {{ category.name }}
                   </mat-option>
                 </mat-select>
               </mat-form-field>
-
-              <mat-form-field fxFlex="33">
-                <input matInput [matDatepicker]="picker" placeholder="Choose a date" name="date" formControlName="date">
-                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                <mat-datepicker #picker></mat-datepicker>
-              </mat-form-field>
-
-              <mat-form-field fxFlex="33">
-                <input matInput placeholder="Payee" value="" type="text" name="payee" formControlName="payee">
-              </mat-form-field>
-
-          </div>
-          <div fxLayout="row" fxLayoutGap="10px" fxFlexFill>
-
-              <mat-form-field fxFlex="50">
-                <input type="text" matInput placeholder="Category" [matAutocomplete]="auto" [formControlName]="'category'">
-              </mat-form-field>
-              <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
-                <mat-option *ngFor="let category of filteredCategories | async" [value]="category">
-                  <span *ngIf="category.parent">{{category.parent}} ></span>{{category.name}}
-                </mat-option>
-              </mat-autocomplete>
 
               <mat-form-field fxFlex="25">
                 <input matInput placeholder="Out" value="" type="number" name="out" formControlName="out">
@@ -43,6 +47,7 @@
                 <input matInput placeholder="In" value="" type="number" name="in" formControlName="in">
               </mat-form-field>
 
+            </div>
           </div>
         </mat-card-content>
         <mat-checkbox name="cleared" [align]="end" formControlName="cleared">
@@ -50,12 +55,10 @@
         </mat-checkbox>
 
         <mat-card-actions>
-          <button mat-raised-button color="primary" type="submit"
-          (click)="saveTransaction()"
-          [disabled]="!transactionForm.valid">
+          <button mat-raised-button color="primary" type="submit" (click)="saveTransaction()" [disabled]="!transactionForm.valid">
               Save Transaction
             </button>
-            <button mat-raised-button color="basic" type="button" (click)="addCategory()">
+          <button mat-raised-button color="basic" type="button" (click)="onAddCategory()">
               Split
             </button>
           <button mat-raised-button color="warn" type="button" (click)="cancel()">

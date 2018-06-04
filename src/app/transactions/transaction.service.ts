@@ -10,12 +10,15 @@ import { Category } from '../shared/category';
 import { Payee } from '../shared/payee';
 import { Budget } from '../shared/budget';
 
+import { CategoryService } from '../categories/category.service';
+
 @Injectable()
 export class TransactionService {
   transactions: Transaction[];
 
   constructor(
-    private db: AngularFirestore
+    private db: AngularFirestore,
+    private categoryService: CategoryService
   ) { }
 
   /**
@@ -124,7 +127,7 @@ export class TransactionService {
     });
   }
 
-  createStartingBalance(account: Account, budget: Budget){
+  createStartingBalance(account: Account, budget: Budget) {
 
   }
 
@@ -143,13 +146,13 @@ export class TransactionService {
   createTransaction(
     transaction: Transaction,
     account: Account,
-    category: Category,
+    categories: { category: Category, in: number, out: number }[],
     budget: Budget,
     userId: string,
     budgetId: string
   ) {
     let items = this.db.collection<Transaction>('budgets/' + budgetId + '/transactions'),
-      catStore = this.db.doc<Category>('budgets/' + budgetId + '/categories/' + category.id),
+
       accStore = this.db.doc<Account>('budgets/' + budgetId + '/accounts/' + account.id),
       shortDate = moment(transaction.date).format("YYYYMM"),
 
@@ -162,43 +165,23 @@ export class TransactionService {
       }
     }
 
-
     // ensure value is negative if it is an expense.
-    if (transaction.in > 0) {
-      transaction.amount = Math.abs(transaction.in);
-      budget.balance += transaction.in;
-      budget.allocations[shortDate].income += transaction.in;
+    if (transaction.amount > 0) {
+      budget.balance += transaction.amount;
+      budget.allocations[shortDate].income += transaction.amount;
     } else {
-      transaction.amount = -Math.abs(transaction.out);
-      budget.allocations[shortDate].expense += transaction.out;
+      budget.allocations[shortDate].expense += Math.abs(transaction.amount);
     }
 
-    // start of split transactions.
-    if (transaction.categories === null){
-      transaction.categories = [];
-    }
-    // transaction.categories[category.id] = {
-    //   category: category.name,
-    //   balance: transaction.amount
-    // };
-    //
-    // remove the category allocations, as it can be huge
-    // category.allocations = {};
     return new Promise((resolve, reject) => {
+
       items.add(transaction.toObject).then(response => {
         account.balance += transaction.amount;
-        category.balance += transaction.amount;
-
-        if (!category.allocations[shortDate]) {
-          console.log('resetting allocattions for ', shortDate);
-          category.allocations[shortDate] = {
-            'actual': 0,
-            'planned': 0
-          }
-        }
-        category.allocations[shortDate].actual += transaction.amount;
+        categories.forEach(category => {
+          this.categoryService.updateCategoryBudget(budgetId, category, shortDate);
+        });
         accStore.update(account);
-        catStore.update(category);
+
         budgetStore.update(budget);
         resolve(response);
       });

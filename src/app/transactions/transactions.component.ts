@@ -54,6 +54,7 @@ export class TransactionsComponent implements OnInit {
 
   selectedRow(row){
     this.selectedTransaction = row;
+    console.log(row);
   }
 }
 

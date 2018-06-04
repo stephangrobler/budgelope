@@ -41,11 +41,8 @@ export class TransactionComponent implements OnInit {
 
   accounts: Account[];
   categories: CategoryId[];
-  catCtrl : FormControl;
 
   selectedAccount: Account;
-
-  filteredCategories: any;
 
   constructor(
     private userService: UserService,
@@ -60,20 +57,6 @@ export class TransactionComponent implements OnInit {
     public snackBar: MatSnackBar
 
   ) {
-
-    this.catCtrl = new FormControl();
-
-  }
-
-  filterCategories(val: string): Category[] {
-    return val ? this.categories.filter(s => {
-
-      return new RegExp(`^${val}`, 'gi').test(s.name + s.parent);
-    }) : this.categories;
-  }
-
-  displayFn(category: any): string {
-    return category ? ' ' + category.parent + ' > ' + category.name : category;
   }
 
   ngOnInit() {
@@ -98,37 +81,36 @@ export class TransactionComponent implements OnInit {
 
   private initForm(){
     let transactionAccount = '';
-    let date = '';
+    let date = new Date();
     let payee = '';
     let amount = '';
 
     this.transactionForm = new FormGroup({
       'account': new FormControl(null, [Validators.required]),
-      'date': new FormControl(null, Validators.required),
+      'date': new FormControl(date, Validators.required),
       'payee': new FormControl(null, Validators.required),
-      'in': new FormControl(null),
-      'out': new FormControl(null),
-      'category': new FormControl(null, Validators.required),
-      'cleared': new FormControl(null)
+      'cleared': new FormControl(null),
+      'categories': new FormArray([])
     });
-
-    this.filteredCategories = this.transactionForm.get('category').valueChanges
-      .startWith(null)
-      .map(category => {
-        return category && typeof category === 'object' ? category.name : category;
-      })
-      .map(name => {
-        return name ? this.filterCategories(name) : this.categories;
-      });
+    this.onAddCategory();
   }
 
   onSubmit(){
     console.log(this.transactionForm);
   }
 
-  addCategory(){
-    // take current category as main
+  onAddCategory(){
+    let categoryGroup = new FormGroup({
+      'category': new FormControl(null, Validators.required),
+      'in': new FormControl(null),
+      'out': new FormControl(null)
+    });
 
+    (<FormArray>this.transactionForm.get('categories')).push(categoryGroup);
+  }
+
+  getControls() {
+    return (<FormArray>this.transactionForm.get('categories')).controls;
   }
 
   saveTransaction() {
@@ -142,10 +124,9 @@ export class TransactionComponent implements OnInit {
   }
 
   update(transaction: Transaction) {
-    let cat: Category = this.catCtrl.value;
+    let cat: Category = this.transactionForm.get('category').value;
     let acc: Account = this.selectedAccount;
     let payee: Payee = new Payee();
-
 
     this.transactionService.updateTransaction(
       this.transactionId,
@@ -160,13 +141,20 @@ export class TransactionComponent implements OnInit {
     let transaction = new Transaction(form.value);
     transaction.accountId = form.value.account.id;
     transaction.accountName = form.value.account.name;
-    transaction.categoryId = form.value.category.id;
-    transaction.categoryName = form.value.category.name;
+    transaction.calculateAmount;
+
+    if (form.value.categories.length > 1){
+      transaction.categoryId = '';
+      transaction.categoryName = 'Split';
+    } else {
+      transaction.categoryId = form.value.categories[0].category.id;
+      transaction.categoryName = form.value.categories[0].category.name;
+    }
 
     this.transactionService.createTransaction(
       transaction,
       form.value.account,
-      form.value.category,
+      form.value.categories,
       this.activeBudget,
       this.userId,
       this.activeBudget.id,
@@ -184,7 +172,6 @@ export class TransactionComponent implements OnInit {
 
   cancel() {
     this.transactionForm.reset();
-    this.selectedAccount = null;
-    this.catCtrl.setValue(null);
+
   }
 }

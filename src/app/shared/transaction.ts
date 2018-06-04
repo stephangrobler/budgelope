@@ -5,7 +5,7 @@ export class Transaction{
   id?: string;
   categoryId: string;
   categoryName: string;
-  categories: any[]; // object with category id for keys
+  categories: {category: Category, in: number, out: number}[]; // object with category id for keys
   accountId: string;
   accountName: string;
   payeeId: string;
@@ -37,11 +37,37 @@ export class Transaction{
     }
   }
 
+  get calculateAmount(): number {
+    this.amount = 0;
+    this.categories.forEach(category => {
+      let amountIn: number = +category.in,
+        amountOut :number = +category.out;
+      this.amount = this.amount + amountIn - amountOut;
+    });
+    if (this.amount > 0){
+      this.in = this.amount;
+    } else {
+      this.out = Math.abs(this.amount);
+    }
+    return this.amount;
+  }
+
   get toObject(): any {
+    let newCategories: {categoryId: string, categoryName: string, in: number, out: number}[] = [];
+    this.categories.forEach(category => {
+      let newCategory = {
+        categoryId: category.category.id,
+        categoryName: category.category.name,
+        in: category.in,
+        out: category.out,
+      }
+      newCategories.push(newCategory);
+    });
+
     return {
       categoryId: this.categoryId,
       categoryName: this.categoryName,
-      categories: this.categories,
+      categories: newCategories,
       accountId: this.accountId,
       accountName: this.accountName,
       payeeId: this.payeeId,

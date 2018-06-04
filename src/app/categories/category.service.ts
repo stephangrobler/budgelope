@@ -56,6 +56,21 @@ export class CategoryService {
 
   }
 
+  updateCategoryBudget(budgetId: string, category: {category:Category, in: number, out: number}, shortDate: string){
+    let catStore = this.db.doc<Category>('budgets/' + budgetId + '/categories/' + category.category.id);
+    let amount = 0 + category.in - category.out;
+
+    category.category.balance += amount;
+    if (!category.category.allocations[shortDate]) {
+      category.category.allocations[shortDate] = {
+        'actual': 0,
+        'planned': 0
+      }
+    }
+    category.category.allocations[shortDate].actual += amount;
+    catStore.update(category.category);
+  }
+
   updateCategory(budgetId: string, category: Category) {
     // update main category
     let dbRef = this.db.doc('categories/' + budgetId + '/' + category.$key);
