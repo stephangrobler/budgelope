@@ -43,6 +43,12 @@ export class TransactionService {
     });
   }
 
+  getTransaction(budgetId: string, transactionId: string): Observable<Transaction>{
+    let transRef = 'budgets/' + budgetId + '/transactions/' + transactionId;
+
+    return this.db.doc<Transaction>(transRef).valueChanges();
+  }
+
   updateTransaction(
     transactionId: string,
     transaction: Transaction,

@@ -66,20 +66,45 @@ export class TransactionComponent implements OnInit {
         this.activeBudget = budget;
       });
 
-      this.route.params.subscribe((params: Params) => {
-        this.transactionId = params["id"];
-      });
+
 
       // get the budget accounts
       this.accountService.getAccounts(profile.activeBudget).subscribe(accounts => this.accounts = accounts);
 
       this.categoryService.getCategories(profile.activeBudget).subscribe(categories => {
         this.categories = categories;
+        this.route.params.subscribe((params: Params) => {
+          if (!params['id']){
+            return;
+          }
+          this.transactionId = params["id"];
+
+          this.transactionService.getTransaction(profile.activeBudget, this.transactionId)
+            .take(1)
+            .subscribe(transaction => {
+              this.clearFormCategories((<FormArray>this.transactionForm.get('categories')));
+              let selectedAccount = this.accounts.filter(account => transaction.accountId == account.id)[0];
+              this.transactionForm.get('account').setValue(selectedAccount);
+              this.transactionForm.get('date').setValue(transaction.date);
+              this.transactionForm.get('payee').setValue(transaction.payee);
+              transaction.categories.forEach(item => {
+                let selectedCategory = this.categories.filter(category => {
+                  return item.categoryId == category.id
+                })[0];
+                let categoryGroup = new FormGroup({
+                  'category': new FormControl(selectedCategory, Validators.required),
+                  'in': new FormControl(+item.in),
+                  'out': new FormControl(+item.out)
+                });
+                (<FormArray>this.transactionForm.get('categories')).push(categoryGroup);
+              })
+            })
+        });
       });
     });
   }
 
-  private initForm(){
+  private initForm() {
     let transactionAccount = '';
     let date = new Date();
     let payee = '';
@@ -95,11 +120,11 @@ export class TransactionComponent implements OnInit {
     this.onAddCategory();
   }
 
-  onSubmit(){
+  onSubmit() {
     console.log(this.transactionForm);
   }
 
-  onAddCategory(){
+  onAddCategory() {
     let categoryGroup = new FormGroup({
       'category': new FormControl(null, Validators.required),
       'in': new FormControl(null),
@@ -107,6 +132,12 @@ export class TransactionComponent implements OnInit {
     });
 
     (<FormArray>this.transactionForm.get('categories')).push(categoryGroup);
+  }
+
+  clearFormCategories(formArray: FormArray){
+    while(formArray.length !== 0){
+      formArray.removeAt(0);
+    }
   }
 
   getControls() {
@@ -143,7 +174,7 @@ export class TransactionComponent implements OnInit {
     transaction.accountName = form.value.account.name;
     transaction.calculateAmount;
 
-    if (form.value.categories.length > 1){
+    if (form.value.categories.length > 1) {
       transaction.categoryId = '';
       transaction.categoryName = 'Split';
     } else {
@@ -172,6 +203,8 @@ export class TransactionComponent implements OnInit {
 
   cancel() {
     this.transactionForm.reset();
-
+    this.clearFormCategories((<FormArray>this.transactionForm.get('categories')));
+    this.onAddCategory();
+    this.transactionId = null;
   }
 }

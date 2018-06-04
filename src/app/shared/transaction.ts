@@ -5,7 +5,7 @@ export class Transaction{
   id?: string;
   categoryId: string;
   categoryName: string;
-  categories: {category: Category, in: number, out: number}[]; // object with category id for keys
+  categories: {categoryId: string, categoryName: string, in: number, out: number}[]; // object with category id for keys
   accountId: string;
   accountName: string;
   payeeId: string;
@@ -54,12 +54,12 @@ export class Transaction{
 
   get toObject(): any {
     let newCategories: {categoryId: string, categoryName: string, in: number, out: number}[] = [];
-    this.categories.forEach(category => {
+    this.categories.forEach(item => {
       let newCategory = {
-        categoryId: category.category.id,
-        categoryName: category.category.name,
-        in: category.in,
-        out: category.out,
+        categoryId: item.categoryId,
+        categoryName: item.categoryName,
+        in: item.in,
+        out: item.out,
       }
       newCategories.push(newCategory);
     });
