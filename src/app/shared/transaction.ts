@@ -23,7 +23,20 @@ export class Transaction{
       this.id = transactionData.id ? transactionData.id : null ;
       this.categoryId = transactionData.categoryId ? transactionData.categoryId : null ;
       this.categoryName = transactionData.category ? transactionData.category : null ;
-      this.categories = transactionData.categories ? transactionData.categories: null;
+      if (transactionData.categories && transactionData.categories.length > 0){
+
+        let newCategories: {categoryId: string, categoryName: string, in: number, out: number}[] = [];
+        transactionData.categories.forEach(item => {
+          let newCategory = {
+            categoryId: item.category.id,
+            categoryName: item.category.name,
+            in: item.in,
+            out: item.out,
+          }
+          newCategories.push(newCategory);
+        });
+        this.categories = newCategories;
+      }
       this.accountId = transactionData.accountId ? transactionData.accountId : null ;
       this.accountName = transactionData.account ? transactionData.account : null ;
       this.payeeId = transactionData.payeeId ? transactionData.payeeId : null ;
@@ -53,21 +66,12 @@ export class Transaction{
   }
 
   get toObject(): any {
-    let newCategories: {categoryId: string, categoryName: string, in: number, out: number}[] = [];
-    this.categories.forEach(item => {
-      let newCategory = {
-        categoryId: item.categoryId,
-        categoryName: item.categoryName,
-        in: item.in,
-        out: item.out,
-      }
-      newCategories.push(newCategory);
-    });
+
 
     return {
       categoryId: this.categoryId,
       categoryName: this.categoryName,
-      categories: newCategories,
+      categories: this.categories,
       accountId: this.accountId,
       accountName: this.accountName,
       payeeId: this.payeeId,

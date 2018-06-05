@@ -180,7 +180,7 @@ export class TransactionService {
     }
 
     return new Promise((resolve, reject) => {
-
+      console.log('transaction', transaction.toObject);
       items.add(transaction.toObject).then(response => {
         account.balance += transaction.amount;
         categories.forEach(category => {
