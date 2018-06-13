@@ -1,13 +1,25 @@
+import { Component } from '@angular/core';
 import { TestBed, async } from '@angular/core/testing';
-
+import { AppRoutingModule } from './shared/app-routing.module';
+import { UserService } from './shared/user.service';
 import { AppComponent } from './app.component';
 
+@Component({selector: 'router-outlet', template: ''})
+class RouterOutletStubComponent { }
+
+
 describe('AppComponent', () => {
+  let userMockService = jasmine.createSpyObj('UserService', ['verifyUser']);
+
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
-        AppComponent
+        AppComponent,
+        RouterOutletStubComponent
       ],
+      providers: [
+        {provide: UserService, userValue: userMockService}
+      ]
     }).compileComponents();
   }));
 
@@ -21,12 +33,5 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.debugElement.componentInstance;
     expect(app.title).toEqual('app works!');
-  }));
-
-  it('should render title in a h1 tag', async(() => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.debugElement.nativeElement;
-    expect(compiled.querySelector('h1').textContent).toContain('app works!');
   }));
 });
