@@ -101,6 +101,7 @@ export class TransactionComponent implements OnInit {
             })
         });
       });
+
     });
   }
 

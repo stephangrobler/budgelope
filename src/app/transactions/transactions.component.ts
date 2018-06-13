@@ -34,11 +34,14 @@ export class TransactionsComponent implements OnInit {
     private af: AngularFireAuth
   ) {
 
-    af.authState.subscribe((user) => {
+  }
+
+  ngOnInit() {
+    this.af.authState.subscribe((user) => {
       if (!user) {
         return;
       }
-      let profile = db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
+      let profile = this.db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
         this.userId = user.uid;
         this.budgetId = profile.activeBudget;
         this.dataSource = new TransactionDataSource(this.transService, profile.activeBudget);
@@ -47,9 +50,6 @@ export class TransactionsComponent implements OnInit {
     this.newTransaction = new Transaction({
       date: new Date()
     });
-  }
-
-  ngOnInit() {
   }
 
   selectedRow(row){
