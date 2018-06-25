@@ -61,15 +61,17 @@ export class BudgetviewComponent implements OnInit {
     private router: Router
   ) {
 
+  }
 
-    auth.authState.subscribe((user) => {
+  ngOnInit() {
+    this.auth.authState.subscribe((user) => {
       if (!user) {
         return;
       }
       this.userId = user.uid;
 
       // get active budget TODO: move to service :P
-      let profile = db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
+      let profile = this.db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
         this.budgetList = [];
         for (let i in profile.availableBudgets){
           let budget = {
@@ -79,7 +81,7 @@ export class BudgetviewComponent implements OnInit {
           this.budgetList.push(budget);
         }
 
-        db.doc<Budget>('budgets/' + profile.activeBudget).valueChanges().subscribe(budget => {
+        this.db.doc<Budget>('budgets/' + profile.activeBudget).valueChanges().subscribe(budget => {
           budget.id = profile.activeBudget;
 
           if (!budget.allocations[this.selectedMonth]) {
@@ -93,9 +95,8 @@ export class BudgetviewComponent implements OnInit {
         });
       });
     });
-  }
 
-  ngOnInit() {
+    console.log('boom');
     // drag and drop bag setup
     this.dragulaService.setOptions('order-bag', {
       moves: function(el, container, handle) {
