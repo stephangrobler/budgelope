@@ -96,11 +96,9 @@ export class BudgetviewComponent implements OnInit {
       });
     });
 
-    console.log('boom');
     // drag and drop bag setup
     this.dragulaService.setOptions('order-bag', {
       moves: function(el, container, handle) {
-        console.log('handle', handle);
         return handle.className.indexOf('handle') > -1;
       }
     });
@@ -144,6 +142,10 @@ export class BudgetviewComponent implements OnInit {
 
   onBudgetActivate(id : string){
     this.db.doc<any>('users/' + this.userId).update({activeBudget: id});
+  }
+
+  onFreshStart(){
+    this.budgetService.freshStart(this.activeBudget.id, this.userId);
   }
 
   updateCategoryOrder(categories: Category[], budgetId: string): void {

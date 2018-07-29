@@ -1,5 +1,5 @@
-import { Component, Directive, NO_ERRORS_SCHEMA } from '@angular/core';
-import { MatMenuModule } from '@angular/material';
+import { Component, Directive, NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { MatMenuModule, MatTableModule } from '@angular/material';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
@@ -8,6 +8,7 @@ import { BudgetService } from '../budget.service';
 import { UserService } from '../../shared/user.service';
 import { DragulaService } from 'ng2-dragula';
 import { Router, ActivatedRoute } from '@angular/router';
+import { Observable } from 'rxjs/Observable';
 
 import { ActivatedRouteStub } from '../../../testing/activate-route-stub';
 
@@ -17,7 +18,7 @@ describe('BudgetviewComponent', () => {
   let fixture: ComponentFixture<BudgetviewComponent>;
 
   let angularFirestoreServiceStub: Partial<AngularFirestore>;
-  let angularFireAuthServiceStub: Partial<AngularFireAuth>;
+
   let budgetServiceStub: Partial<BudgetService>;
   let userServiceStub: Partial<UserService>;
   let dragulaServiceStub: Partial<DragulaService>;
@@ -27,19 +28,29 @@ describe('BudgetviewComponent', () => {
 
   beforeEach(async(() => {
     activatedRouteStub = new ActivatedRouteStub();
-    angularFireAuthServiceStub = jasmine.createSpyObj('AngularFireAuth', ['authState']);
-    angularFirestoreServiceStub = jasmine.createSpyObj('AngularFirestore', ['doc', 'collection']);
+
+  let angularFireAuthServiceStub = jasmine.createSpyObj('AngularFireAuth', ['authenticate']);
+  angularFireAuthServiceStub.authState = Observable.of([]);
+
+  let angularFirestoreServiceStub = jasmine.createSpyObj('AngularFirestore', ['doc', 'collection']);
+  angularFirestoreServiceStub.doc.and.returnValue({
+    'valueChanges': function(){
+      return Observable.of({})
+    }
+  });
+  
     dragulaServiceStub = {};
     budgetServiceStub = {};
     userServiceStub = {};
     TestBed.configureTestingModule({
       imports: [
-        MatMenuModule
+        MatMenuModule,        
+        MatTableModule
       ],
       declarations: [
         BudgetviewComponent,
       ],
-      schemas: [NO_ERRORS_SCHEMA],
+      schemas: [NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA],
       providers: [
         {provide: AngularFirestore, useValue: angularFirestoreServiceStub },
         {provide: AngularFireAuth, useValue: angularFireAuthServiceStub },

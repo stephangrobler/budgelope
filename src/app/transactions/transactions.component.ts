@@ -16,6 +16,7 @@ import { TransactionComponent } from './transaction/transaction.component';
 })
 export class TransactionsComponent implements OnInit {
 
+  title = 'Transactions';
   userId: string;
   budgetId: string;
   displayedColumns = ['date', 'account', 'payee', 'category', 'out', 'in'];
@@ -23,7 +24,6 @@ export class TransactionsComponent implements OnInit {
   newTransaction: Transaction;
 
   selectedTransaction: Transaction;
-
 
   constructor(
     private transService: TransactionService,
@@ -41,10 +41,11 @@ export class TransactionsComponent implements OnInit {
       if (!user) {
         return;
       }
-      let profile = this.db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
+
+      const profile = this.db.doc<any>('users/' + user.uid).valueChanges().subscribe(profileRead => {
         this.userId = user.uid;
-        this.budgetId = profile.activeBudget;
-        this.dataSource = new TransactionDataSource(this.transService, profile.activeBudget);
+        this.budgetId = profileRead.activeBudget;
+        this.dataSource = new TransactionDataSource(this.transService, profileRead.activeBudget);
       });
     });
     this.newTransaction = new Transaction({

@@ -74,15 +74,21 @@ export class BudgetService {
 
       budgetStore.add(cBudget).then(function(docRef) {
         // rename old budget if not default
+        let newName: string = t.name + ' - FRESH START ' + moment().format('YYYY-MM-DD hh:mm:ss');
         if (currentBudgetId != 'default') {
 
-          let newName: string = t.name + ' - FRESH START ' + moment().format('YYYY-MM-DD hh:mm:ss');
           budgetStore.doc(currentBudgetId).update({ 'name': newName });
           accountService.copyAccounts(currentBudgetId, docRef.id);
         }
 
+        let userObj = {
+          activeBudget: docRef.id,
+          availableBudgets: {}
+        };
+        userObj.availableBudgets[docRef.id] = {name: newName};
+
         // set user active budget
-        userStore.doc(userId).update({ activeBudget: docRef.id });
+        userStore.doc(userId).update(userObj);
 
         // copy categories
         categoryService.copyCategories(currentBudgetId, docRef.id);
