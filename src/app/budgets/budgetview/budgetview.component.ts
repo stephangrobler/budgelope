@@ -70,10 +70,12 @@ export class BudgetviewComponent implements OnInit {
       }
       this.userId = user.uid;
 
+      console.log('users/', user.uid);
       // get active budget TODO: move to service :P
-      let profile = this.db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
+      this.db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
         this.budgetList = [];
-        for (let i in profile.availableBudgets){
+        console.log('budgets/' + profile.activeBudget);
+        for (let i in profile.availableBudgets) {
           let budget = {
             id: i,
             name: profile.availableBudgets[i].name
@@ -83,7 +85,7 @@ export class BudgetviewComponent implements OnInit {
 
         this.db.doc<Budget>('budgets/' + profile.activeBudget).valueChanges().subscribe(budget => {
           budget.id = profile.activeBudget;
-
+          console.log('budget', budget);
           if (!budget.allocations[this.selectedMonth]) {
             budget.allocations[this.selectedMonth] = {
               "income": 0,
@@ -95,7 +97,7 @@ export class BudgetviewComponent implements OnInit {
         });
       });
     });
-
+    console.log('test3');
     // drag and drop bag setup
     this.dragulaService.setOptions('order-bag', {
       moves: function(el, container, handle) {
@@ -105,7 +107,7 @@ export class BudgetviewComponent implements OnInit {
     this.dragulaService.dropModel.subscribe((value) => {
       this.updateCategoryOrder(this.sortList, this.activeBudget.id);
     });
-
+    console.log('test5');
     // if the month is specified, use that, else use the current month
     this.route.params.subscribe((params: Params) => {
       let month = +params['month'].substr(-2, 2);
@@ -180,6 +182,7 @@ export class BudgetviewComponent implements OnInit {
 
   getCategories(budgetId: string): void {
     let ref = 'budgets/' + budgetId + '/categories';
+    console.log('test4');
     let testList = this.db.collection<Category[]>(ref, ref => ref.orderBy('sortingOrder')).snapshotChanges().map(budget => {
       let budgetList: any = budget.map(b => {
         let thisRef = ref + '/' + b.payload.doc.id + '/categories';

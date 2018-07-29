@@ -53,16 +53,16 @@ export class TransactionsComponent implements OnInit {
     });
   }
 
-  selectedRow(row){
+  selectedRow(row) {
     this.selectedTransaction = row;
     console.log(row);
     this.router.navigate(['/app/transactions', row.id]);
   }
 }
 
-export class TransactionDataSource extends DataSource<any>{
+export class TransactionDataSource extends DataSource<any> {
 
-  constructor(private transService: TransactionService, private budgetId : string) {
+  constructor(private transService: TransactionService, private budgetId: string) {
     super();
   }
 
