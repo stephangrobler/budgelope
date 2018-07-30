@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angularfire2/database';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
-import { Router, ActivatedRoute, ParamMap, Params } from '@angular/router';
+import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 
 import { DragulaService } from 'ng2-dragula';
 
@@ -19,6 +19,7 @@ import { Category } from '../../shared/category';
 import { Budget } from '../../shared/budget';
 import { BudgetService } from '../budget.service';
 import { UserService } from '../../shared/user.service';
+import { switchMap } from 'rxjs/operators';
 
 
 @Component({
@@ -42,12 +43,12 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
 
   sortList: any;
 
-  isHeader: boolean = false;
+  isHeader = false;
 
-  totalIncome: number = 0;
-  totalExpense: number = 0;
-  totalBudgeted: number = 0;
-  totalAvailable: number = 0;
+  totalIncome = 0;
+  totalExpense = 0;
+  totalBudgeted = 0;
+  totalAvailable = 0;
 
   budgetList: any[];
 
@@ -69,12 +70,9 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
         return;
       }
       this.userId = user.uid;
-
-      console.log('users/', user.uid);
       // get active budget TODO: move to service :P
       this.db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
         this.budgetList = [];
-        console.log('budgets/' + profile.activeBudget);
         for (const i in profile.availableBudgets) {
           if (profile.availableBudgets.hasOwnProperty(i)) {
 
@@ -88,11 +86,10 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
 
         this.db.doc<Budget>('budgets/' + profile.activeBudget).valueChanges().subscribe(budget => {
           budget.id = profile.activeBudget;
-          console.log('budget', budget);
           if (!budget.allocations[this.selectedMonth]) {
             budget.allocations[this.selectedMonth] = {
-              "income": 0,
-              "expense": 0
+              'income': 0,
+              'expense': 0
             };
           }
           this.getCategories(profile.activeBudget);
@@ -100,7 +97,6 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
         });
       });
     });
-    console.log('test3');
     // drag and drop bag setup
     this.dragulaService.setOptions('order-bag', {
       moves: function(el, container, handle) {
@@ -110,16 +106,20 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     this.dragulaService.dropModel.subscribe((value) => {
       this.updateCategoryOrder(this.sortList, this.activeBudget.id);
     });
-    console.log('test 5')
 
     // if the month is specified, use that, else use the current month
-    this.route.params.subscribe((params: Params) => {
-      const month = +params['month'].substr(-2, 2);
-      const year = +params['month'].substr(0, 4);
+    this.selectedMonth = this.route.paramMap.pipe(
+      switchMap((params: ParamMap) => {
+        return Observable.of({'month': params.get('month')});
+      })
+    );
+    this.selectedMonth.subscribe(monthObj => {
+      // check for null and object
+      if (monthObj && monthObj.month) {
+      const month = +monthObj.month.substr(-2, 2);
+      const year = +monthObj.month.substr(0, 4);
 
-      console.log('test 6');
-      if (params['month']) {
-        this.selectedMonth = params['month'];
+        this.selectedMonth = monthObj.month;
         this.nextMonth = moment().year(year).month(month - 1).add(1, 'months');
         this.prevMonth = moment().year(year).month(month - 1).subtract(1, 'months');
         this.displayMonth = moment(this.selectedMonth + '01').format('MMMM YYYY');
@@ -138,7 +138,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
           'expense': 0
         };
       }
-    })
+    });
   };
 
   ngOnDestroy() {
@@ -186,11 +186,10 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
   }
 
   getCategories(budgetId: string): void {
-    let ref = 'budgets/' + budgetId + '/categories';
-    console.log('test4');
-    let testList = this.db.collection<Category[]>(ref, ref => ref.orderBy('sortingOrder')).snapshotChanges().map(budget => {
-      let budgetList: any = budget.map(b => {
-        let thisRef = ref + '/' + b.payload.doc.id + '/categories';
+    const reference = 'budgets/' + budgetId + '/categories';
+    const testList = this.db.collection<Category[]>(reference, ref => ref.orderBy('sortingOrder')).snapshotChanges().map(budget => {
+      const budgetList: any = budget.map(b => {
+        const thisRef = reference + '/' + b.payload.doc.id + '/categories';
         const data = b.payload.doc.data() as Category;
         const catRef = this.db.collection<Category>(thisRef).snapshotChanges();
         const id = b.payload.doc.id;
@@ -215,11 +214,11 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
 
   }
   checkIsHeader(item) {
-    return item.parent == '';
+    return item.parent === '';
   }
 
   loadAccounts(budgetId: string) {
-    let accRef = 'accounts/' + budgetId;
+    const accRef = 'accounts/' + budgetId;
     // this.accounts = this.db.list(accRef);
   }
 
@@ -236,9 +235,9 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
   }
 
   log(event) {
-    let count: number = 1;
-    let currentParent: any;
-    let currentChildCount: number;
+    // const count: number = 1;
+    // const currentParent: any;
+    // const currentChildCount: number;
     // this.sortList.forEach((item) => {
     //   if (item.parent == '') {
     //     currentParent = item;
@@ -260,11 +259,11 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
   }
 
   blur(item) {
-    let planned: number = item.allocations[this.selectedMonth].planned;
-    let ref = 'budgets/' + this.activeBudget.id + '/categories/' + item.id,
+    const planned: number = item.allocations[this.selectedMonth].planned;
+    const ref = 'budgets/' + this.activeBudget.id + '/categories/' + item.id,
       budgetRef = 'budgets/' + this.activeBudget.id;
 
-    if (planned != item.original) {
+    if (planned !== item.original) {
       item.balance = (item.balance - item.original) + planned;
 
       // update the budget available balance

@@ -52,16 +52,30 @@
                 </div>
                 <div class="planned-input text-right" fxFlex="25">
                   <mat-form-field *ngIf="item.allocations && item.parent != ''">
-                    <input matInput type="number" name="planned" class="text-right" [(ngModel)]="item.allocations[selectedMonth].planned" (blur)="blur(item)" (focus)="focus(item)" tabindex="">
+                    <input matInput type="number" 
+                      name="planned" 
+                      class="text-right" 
+                      [(ngModel)]="item.allocations[selectedMonth].planned" 
+                      (blur)="blur(item)" 
+                      (focus)="focus(item)" 
+                      tabindex="">
                   </mat-form-field>
                 </div>
-                <div class="actual text-right" fxFlex="15">
+                <div class="actual text-right" *ngIf="item.parent != ''" fxFlex="15">
                   <span *ngIf="item.allocations">
                         {{item.allocations[selectedMonth].actual | number:'1.2'}}
-                        </span>
+                  </span>
+                </div>
+                <div class="actual text-right" *ngIf="item.parent == ''" fxFlex="15">
+                  <span *ngIf="item.allocations">
+                        &nbsp;
+                  </span>
                 </div>
                 <div class="balance text-right" *ngIf="item.parent != ''" fxFlex="15">
                   {{item.balance | number:'1.2'}}
+                </div>
+                <div class="balance text-right" *ngIf="item.parent == ''" fxFlex="15">
+                  &nbsp;
                 </div>
               </div>
             </mat-list-item>

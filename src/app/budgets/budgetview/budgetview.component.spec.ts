@@ -59,6 +59,9 @@ describe('BudgetviewComponent', () => {
 
   beforeEach(async (() => {
     activatedRouteStub = new ActivatedRouteStub();
+    activatedRouteStub.setParamMap({
+      'month': '201805'
+    });
 
     angularFireAuthServiceStub = jasmine.createSpyObj('AngularFireAuth', ['authenticate']);
     angularFireAuthServiceStub.authState = Observable.of({
@@ -72,7 +75,7 @@ describe('BudgetviewComponent', () => {
       }
     });
 
-    dragulaServiceStub = jasmine.createSpyObj('DragulaService', ['setOptions']);
+    dragulaServiceStub = jasmine.createSpyObj('DragulaService', ['setOptions', 'find']);
     dragulaServiceStub.dropModel = Observable.of({});
 
     budgetServiceStub = {};
@@ -119,12 +122,7 @@ describe('BudgetviewComponent', () => {
   }));
 
   beforeEach(() => {
-    activatedRouteStub.setParamMap({
-      'month': '201805'
-    });
-
     angularFirestoreServiceStub.doc.and.callFake(function (args) {
-      console.log('unit test args:', args);
       if (args === 'users/12345') {
         return {
           'valueChanges': function () {
@@ -155,7 +153,7 @@ describe('BudgetviewComponent', () => {
     fixture.detectChanges();
   });
 
-  fit('should create a component', () => {
+  it('should create a component', () => {
     expect(component).toBeTruthy();
   });
 });

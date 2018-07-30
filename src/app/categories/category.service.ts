@@ -12,8 +12,8 @@ export class CategoryService {
     private db: AngularFirestore
   ) { }
 
-  getCategories(budgetId: string): Observable<CategoryId[]>{
-    return this.db.collection<Category>('budgets/' + budgetId + '/categories').snapshotChanges()
+  getCategories(budgetId: string): Observable<CategoryId[]> {
+    return this.db.collection<Category>('budgets/' + budgetId + '/categories', ref => ref.orderBy('sortingOrder')).snapshotChanges()
       .map(actions => {
         return actions.map(a => {
           const data = a.payload.doc.data() as CategoryId;
@@ -24,24 +24,24 @@ export class CategoryService {
   }
 
   createCategory(budgetId: string, category: Category) {
-    let dbRef = this.db.collection('categories/' + budgetId);
-    let newCat = dbRef.add(category);
-    let categoryId = "newCat.key";
+    const dbRef = this.db.collection('categories/' + budgetId);
+    const newCat = dbRef.add(category);
+    const categoryId = 'newCat.key';
     // create a allocation
     // current allocation
-    let currentDate = new Date();
-    let month = moment().format('YYYYMM');
-    let nextMonth = moment().add(1, 'months').format("YYYYMM");
-    let catData = category;
-    let allocData = {
-      "actual": 0,
-      "balance": 0,
-      "planned": 0,
-      "previousBalance": 0,
-      "name": catData.name,
-      "parent": catData.parent,
-      "sortingOrder": catData.sortingOrder,
-      "type": catData.type,
+    const currentDate = new Date();
+    const month = moment().format('YYYYMM');
+    const nextMonth = moment().add(1, 'months').format('YYYYMM');
+    const catData = category;
+    const allocData = {
+      'actual': 0,
+      'balance': 0,
+      'planned': 0,
+      'previousBalance': 0,
+      'name': catData.name,
+      'parent': catData.parent,
+      'sortingOrder': catData.sortingOrder,
+      'type': catData.type,
     }
     let currentAllocationMonthRef = '/allocations/' + budgetId + '/' + month;
     let nextAllocationMonthRef = '/allocations/' + budgetId + '/' + nextMonth;
@@ -73,17 +73,17 @@ export class CategoryService {
 
   updateCategory(budgetId: string, category: Category) {
     // update main category
-    let dbRef = this.db.doc('categories/' + budgetId + '/' + category.$key);
-    let categoryId = category.$key;
+    const dbRef = this.db.doc('categories/' + budgetId + '/' + category.$key);
+    const categoryId = category.$key;
     console.log(category);
     // update allocations
-    let updateObj = {};
+    const updateObj = {};
 
     // get all allocations
-    let allocationsRef = '/categoryAllocations/' + budgetId + '/' + categoryId;
+    const allocationsRef = '/categoryAllocations/' + budgetId + '/' + categoryId;
     // update the allocations
-    let allocationLocations = firebase.database().ref(allocationsRef).once('value').then(results => {
-      let allResults = results.val();
+    const allocationLocations = firebase.database().ref(allocationsRef).once('value').then(results => {
+      const allResults = results.val();
       // update allocations
 
       Object.keys(allResults).forEach(month => {
