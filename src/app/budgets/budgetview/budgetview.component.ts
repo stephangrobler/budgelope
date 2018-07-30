@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angularfire2/database';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
@@ -26,7 +26,7 @@ import { UserService } from '../../shared/user.service';
   templateUrl: './budgetview.component.html',
   styleUrls: ['./budgetview.component.scss']
 })
-export class BudgetviewComponent implements OnInit {
+export class BudgetviewComponent implements OnInit, OnDestroy {
   categoriesAllocations: AngularFireList<any>;
   categories: any[];
   allocations: AngularFireList<any>;
@@ -75,12 +75,15 @@ export class BudgetviewComponent implements OnInit {
       this.db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
         this.budgetList = [];
         console.log('budgets/' + profile.activeBudget);
-        for (let i in profile.availableBudgets) {
-          let budget = {
+        for (const i in profile.availableBudgets) {
+          if (profile.availableBudgets.hasOwnProperty(i)) {
+
+          const budget = {
             id: i,
             name: profile.availableBudgets[i].name
           };
           this.budgetList.push(budget);
+          }
         }
 
         this.db.doc<Budget>('budgets/' + profile.activeBudget).valueChanges().subscribe(budget => {
@@ -107,19 +110,21 @@ export class BudgetviewComponent implements OnInit {
     this.dragulaService.dropModel.subscribe((value) => {
       this.updateCategoryOrder(this.sortList, this.activeBudget.id);
     });
-    console.log('test5');
+    console.log('test 5')
+
     // if the month is specified, use that, else use the current month
     this.route.params.subscribe((params: Params) => {
-      let month = +params['month'].substr(-2, 2);
-      let year = +params['month'].substr(0, 4);
+      const month = +params['month'].substr(-2, 2);
+      const year = +params['month'].substr(0, 4);
 
+      console.log('test 6');
       if (params['month']) {
         this.selectedMonth = params['month'];
         this.nextMonth = moment().year(year).month(month - 1).add(1, 'months');
         this.prevMonth = moment().year(year).month(month - 1).subtract(1, 'months');
         this.displayMonth = moment(this.selectedMonth + '01').format('MMMM YYYY');
       } else {
-        this.selectedMonth = moment().format("YYYYMM");
+        this.selectedMonth = moment().format('YYYYMM');
         this.displayMonth = moment(this.selectedMonth + '01').format('MMMM YYYY');
       }
 
@@ -129,12 +134,12 @@ export class BudgetviewComponent implements OnInit {
 
       if (this.activeBudget && !this.activeBudget.allocations[this.selectedMonth]) {
         this.activeBudget.allocations[this.selectedMonth] = {
-          "income": 0,
-          "expense": 0
+          'income': 0,
+          'expense': 0
         };
       }
     })
-  }
+  };
 
   ngOnDestroy() {
     if (this.dragulaService.find('order-bag') !== undefined) {
@@ -142,20 +147,20 @@ export class BudgetviewComponent implements OnInit {
     }
   }
 
-  onBudgetActivate(id : string){
+  onBudgetActivate(id: string) {
     this.db.doc<any>('users/' + this.userId).update({activeBudget: id});
   }
 
-  onFreshStart(){
+  onFreshStart() {
     this.budgetService.freshStart(this.activeBudget.id, this.userId);
   }
 
   updateCategoryOrder(categories: Category[], budgetId: string): void {
-    let ref = 'budgets/' + budgetId + '/categories/';
+    const ref = 'budgets/' + budgetId + '/categories/';
     categories.forEach(function(category, index) {
-      let newOrder = ('000' + (index + 1).toString()).slice(-3);
+      const newOrder = ('000' + (index + 1).toString()).slice(-3);
       // check to see if it is neccessary to update the category
-      if (category.sortingOrder != newOrder) {
+      if (category.sortingOrder !== newOrder) {
         category.sortingOrder = newOrder;
         this.db.doc(ref + category.id).update(category);
         console.log('updating: ', category.name);
