@@ -234,30 +234,6 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     item.original = item.allocations[this.selectedMonth].planned;
   }
 
-  log(event) {
-    // const count: number = 1;
-    // const currentParent: any;
-    // const currentChildCount: number;
-    // this.sortList.forEach((item) => {
-    //   if (item.parent == '') {
-    //     currentParent = item;
-    //     currentChildCount = 0;
-    //   }
-    //
-    //   if (item.parent != '') {
-    //     if (item.sortingOrder.substr(0, 3) == currentParent.sortingOrder) {
-    //       // increment child count
-    //       currentChildCount++;
-    //       let childOrder = currentParent.sortingOrder + ':' + ("000" + currentChildCount).slice(-3);
-    //
-    //       if (childOrder != item.sortingOrder) {
-    //         // this.db.object('categories/' + this.activeBudget + '/' + item.$key).update({ 'sortingOrder': childOrder });
-    //       }
-    //     }
-    //   }
-    // })
-  }
-
   blur(item) {
     const planned: number = item.allocations[this.selectedMonth].planned;
     const ref = 'budgets/' + this.activeBudget.id + '/categories/' + item.id,

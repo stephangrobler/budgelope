@@ -1,9 +1,13 @@
 import { Component, OnInit, OnChanges, Input, SimpleChange } from '@angular/core';
 import { FormGroup, FormControl, FormArray, Validators } from '@angular/forms';
-import { Router, ActivatedRoute, Params } from '@angular/router';
+import { Router, ActivatedRoute, Params, ParamMap } from '@angular/router';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angularfire2/database';
-import { AngularFirestore, AngularFirestoreDocument, AngularFirestoreCollection } from 'angularfire2/firestore';
+import {
+  AngularFirestore,
+  AngularFirestoreDocument,
+  AngularFirestoreCollection
+} from 'angularfire2/firestore';
 
 import { MatSnackBar } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
@@ -22,7 +26,7 @@ import { UserService } from '../../shared/user.service';
 import { TransactionService } from '../transaction.service';
 import { AccountService } from '../../accounts/account.service';
 import { CategoryService } from '../../categories/category.service';
-
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-transaction',
@@ -30,9 +34,9 @@ import { CategoryService } from '../../categories/category.service';
   styleUrls: ['./transaction.component.scss']
 })
 export class TransactionComponent implements OnInit {
-
   transactionForm: FormGroup;
   transactionId: string;
+  title = 'Transaction';
 
   userId: string;
   activeBudget: Budget;
@@ -55,68 +59,78 @@ export class TransactionComponent implements OnInit {
     private db: AngularFirestore,
     private af: AngularFireAuth,
     public snackBar: MatSnackBar
-
-  ) {
-  }
+  ) {}
 
   ngOnInit() {
     this.initForm();
+
     this.userService.getProfile$().subscribe(profile => {
       this.budgetService.getActiveBudget$().subscribe(budget => {
         this.activeBudget = budget;
       });
 
-
-
       // get the budget accounts
-      this.accountService.getAccounts(profile.activeBudget).subscribe(accounts => this.accounts = accounts);
+      this.accountService
+        .getAccounts(profile.activeBudget)
+        .subscribe(accounts => (this.accounts = accounts));
 
       this.categoryService.getCategories(profile.activeBudget).subscribe(categories => {
         this.categories = categories;
-        this.route.params.subscribe((params: Params) => {
-          if (!params['id']){
+
+        const paramMap = this.route.paramMap.pipe(
+          switchMap((params: ParamMap) => {
+            return Observable.of({ id: params.get('id') });
+          })
+        );
+        paramMap.subscribe(params => {
+          if (!params.id) {
             return;
           }
-          this.transactionId = params["id"];
-
-          this.transactionService.getTransaction(profile.activeBudget, this.transactionId)
+          this.transactionId = params.id;
+          this.transactionService
+            .getTransaction(profile.activeBudget, this.transactionId)
             .take(1)
             .subscribe(transaction => {
-              this.clearFormCategories((<FormArray>this.transactionForm.get('categories')));
-              let selectedAccount = this.accounts.filter(account => transaction.accountId == account.id)[0];
+              this.clearFormCategories(<FormArray>this.transactionForm.get('categories'));
+
+              const selectedAccount = this.accounts.filter(
+                account => transaction.accountId === account.id
+              )[0];
+
               this.transactionForm.get('account').setValue(selectedAccount);
               this.transactionForm.get('date').setValue(transaction.date);
               this.transactionForm.get('payee').setValue(transaction.payee);
-              transaction.categories.forEach(item => {
-                let selectedCategory = this.categories.filter(category => {
-                  return item.categoryId == category.id
-                })[0];
-                let categoryGroup = new FormGroup({
-                  'category': new FormControl(selectedCategory, Validators.required),
-                  'in': new FormControl(+item.in),
-                  'out': new FormControl(+item.out)
+              if (transaction.categories) {
+                transaction.categories.forEach(item => {
+                  const selectedCategory = this.categories.filter(category => {
+                    return item.categoryId === category.id;
+                  })[0];
+                  const categoryGroup = new FormGroup({
+                    category: new FormControl(selectedCategory, Validators.required),
+                    in: new FormControl(+item.in),
+                    out: new FormControl(+item.out)
+                  });
+                  (<FormArray>this.transactionForm.get('categories')).push(categoryGroup);
                 });
-                (<FormArray>this.transactionForm.get('categories')).push(categoryGroup);
-              })
-            })
+              }
+            });
         });
       });
-
     });
   }
 
   private initForm() {
-    let transactionAccount = '';
-    let date = new Date();
-    let payee = '';
-    let amount = '';
+    const transactionAccount = '';
+    const date = new Date();
+    const payee = '';
+    const amount = '';
 
     this.transactionForm = new FormGroup({
-      'account': new FormControl(null, [Validators.required]),
-      'date': new FormControl(date, Validators.required),
-      'payee': new FormControl(null, Validators.required),
-      'cleared': new FormControl(null),
-      'categories': new FormArray([])
+      account: new FormControl(null, [Validators.required]),
+      date: new FormControl(date, Validators.required),
+      payee: new FormControl(null, Validators.required),
+      cleared: new FormControl(false),
+      categories: new FormArray([])
     });
     this.onAddCategory();
   }
@@ -126,17 +140,17 @@ export class TransactionComponent implements OnInit {
   }
 
   onAddCategory() {
-    let categoryGroup = new FormGroup({
-      'category': new FormControl(null, Validators.required),
-      'in': new FormControl(null),
-      'out': new FormControl(null)
+    const categoryGroup = new FormGroup({
+      category: new FormControl(null, Validators.required),
+      in: new FormControl(null),
+      out: new FormControl(null)
     });
 
     (<FormArray>this.transactionForm.get('categories')).push(categoryGroup);
   }
 
-  clearFormCategories(formArray: FormArray){
-    while(formArray.length !== 0){
+  clearFormCategories(formArray: FormArray) {
+    while (formArray.length !== 0) {
       formArray.removeAt(0);
     }
   }
@@ -156,9 +170,9 @@ export class TransactionComponent implements OnInit {
   }
 
   update(transaction: Transaction) {
-    let cat: Category = this.transactionForm.get('category').value;
-    let acc: Account = this.selectedAccount;
-    let payee: Payee = new Payee();
+    const cat: Category = this.transactionForm.get('category').value;
+    const acc: Account = this.selectedAccount;
+    const payee: Payee = new Payee();
 
     this.transactionService.updateTransaction(
       this.transactionId,
@@ -170,10 +184,10 @@ export class TransactionComponent implements OnInit {
   }
 
   create(form: FormGroup) {
-    let transaction = new Transaction(form.value);
+    const transaction = new Transaction(form.value);
     transaction.accountId = form.value.account.id;
     transaction.accountName = form.value.account.name;
-    transaction.calculateAmount;
+    // transaction.calculateAmount;
 
     if (form.value.categories.length > 1) {
       transaction.categoryId = '';
@@ -183,17 +197,19 @@ export class TransactionComponent implements OnInit {
       transaction.categoryName = form.value.categories[0].category.name;
     }
 
-    this.transactionService.createTransaction(
-      transaction,
-      form.value.account,
-      form.value.categories,
-      this.activeBudget,
-      this.userId,
-      this.activeBudget.id,
-    ).then(response => {
-      this.transactionForm.reset();
-      this.openSnackBar('Created transaction successfully');
-    });
+    this.transactionService
+      .createTransaction(
+        transaction,
+        form.value.account,
+        form.value.categories,
+        this.activeBudget,
+        this.userId,
+        this.activeBudget.id
+      )
+      .then(response => {
+        this.transactionForm.reset();
+        this.openSnackBar('Created transaction successfully');
+      });
   }
 
   openSnackBar(message: string) {
@@ -204,7 +220,7 @@ export class TransactionComponent implements OnInit {
 
   cancel() {
     this.transactionForm.reset();
-    this.clearFormCategories((<FormArray>this.transactionForm.get('categories')));
+    this.clearFormCategories(<FormArray>this.transactionForm.get('categories'));
     this.onAddCategory();
     this.transactionId = null;
   }
