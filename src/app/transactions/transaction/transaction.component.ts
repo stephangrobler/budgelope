@@ -77,43 +77,11 @@ export class TransactionComponent implements OnInit {
       this.categoryService.getCategories(profile.activeBudget).subscribe(categories => {
         this.categories = categories;
 
-        const paramMap = this.route.paramMap.pipe(
-          switchMap((params: ParamMap) => {
-            return Observable.of({ id: params.get('id') });
-          })
-        );
-        paramMap.subscribe(params => {
-          if (!params.id) {
+        this.route.paramMap.subscribe(params => {
+          if (!params.get('id')) {
             return;
           }
-          this.transactionId = params.id;
-          this.transactionService
-            .getTransaction(profile.activeBudget, this.transactionId)
-            .take(1)
-            .subscribe(transaction => {
-              this.clearFormCategories(<FormArray>this.transactionForm.get('categories'));
-
-              const selectedAccount = this.accounts.filter(
-                account => transaction.accountId === account.id
-              )[0];
-
-              this.transactionForm.get('account').setValue(selectedAccount);
-              this.transactionForm.get('date').setValue(transaction.date);
-              this.transactionForm.get('payee').setValue(transaction.payee);
-              if (transaction.categories) {
-                transaction.categories.forEach(item => {
-                  const selectedCategory = this.categories.filter(category => {
-                    return item.categoryId === category.id;
-                  })[0];
-                  const categoryGroup = new FormGroup({
-                    category: new FormControl(selectedCategory, Validators.required),
-                    in: new FormControl(+item.in),
-                    out: new FormControl(+item.out)
-                  });
-                  (<FormArray>this.transactionForm.get('categories')).push(categoryGroup);
-                });
-              }
-            });
+          this.loadTransaction(params.get('id'), profile.activeBudget);
         });
       });
     });
@@ -133,6 +101,37 @@ export class TransactionComponent implements OnInit {
       categories: new FormArray([])
     });
     this.onAddCategory();
+  }
+
+  loadTransaction(transactionId: string, budgetId: string) {
+    this.transactionService
+      .getTransaction(budgetId, transactionId)
+      .take(1)
+      .subscribe(transaction => {
+        this.clearFormCategories(<FormArray>this.transactionForm.get('categories'));
+
+        const selectedAccount = this.accounts.filter(
+          account => transaction.accountId === account.id
+        )[0];
+
+        this.transactionForm.get('account').setValue(selectedAccount);
+        this.transactionForm.get('date').setValue(transaction.date);
+        this.transactionForm.get('payee').setValue(transaction.payee);
+
+        if (transaction.categories) {
+          transaction.categories.forEach(item => {
+            const selectedCategory = this.categories.filter(category => {
+              return item.categoryId === category.id;
+            })[0];
+            const categoryGroup = new FormGroup({
+              category: new FormControl(selectedCategory, Validators.required),
+              in: new FormControl(+item.in),
+              out: new FormControl(+item.out)
+            });
+            (<FormArray>this.transactionForm.get('categories')).push(categoryGroup);
+          });
+        }
+      });
   }
 
   onSubmit() {
