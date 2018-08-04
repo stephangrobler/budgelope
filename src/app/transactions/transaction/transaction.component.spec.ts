@@ -18,7 +18,7 @@ import { UserService } from '../../shared/user.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
-import { Observable } from 'rxjs/Observable';
+import { Observable, of } from 'rxjs';
 import {
   ReactiveFormsModule,
   FormsModule,
@@ -40,7 +40,7 @@ describe('TransactionsComponent', () => {
     'getTransactions',
     'getTransaction'
   ]);
-  TransactionServiceStub.getTransactions.and.returnValue(Observable.of([]));
+  TransactionServiceStub.getTransactions.and.returnValue(of([]));
 
   const BudgetServiceStub = jasmine.createSpyObj('BudgetService', [
     'getTransactions',
@@ -50,7 +50,7 @@ describe('TransactionsComponent', () => {
   const RouterStub = jasmine.createSpyObj('Router', ['navigate']);
   let accountServiceStub, categoryServiceStub, matSnackBarStub, activatedRouteStub;
   const angularFireAuthServiceStub = jasmine.createSpyObj('AngularFireAuth', ['authenticate']);
-  angularFireAuthServiceStub.authState = Observable.of([]);
+  angularFireAuthServiceStub.authState = of([]);
 
   const angularFirestoreServiceStub = jasmine.createSpyObj('AngularFirestore', [
     'doc',
@@ -58,7 +58,7 @@ describe('TransactionsComponent', () => {
   ]);
   angularFirestoreServiceStub.doc.and.returnValue({
     valueChanges: function() {
-      return Observable.of({});
+      return of({});
     }
   });
 
@@ -68,29 +68,29 @@ describe('TransactionsComponent', () => {
       id: '201805'
     });
     accountServiceStub = jasmine.createSpyObj('AccountService', ['getAccounts', 'updateAccount']);
-    accountServiceStub.getAccounts.and.returnValue(Observable.of([]));
+    accountServiceStub.getAccounts.and.returnValue(of([]));
 
     categoryServiceStub = jasmine.createSpyObj('CategoryService', [
       'getCategories',
       'updateCategory'
     ]);
-    categoryServiceStub.getCategories.and.returnValue(Observable.of([]));
+    categoryServiceStub.getCategories.and.returnValue(of([]));
 
     matSnackBarStub = jasmine.createSpyObj('MatSnackBar', ['open']);
 
     TransactionServiceStub.getTransaction.and.returnValue(
-      Observable.of({
+      of({
         date: '2018-01-01',
         payee: 'Test Payee'
       })
     );
     UserServiceStub.getProfile$.and.returnValue(
-      Observable.of({
+      of({
         uid: '09876'
       })
     );
     BudgetServiceStub.getActiveBudget$.and.returnValue(
-      Observable.of({
+      of({
         id: '54321'
       })
     );

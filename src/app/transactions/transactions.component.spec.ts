@@ -8,24 +8,24 @@ import { UserService } from '../shared/user.service';
 import { Router } from '@angular/router';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
-import { Observable } from 'rxjs/Observable';
+import { Observable, of } from 'rxjs';
 
 describe('TransactionsComponent', () => {
 
   const TransactionServiceStub = jasmine.createSpyObj('TransactionService', ['getTransactions']);
-  TransactionServiceStub.getTransactions.and.returnValue(Observable.of([]));
+  TransactionServiceStub.getTransactions.and.returnValue(of([]));
 
   const BudgetServiceStub = jasmine.createSpyObj('BudgetService', ['getTransactions']);
   const UserServiceStub = jasmine.createSpyObj('UserService', ['getUser']);
   const RouterStub = jasmine.createSpyObj('Router', ['navigate']);
 
   const angularFireAuthServiceStub = jasmine.createSpyObj('AngularFireAuth', ['authenticate']);
-  angularFireAuthServiceStub.authState = Observable.of([]);
+  angularFireAuthServiceStub.authState = of([]);
 
   const angularFirestoreServiceStub = jasmine.createSpyObj('AngularFirestore', ['doc', 'collection']);
   angularFirestoreServiceStub.doc.and.returnValue({
     'valueChanges': function () {
-      return Observable.of({})
+      return of({})
     }
   });
 

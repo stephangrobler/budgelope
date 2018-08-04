@@ -6,16 +6,16 @@ import { Account } from '../shared/account';
 import { Category } from '../shared/category';
 import { Budget } from '../shared/budget';
 import { Transaction } from '../shared/transaction';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 describe('Transaction Service to be thing', () => {
   let service: TransactionService;
   let dbMock, categoryServiceMock;
 
-  let account = new Account();
-  let category = new Category();
-  let budget = new Budget();
-  let transaction = new Transaction();
+  const account = new Account();
+  const category = new Category();
+  const budget = new Budget();
+  const transaction = new Transaction();
 
   beforeEach(() => {
     dbMock = jasmine.createSpyObj('AngularFirestore', ['collection', 'doc']);
@@ -26,7 +26,7 @@ describe('Transaction Service to be thing', () => {
       doc: function() {
         return {
           valueChanges: () => {
-            return Observable.of({});
+            return of({});
           },
           update: () => {
             return {
