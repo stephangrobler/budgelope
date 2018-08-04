@@ -6,9 +6,9 @@
       </mat-card-title>
       <mat-card-content>
         <section>
-          <mat-input-container>
+          <mat-form-field>
             <input matInput type="text" placeholder="Category name" [(ngModel)]="category.name" name="name" #nm="ngModel">
-          </mat-input-container>
+          </mat-form-field>
         </section>
         <section>
           <mat-select placeholder="Parent Category" [(ngModel)]="parent" name="parent">

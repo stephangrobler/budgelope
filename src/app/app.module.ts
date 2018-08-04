@@ -7,7 +7,7 @@ import { AngularFirestoreModule } from 'angularfire2/firestore';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { AngularFireAuthModule } from 'angularfire2/auth';
 import { environment } from '../environments/environment';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+
 import { AppComponent } from './app.component';
 import { ErrorComponent } from './error/error.component';
 import { LoginComponent } from './login/login.component';
@@ -32,7 +32,6 @@ import { CoreModule } from './core/core.module';
     FormsModule,
     ReactiveFormsModule,
     HttpModule,
-    NgbModule.forRoot(),
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireDatabaseModule,
     AngularFirestoreModule,

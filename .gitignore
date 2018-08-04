@@ -8,6 +8,7 @@
 # dependencies
 /node_modules
 /functions/node_modules
+/angular_material_schematics-yxl7mR
 
 # IDEs and editors
 /.idea

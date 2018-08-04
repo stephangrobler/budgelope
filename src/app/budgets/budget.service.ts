@@ -2,10 +2,8 @@ import { Injectable } from '@angular/core';
 import * as firebase from 'firebase';
 import * as moment from 'moment';
 import { AngularFirestore } from 'angularfire2/firestore';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/take';
-import 'rxjs/add/operator/mergeMap';
-
+import { Observable } from 'rxjs';
+import { take, mergeMap } from 'rxjs/operators';
 import { Budget } from '../shared/budget';
 import { CategoryService } from '../categories/category.service';
 import { AccountService } from '../accounts/account.service'
@@ -29,7 +27,9 @@ export class BudgetService {
     let currentUser = firebase.auth().currentUser;
     // get the activebudget from the user object
     return this.db.doc<any>('users/' + currentUser.uid).valueChanges()
-      .flatMap(user => this.db.doc<Budget>('budgets/' + user.activeBudget).valueChanges());
+      .pipe(
+        mergeMap(user => this.db.doc<Budget>('budgets/' + user.activeBudget).valueChanges())
+      );
   }
 
   createBudget(budget: Budget) {
@@ -58,7 +58,9 @@ export class BudgetService {
       cBudget: Budget,
       newBudget: Budget = new Budget();
 
-    budgetStore.doc<Budget>(currentBudgetId).valueChanges().take(1).subscribe(t => {
+    budgetStore.doc<Budget>(currentBudgetId).valueChanges().pipe(
+      take(1)
+    ).subscribe(t => {
       cBudget = t;
       let categoryService = this.categoryService,
         accountService = this.accountService;

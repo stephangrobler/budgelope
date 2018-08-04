@@ -10,11 +10,9 @@ import {
 } from 'angularfire2/firestore';
 
 import { MatSnackBar } from '@angular/material';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
+import { switchMap, take } from 'rxjs/operators';
 import * as moment from 'moment';
-import 'rxjs/add/operator/startWith';
-import 'rxjs/add/operator/map';
-
 import { Profile } from '../../shared/profile';
 import { Transaction } from '../../shared/transaction';
 import { Account } from '../../shared/account';
@@ -26,7 +24,6 @@ import { UserService } from '../../shared/user.service';
 import { TransactionService } from '../transaction.service';
 import { AccountService } from '../../accounts/account.service';
 import { CategoryService } from '../../categories/category.service';
-import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-transaction',
@@ -36,16 +33,13 @@ import { switchMap } from 'rxjs/operators';
 export class TransactionComponent implements OnInit {
   transactionForm: FormGroup;
   transactionId: string;
-  title = 'Transaction';
 
+  title = 'Transaction';
   userId: string;
   activeBudget: Budget;
-
   item: AngularFirestoreDocument<any>;
-
   accounts: Account[];
   categories: CategoryId[];
-
   selectedAccount: Account;
 
   constructor(
@@ -106,8 +100,9 @@ export class TransactionComponent implements OnInit {
   loadTransaction(transactionId: string, budgetId: string) {
     this.transactionService
       .getTransaction(budgetId, transactionId)
-      .take(1)
-      .subscribe(transaction => {
+      .pipe(
+        take(1)
+      ).subscribe(transaction => {
         this.clearFormCategories(<FormArray>this.transactionForm.get('categories'));
 
         const selectedAccount = this.accounts.filter(
@@ -130,7 +125,6 @@ export class TransactionComponent implements OnInit {
             });
             (<FormArray>this.transactionForm.get('categories')).push(categoryGroup);
           });
-          
         }
       });
   }
@@ -179,7 +173,7 @@ export class TransactionComponent implements OnInit {
   /**
    * Updates the categories for the transaction based on changes made to saved 
    * transactions
-   * 
+   *
    * @param oldCategories FormArray
    * @param newCategories FormArray
    */

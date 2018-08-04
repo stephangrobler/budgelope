@@ -3,24 +3,16 @@ import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angular
 import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
-
 import { DragulaService } from 'ng2-dragula';
-
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/do';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/take';
-import 'rxjs/add/operator/switchMap';
-
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import * as moment from 'moment';
-
 import { Account } from '../../shared/account';
 import { Category } from '../../shared/category';
 import { Budget } from '../../shared/budget';
 import { BudgetService } from '../budget.service';
 import { UserService } from '../../shared/user.service';
 import { switchMap } from 'rxjs/operators';
-
 
 @Component({
   selector: 'app-budgetview',
@@ -60,42 +52,45 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     private dragulaService: DragulaService,
     private route: ActivatedRoute,
     private router: Router
-  ) {
-
-  }
+  ) {}
 
   ngOnInit() {
-    this.auth.authState.subscribe((user) => {
+    this.auth.authState.subscribe(user => {
       if (!user) {
         return;
       }
       this.userId = user.uid;
       // get active budget TODO: move to service :P
-      this.db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
-        this.budgetList = [];
-        for (const i in profile.availableBudgets) {
-          if (profile.availableBudgets.hasOwnProperty(i)) {
-
-          const budget = {
-            id: i,
-            name: profile.availableBudgets[i].name
-          };
-          this.budgetList.push(budget);
+      this.db
+        .doc<any>('users/' + user.uid)
+        .valueChanges()
+        .subscribe(profile => {
+          this.budgetList = [];
+          for (const i in profile.availableBudgets) {
+            if (profile.availableBudgets.hasOwnProperty(i)) {
+              const budget = {
+                id: i,
+                name: profile.availableBudgets[i].name
+              };
+              this.budgetList.push(budget);
+            }
           }
-        }
 
-        this.db.doc<Budget>('budgets/' + profile.activeBudget).valueChanges().subscribe(budget => {
-          budget.id = profile.activeBudget;
-          if (!budget.allocations[this.selectedMonth]) {
-            budget.allocations[this.selectedMonth] = {
-              'income': 0,
-              'expense': 0
-            };
-          }
-          this.getCategories(profile.activeBudget);
-          return this.activeBudget = budget;
+          this.db
+            .doc<Budget>('budgets/' + profile.activeBudget)
+            .valueChanges()
+            .subscribe(budget => {
+              budget.id = profile.activeBudget;
+              if (!budget.allocations[this.selectedMonth]) {
+                budget.allocations[this.selectedMonth] = {
+                  income: 0,
+                  expense: 0
+                };
+              }
+              this.getCategories(profile.activeBudget);
+              return (this.activeBudget = budget);
+            });
         });
-      });
     });
     // drag and drop bag setup
     this.dragulaService.setOptions('order-bag', {
@@ -103,25 +98,31 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
         return handle.className.indexOf('handle') > -1;
       }
     });
-    this.dragulaService.dropModel.subscribe((value) => {
+    this.dragulaService.dropModel.subscribe(value => {
       this.updateCategoryOrder(this.sortList, this.activeBudget.id);
     });
 
     // if the month is specified, use that, else use the current month
     this.selectedMonth = this.route.paramMap.pipe(
       switchMap((params: ParamMap) => {
-        return Observable.of({'month': params.get('month')});
+        return of({ month: params.get('month') });
       })
     );
     this.selectedMonth.subscribe(monthObj => {
       // check for null and object
       if (monthObj && monthObj.month) {
-      const month = +monthObj.month.substr(-2, 2);
-      const year = +monthObj.month.substr(0, 4);
+        const month = +monthObj.month.substr(-2, 2);
+        const year = +monthObj.month.substr(0, 4);
 
         this.selectedMonth = monthObj.month;
-        this.nextMonth = moment().year(year).month(month - 1).add(1, 'months');
-        this.prevMonth = moment().year(year).month(month - 1).subtract(1, 'months');
+        this.nextMonth = moment()
+          .year(year)
+          .month(month - 1)
+          .add(1, 'months');
+        this.prevMonth = moment()
+          .year(year)
+          .month(month - 1)
+          .subtract(1, 'months');
         this.displayMonth = moment(this.selectedMonth + '01').format('MMMM YYYY');
       } else {
         this.selectedMonth = moment().format('YYYYMM');
@@ -134,12 +135,12 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
 
       if (this.activeBudget && !this.activeBudget.allocations[this.selectedMonth]) {
         this.activeBudget.allocations[this.selectedMonth] = {
-          'income': 0,
-          'expense': 0
+          income: 0,
+          expense: 0
         };
       }
     });
-  };
+  }
 
   ngOnDestroy() {
     if (this.dragulaService.find('order-bag') !== undefined) {
@@ -148,7 +149,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
   }
 
   onBudgetActivate(id: string) {
-    this.db.doc<any>('users/' + this.userId).update({activeBudget: id});
+    this.db.doc<any>('users/' + this.userId).update({ activeBudget: id });
   }
 
   onFreshStart() {
@@ -187,17 +188,22 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
 
   getCategories(budgetId: string): void {
     const reference = 'budgets/' + budgetId + '/categories';
-    const testList = this.db.collection<Category[]>(reference, ref => ref.orderBy('sortingOrder')).snapshotChanges().map(budget => {
-      const budgetList: any = budget.map(b => {
-        const thisRef = reference + '/' + b.payload.doc.id + '/categories';
-        const data = b.payload.doc.data() as Category;
-        const catRef = this.db.collection<Category>(thisRef).snapshotChanges();
-        const id = b.payload.doc.id;
-        return { id, ...data }
-      });
+    const testList = this.db
+      .collection<Category>(reference, ref => ref.orderBy('sortingOrder'))
+      .snapshotChanges()
+      .pipe(
+        map(budget => {
+          const budgetList: any = budget.map(b => {
+            const thisRef = reference + '/' + b.payload.doc.id + '/categories';
+            const data = b.payload.doc.data() as Category;
+            const catRef = this.db.collection<Category>(thisRef).snapshotChanges();
+            const id = b.payload.doc.id;
+            return { id, ...data };
+          });
 
-      return budgetList;
-    });
+          return budgetList;
+        })
+      );
 
     testList.subscribe(list => {
       this.checkAllocations(list, this.selectedMonth);
@@ -211,7 +217,6 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
 
   onPrevMonth() {
     this.router.navigate(['/app/budget', this.prevMonth.format('YYYYMM')]);
-
   }
   checkIsHeader(item) {
     return item.parent === '';
@@ -240,13 +245,13 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
       budgetRef = 'budgets/' + this.activeBudget.id;
 
     if (planned !== item.original) {
-      item.balance = (item.balance - item.original) + planned;
+      item.balance = item.balance - item.original + planned;
 
       // update the budget available balance
-      this.activeBudget.balance = (this.activeBudget.balance - planned) + item.original;
+      this.activeBudget.balance = this.activeBudget.balance - planned + item.original;
 
-      delete (item.original);
-      delete (item.id);
+      delete item.original;
+      delete item.id;
 
       this.db.doc(ref).update(item);
       this.db.doc(budgetRef).update(this.activeBudget);

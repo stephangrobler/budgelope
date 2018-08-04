@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from 'angularfire2/firestore';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
+import { map, take } from 'rxjs/operators';
 import * as firebase from 'firebase';
 import * as moment from 'moment';
 
@@ -9,15 +10,13 @@ import { Account } from '../shared/account';
 import { Category } from '../shared/category';
 import { Payee } from '../shared/payee';
 import { Budget } from '../shared/budget';
-
 import { CategoryService } from '../categories/category.service';
 
 @Injectable()
 export class TransactionService {
   transactions: Transaction[];
 
-  constructor(private db: AngularFirestore, private categoryService: CategoryService) {
-  }
+  constructor(private db: AngularFirestore, private categoryService: CategoryService) {}
 
   /**
    * Get all transactions with the id of the transactions
@@ -30,15 +29,17 @@ export class TransactionService {
     return this.db
       .collection<Transaction>(transRef, ref => ref.orderBy('date', 'desc'))
       .snapshotChanges()
-      .map(actions => {
-        let stuff = actions.map(a => {
-          const data = a.payload.doc.data() as Transaction;
-          const id = a.payload.doc.id;
-          data.id = id;
-          return { id, ...data };
-        });
-        return stuff;
-      });
+      .pipe(
+        map(actions => {
+          let stuff = actions.map(a => {
+            const data = a.payload.doc.data() as Transaction;
+            const id = a.payload.doc.id;
+            data.id = id;
+            return { id, ...data };
+          });
+          return stuff;
+        })
+      );
   }
 
   getTransaction(budgetId: string, transactionId: string): Observable<Transaction> {
@@ -84,18 +85,22 @@ export class TransactionService {
       // budget.allocations[shortDate].expense += transaction.out;
     }
 
-    currentDoc.take(1).subscribe(currentTransaction => {
+    currentDoc.pipe(
+      take(1)
+    ).subscribe(currentTransaction => {
       // update accounts if changes were made to it
-      if (account && account.id != currentTransaction.accountId) {
+      if (account && account.id !== currentTransaction.accountId) {
         // load original account to reset values.
       }
       // update category if not the same as previous category
-      if (category && category.id != currentTransaction.categoryId) {
+      if (category && category.id !== currentTransaction.categoryId) {
         let categoryRef = 'budgets/' + budget.id + '/categories';
         this.db
           .doc<Category>(categoryRef + '/' + currentTransaction.categoryId)
           .valueChanges()
-          .take(1)
+          .pipe(
+            take(1)
+          )
           .subscribe(currentCategory => {
             currentCategory.balance -= transaction.amount;
             this.db.doc(categoryRef + '/' + currentTransaction.categoryId).update(currentCategory);
