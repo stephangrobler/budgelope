@@ -2,7 +2,6 @@ import { Component, OnInit, OnChanges, Input, SimpleChange } from '@angular/core
 import { FormGroup, FormControl, FormArray, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, Params, ParamMap } from '@angular/router';
 import { AngularFireAuth } from 'angularfire2/auth';
-import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angularfire2/database';
 import {
   AngularFirestore,
   AngularFirestoreDocument,

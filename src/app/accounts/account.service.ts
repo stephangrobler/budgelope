@@ -25,7 +25,7 @@ export class AccountService {
   }
 
   createAccount(budget: Budget, account: Account) {
-    let accountStore = this.db.collection<Account>('budgets/' + budget.id + '/accounts');
+    const accountStore = this.db.collection<Account>('budgets/' + budget.id + '/accounts');
     // add account then add starting account balance transaction to update the budget
     // accountStore.add(account).then(docRef => {
     //   this.transactionService.createStartingBalance(account, budget);
@@ -33,7 +33,7 @@ export class AccountService {
   }
 
   updateAccount(update: Account) {
-    let dbRef = firebase
+    const dbRef = firebase
       .database()
       .ref('accounts')
       .child(update.id)
@@ -45,7 +45,7 @@ export class AccountService {
   }
 
   removeAccount(delAccount: Account) {
-    let dbRef = firebase
+    const dbRef = firebase
       .database()
       .ref('accounts')
       .child(delAccount.id)
@@ -56,7 +56,7 @@ export class AccountService {
   /** Copy accounts from a budget to another specified budget
    */
   copyAccounts(currentBudgetId: string, toBudgetId: string) {
-    let fromRef = 'budgets/' + currentBudgetId + '/accounts';
+    const fromRef = 'budgets/' + currentBudgetId + '/accounts';
     this.db
       .collection<Account>(fromRef)
       .snapshotChanges()
@@ -69,7 +69,7 @@ export class AccountService {
       )
       .subscribe(accounts => {
         accounts.forEach(function(item) {
-          let store = this.db.collection('budgets/' + toBudgetId + '/accounts').doc(item.id);
+          const store = this.db.collection('budgets/' + toBudgetId + '/accounts').doc(item.id);
           item.balance = 0;
           delete item.id;
           store.set(item);
