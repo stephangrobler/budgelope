@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute, Params } from '@angular/router';
-import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angularfire2/database';
+import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -21,6 +20,7 @@ export interface CategoryId extends Category {
   styleUrls: ['./category.component.scss']
 })
 export class CategoryComponent implements OnInit {
+  title = 'Category';
   name: string;
   parent: CategoryId;
   categories: Observable<CategoryId[]>;
@@ -43,23 +43,22 @@ export class CategoryComponent implements OnInit {
 
   ngOnInit() {
     // get the category id from the route
-    this.route.params.forEach((params: Params) => {
-      this.categoryId = params['id'];
+    this.route.paramMap.subscribe(params => {
+      this.categoryId = params.get('id');
     });
+
     this.auth.authState.subscribe(user => {
       if (!user) {
         return;
       }
       this.theUserId = user.uid;
-      let ref = 'users/' + user.uid;
-      console.log(ref);
+      const ref = 'users/' + user.uid;
 
       this.profile = this.db
         .doc<any>(ref)
         .valueChanges()
         .subscribe(profile => {
           this.activeBudget = profile.activeBudget;
-          console.log(profile);
           this.loadParentCategories(profile.activeBudget);
           if (this.categoryId !== 'add') {
             this.db
@@ -74,8 +73,8 @@ export class CategoryComponent implements OnInit {
   }
 
   loadParentCategories(budgetId: string) {
-    let ref = 'budgets/' + budgetId + '/categories';
-    let parentCategories = this.db.collection<Category>(ref, ls => ls.where('parent', '==', ''));
+    const ref = 'budgets/' + budgetId + '/categories';
+    const parentCategories = this.db.collection<Category>(ref, ls => ls.where('parent', '==', ''));
 
     // get all the categories so that we can have counts to do the correct
     // saving and counts :P
@@ -90,13 +89,8 @@ export class CategoryComponent implements OnInit {
     );
   }
 
-  copyCategories() {
-    // this.categoryService.copyCategories('pPkN7QxRdyyvG4Jy2hr6', 'default');
-    this.budgetService.freshStart('pPkN7QxRdyyvG4Jy2hr6', this.theUserId);
-  }
-
   saveCategory() {
-    let ref = 'budgets/' + this.activeBudget + '/categories';
+    const ref = 'budgets/' + this.activeBudget + '/categories';
 
     if (this.parent) {
       this.category.parent = this.parent.name;
@@ -120,7 +114,7 @@ export class CategoryComponent implements OnInit {
         .then(() => console.log('Add Successfull.'));
       // this.categoryService.createCategory(this.activeBudget, this.category);
     } else {
-      let dbRef = this.db
+      const dbRef = this.db
         .doc(ref)
         .update({
           name: this.category.name,
@@ -135,6 +129,6 @@ export class CategoryComponent implements OnInit {
   }
 
   cancel() {
-    this.router.navigate(['/budgetview']);
+    this.router.navigate(['/app/budget']);
   }
 }

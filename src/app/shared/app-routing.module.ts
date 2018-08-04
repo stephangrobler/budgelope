@@ -12,6 +12,8 @@ import { AuthGuardService } from './auth-guard.service';
 import { BudgetviewComponent } from '../budgets/budgetview/budgetview.component';
 import { TransactionComponent } from '../transactions/transaction/transaction.component';
 import { TransactionsComponent } from '../transactions/transactions.component';
+import { CategoriesComponent } from '../categories/categories.component';
+import { CategoryComponent } from '../categories/category/category.component';
 
 const appRoutes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -24,6 +26,8 @@ const appRoutes: Routes = [
       { path: 'transactions', component: TransactionsComponent },
       { path: 'accounts', component: AccountListComponent },
       { path: 'account/:id', component: AccountComponent },
+      { path: 'categories', component: CategoriesComponent },
+      { path: 'category/:id', component: CategoryComponent },
     ]
   },
   { path: 'signup', component: SignUpComponent },
