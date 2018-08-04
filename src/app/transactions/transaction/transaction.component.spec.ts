@@ -24,15 +24,20 @@ import { AccountService } from '../../accounts/account.service';
 import { Account } from '../../shared/account';
 import { CategoryService } from '../../categories/category.service';
 
-
 import { ActivatedRouteStub } from '../../../testing/activate-route-stub';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('TransactionsComponent', () => {
-  const TransactionServiceStub = jasmine.createSpyObj('TransactionService', ['getTransactions', 'getTransaction']);
+  const TransactionServiceStub = jasmine.createSpyObj('TransactionService', [
+    'getTransactions',
+    'getTransaction'
+  ]);
   TransactionServiceStub.getTransactions.and.returnValue(Observable.of([]));
 
-  const BudgetServiceStub = jasmine.createSpyObj('BudgetService', ['getTransactions', 'getActiveBudget$']);
+  const BudgetServiceStub = jasmine.createSpyObj('BudgetService', [
+    'getTransactions',
+    'getActiveBudget$'
+  ]);
   const UserServiceStub = jasmine.createSpyObj('UserService', ['getUser', 'getProfile$']);
   const RouterStub = jasmine.createSpyObj('Router', ['navigate']);
   let accountServiceStub, categoryServiceStub, matSnackBarStub, activatedRouteStub;
@@ -54,7 +59,7 @@ describe('TransactionsComponent', () => {
     activatedRouteStub.setParamMap({
       id: '201805'
     });
-    accountServiceStub = jasmine.createSpyObj('AccountService', ['getAccounts']);
+    accountServiceStub = jasmine.createSpyObj('AccountService', ['getAccounts', 'updateAccount']);
     accountServiceStub.getAccounts.and.returnValue(Observable.of([]));
 
     categoryServiceStub = jasmine.createSpyObj('CategoryService', ['getCategories']);
@@ -62,16 +67,22 @@ describe('TransactionsComponent', () => {
 
     matSnackBarStub = jasmine.createSpyObj('MatSnackBar', ['open']);
 
-    TransactionServiceStub.getTransaction.and.returnValue(Observable.of({
+    TransactionServiceStub.getTransaction.and.returnValue(
+      Observable.of({
         date: '2018-01-01',
         payee: 'Test Payee'
-    }));
-    UserServiceStub.getProfile$.and.returnValue(Observable.of({
+      })
+    );
+    UserServiceStub.getProfile$.and.returnValue(
+      Observable.of({
         uid: '09876'
-    }));
-    BudgetServiceStub.getActiveBudget$.and.returnValue(Observable.of({
+      })
+    );
+    BudgetServiceStub.getActiveBudget$.and.returnValue(
+      Observable.of({
         id: '54321'
-    }));
+      })
+    );
 
     TestBed.configureTestingModule({
       declarations: [TransactionComponent],
@@ -144,4 +155,44 @@ describe('TransactionsComponent', () => {
     expect(app.title).toEqual('Transaction');
   }));
 
+  it('should update the old account and new selected account', function() {
+    const fixture = TestBed.createComponent(TransactionComponent);
+    const account = new Account();
+    const oldAccount = new Account();
+    account.balance = 500;
+    oldAccount.balance = 500;
+
+    fixture.componentInstance.updateAccount(500, oldAccount, account);
+
+    expect(accountServiceStub.updateAccount).toHaveBeenCalledTimes(2);
+  });
+
+  it('should update the old account and new selected account', function() {
+    const fixture = TestBed.createComponent(TransactionComponent);
+    const account = new Account();
+    const oldAccount = new Account();
+    account.balance = 500;
+    oldAccount.balance = 500;
+
+    fixture.componentInstance.updateAccount(500, oldAccount, account);
+
+    expect(accountServiceStub.updateAccount).toHaveBeenCalledWith(
+      jasmine.objectContaining({ balance: 0 })
+    );
+  });
+
+  it('should update the old account and new selected account', function() {
+    const fixture = TestBed.createComponent(TransactionComponent);
+    const account = new Account();
+    const oldAccount = new Account();
+
+    account.balance = 1000;
+    oldAccount.balance = 0;
+
+    fixture.componentInstance.updateAccount(-500, oldAccount, account);
+
+    expect(accountServiceStub.updateAccount).toHaveBeenCalledWith(
+      jasmine.objectContaining({ balance: 500 })
+    );
+  });
 });

@@ -168,6 +168,13 @@ export class TransactionComponent implements OnInit {
     }
   }
 
+  updateAccount(amount: number, oldAccount: Account, newAccount: Account) {
+    oldAccount.balance -= amount;
+    newAccount.balance += amount;
+    this.accountService.updateAccount(oldAccount);
+    this.accountService.updateAccount(newAccount);
+  }
+
   update(transaction: Transaction) {
     const cat: Category = this.transactionForm.get('category').value;
     const acc: Account = this.selectedAccount;
