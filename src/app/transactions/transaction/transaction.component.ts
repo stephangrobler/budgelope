@@ -130,6 +130,7 @@ export class TransactionComponent implements OnInit {
             });
             (<FormArray>this.transactionForm.get('categories')).push(categoryGroup);
           });
+          
         }
       });
   }
@@ -173,6 +174,29 @@ export class TransactionComponent implements OnInit {
     newAccount.balance += amount;
     this.accountService.updateAccount(oldAccount);
     this.accountService.updateAccount(newAccount);
+  }
+
+  /**
+   * Updates the categories for the transaction based on changes made to saved 
+   * transactions
+   * 
+   * @param oldCategories FormArray
+   * @param newCategories FormArray
+   */
+  updateCategories(oldCategories: FormArray, newCategories: FormArray) {
+    // reset old categories
+    oldCategories.value.forEach(categoryItem => {
+      categoryItem.category.balance -= +categoryItem.in;
+      categoryItem.category.balance += +categoryItem.out;
+      this.categoryService.updateCategory(this.activeBudget.id, categoryItem.category);
+    });
+
+    // adjust new categories
+    newCategories.value.forEach(categoryItem => {
+      categoryItem.category.balance += +categoryItem.in;
+      categoryItem.category.balance -= +categoryItem.out;
+      this.categoryService.updateCategory(this.activeBudget.id, categoryItem.category);
+    });
   }
 
   update(transaction: Transaction) {

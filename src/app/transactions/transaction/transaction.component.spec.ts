@@ -19,13 +19,21 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { Observable } from 'rxjs/Observable';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormsModule,
+  FormArray,
+  FormGroup,
+  FormControl
+} from '@angular/forms';
 import { AccountService } from '../../accounts/account.service';
 import { Account } from '../../shared/account';
 import { CategoryService } from '../../categories/category.service';
 
 import { ActivatedRouteStub } from '../../../testing/activate-route-stub';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { Category } from '../../shared/category';
+import { Budget } from '../../shared/budget';
 
 describe('TransactionsComponent', () => {
   const TransactionServiceStub = jasmine.createSpyObj('TransactionService', [
@@ -62,7 +70,10 @@ describe('TransactionsComponent', () => {
     accountServiceStub = jasmine.createSpyObj('AccountService', ['getAccounts', 'updateAccount']);
     accountServiceStub.getAccounts.and.returnValue(Observable.of([]));
 
-    categoryServiceStub = jasmine.createSpyObj('CategoryService', ['getCategories']);
+    categoryServiceStub = jasmine.createSpyObj('CategoryService', [
+      'getCategories',
+      'updateCategory'
+    ]);
     categoryServiceStub.getCategories.and.returnValue(Observable.of([]));
 
     matSnackBarStub = jasmine.createSpyObj('MatSnackBar', ['open']);
@@ -155,7 +166,7 @@ describe('TransactionsComponent', () => {
     expect(app.title).toEqual('Transaction');
   }));
 
-  it('should update the old account and new selected account', function() {
+  it('should update the old account and new selected account', () => {
     const fixture = TestBed.createComponent(TransactionComponent);
     const account = new Account();
     const oldAccount = new Account();
@@ -167,7 +178,7 @@ describe('TransactionsComponent', () => {
     expect(accountServiceStub.updateAccount).toHaveBeenCalledTimes(2);
   });
 
-  it('should update the old account and new selected account', function() {
+  it('should update the old account and new selected account', () => {
     const fixture = TestBed.createComponent(TransactionComponent);
     const account = new Account();
     const oldAccount = new Account();
@@ -181,7 +192,7 @@ describe('TransactionsComponent', () => {
     );
   });
 
-  it('should update the old account and new selected account', function() {
+  it('should update the old account and new selected account', () => {
     const fixture = TestBed.createComponent(TransactionComponent);
     const account = new Account();
     const oldAccount = new Account();
@@ -194,5 +205,127 @@ describe('TransactionsComponent', () => {
     expect(accountServiceStub.updateAccount).toHaveBeenCalledWith(
       jasmine.objectContaining({ balance: 500 })
     );
+  });
+
+  it('should update the categories and call update 3 times', () => {
+    const fixture = TestBed.createComponent(TransactionComponent);
+
+    fixture.componentInstance.activeBudget = new Budget();
+    fixture.componentInstance.activeBudget.id = 'TestBudgetID';
+
+    const category1 = new Category(),
+      category2 = new Category(),
+      category3 = new Category();
+
+    const oldCategories = new FormArray([
+      new FormGroup({
+        category: new FormControl(category1),
+        in: new FormControl(0),
+        out: new FormControl(100)
+      })
+    ]);
+
+    const newCategories = new FormArray([
+      new FormGroup({
+        category: new FormControl(category2),
+        in: new FormControl(0),
+        out: new FormControl(80)
+      }),
+      new FormGroup({
+        category: new FormControl(category3),
+        in: new FormControl(0),
+        out: new FormControl(20)
+      })
+    ]);
+
+    fixture.componentInstance.updateCategories(oldCategories, newCategories);
+
+    expect(categoryServiceStub.updateCategory).toHaveBeenCalledTimes(3);
+  });
+
+  it('should update the categories and call update with specific parameters', () => {
+    const fixture = TestBed.createComponent(TransactionComponent);
+    const category1 = new Category(),
+      category2 = new Category(),
+      category3 = new Category();
+
+    fixture.componentInstance.activeBudget = new Budget();
+    fixture.componentInstance.activeBudget.id = 'TestBudgetID';
+
+    category1.balance = 0;
+    category2.balance = 100;
+    category3.balance = 100;
+
+    const oldCategories = new FormArray([
+      new FormGroup({
+        category: new FormControl(category1),
+        in: new FormControl(0),
+        out: new FormControl(100)
+      })
+    ]);
+
+    const newCategories = new FormArray([
+      new FormGroup({
+        category: new FormControl(category2),
+        in: new FormControl(0),
+        out: new FormControl(80)
+      }),
+      new FormGroup({
+        category: new FormControl(category3),
+        in: new FormControl(0),
+        out: new FormControl(20)
+      })
+    ]);
+
+    fixture.componentInstance.updateCategories(oldCategories, newCategories);
+
+    expect(categoryServiceStub.updateCategory.calls.allArgs()).toEqual([
+      [jasmine.anything(), jasmine.objectContaining({ balance: 100 })],
+      [jasmine.anything(), jasmine.objectContaining({ balance: 20 })],
+      [jasmine.anything(), jasmine.objectContaining({ balance: 80 })]
+    ]);
+  });
+
+  it('should update the categories and call update with specific parameters reduced category count', () => {
+    const fixture = TestBed.createComponent(TransactionComponent);
+    const category1 = new Category(),
+      category2 = new Category(),
+      category3 = new Category();
+
+    fixture.componentInstance.activeBudget = new Budget();
+    fixture.componentInstance.activeBudget.id = 'TestBudgetID';
+
+    category1.balance = 0;
+    category2.balance = 100;
+    category3.balance = 100;
+
+    const oldCategories = new FormArray([
+      new FormGroup({
+        category: new FormControl(category1),
+        in: new FormControl(0),
+        out: new FormControl(100)
+      }),
+      new FormGroup({
+        category: new FormControl(category2),
+        in: new FormControl(0),
+        out: new FormControl(80)
+      }),
+    ]);
+
+    const newCategories = new FormArray([
+      new FormGroup({
+        category: new FormControl(category3),
+        in: new FormControl(0),
+        out: new FormControl(180)
+      })
+    ]);
+
+    fixture.componentInstance.updateCategories(oldCategories, newCategories);
+
+    expect(categoryServiceStub.updateCategory.calls.allArgs()).toEqual([
+      [jasmine.anything(), jasmine.objectContaining({ balance: 100 })],
+      [jasmine.anything(), jasmine.objectContaining({ balance: 180 })],
+      [jasmine.anything(), jasmine.objectContaining({ balance: -80 })]
+    ]);
   });
 });
