@@ -94,7 +94,7 @@ export class CategoryComponent implements OnInit {
   onSubmit() {
     const ref = 'budgets/' + this.activeBudget + '/categories';
 
-    if (this.parent) {
+    if (this.parent && this.parent.name !== '') {
       this.category.parent = this.parent.name;
       this.category.parentId = this.parent.id;
     } else {
@@ -102,6 +102,7 @@ export class CategoryComponent implements OnInit {
       this.category.parentId = '';
     }
     this.category.type = this.category.type;
+    console.log(this.category);
     if (this.categoryId === 'add') {
       this.db
         .collection<Category>(ref)

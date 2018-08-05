@@ -40,6 +40,9 @@ describe('categoryComponent', () => {
     },
     update: () => {
       return new Promise(() => {return []});
+    },
+    add: () => {
+      {return new Promise(() => {return {}})};
     }
   });
 
@@ -52,7 +55,7 @@ describe('categoryComponent', () => {
       return of([]);
     },
     add: () => {
-      return of([]);
+      {return new Promise(() => {return {}})};
     }
   });
 
@@ -139,8 +142,12 @@ describe('categoryComponent', () => {
 
   it('should save the category based on details in form', () => {
     const fixture = TestBed.createComponent(CategoryComponent);
+    const component = fixture.componentInstance;
 
-    fixture.componentInstance.onSubmit();
+    component.categoryId = 'add';
+    component.category.type = 'expense';
+
+    component.onSubmit();
 
     expect(angularFirestoreServiceStub.collection).toHaveBeenCalled();
   });
