@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
+
 import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
+
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -89,7 +91,7 @@ export class CategoryComponent implements OnInit {
     );
   }
 
-  saveCategory() {
+  onSubmit() {
     const ref = 'budgets/' + this.activeBudget + '/categories';
 
     if (this.parent) {

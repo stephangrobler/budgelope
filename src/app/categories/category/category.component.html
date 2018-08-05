@@ -1,6 +1,6 @@
 <div class="container">
   <h1>{{title}}</h1>
-  <form class="form" action="index.html" method="post">
+  <form class="form" (ngSubmit)="onSubmit()" #categoryForm="ngForm">
     <mat-card class="category-card">
       <mat-card-title>
         Category
@@ -8,25 +8,26 @@
       <mat-card-content>
         <section>
           <mat-form-field>
-            <input matInput type="text" placeholder="Category name" [(ngModel)]="category.name" name="name" #nm="ngModel">
+            <input matInput type="text" placeholder="Category name" [(ngModel)]="category.name" name="name" required>
           </mat-form-field>
         </section>
         <section>
-          <mat-select placeholder="Parent Category" [(ngModel)]="parent" name="parent">
+          <mat-select placeholder="Parent Category" [(ngModel)]="parent" name="parent" required>
+            <mat-option [value]="'newParent'">New Parent</mat-option>
             <mat-option *ngFor="let category of categories | async" [value]="category">
               {{category.name}}
             </mat-option>
           </mat-select>
         </section>
         <section>
-          <mat-radio-group [(ngModel)]="category.type" name="type">
+          <mat-radio-group [(ngModel)]="category.type" name="type" required>
             <mat-radio-button [value]="'expense'">Spend</mat-radio-button>
             <mat-radio-button [value]="'income'">Earn</mat-radio-button>
           </mat-radio-group>
         </section>
       </mat-card-content>
       <mat-card-actions>
-        <button type="button" mat-raised-button color="primary" (click)="saveCategory()">
+        <button type="submit" mat-raised-button color="primary" [disabled]="!categoryForm.form.valid">
           Save
         </button>
         <button type="button" mat-button (click)="cancel()">

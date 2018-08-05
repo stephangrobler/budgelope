@@ -1,5 +1,12 @@
 import { NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { MatTableModule, MatCardModule, MatRadioModule, MatSelectModule, MatFormFieldModule, MatInputModule } from '@angular/material';
+import {
+  MatTableModule,
+  MatCardModule,
+  MatRadioModule,
+  MatSelectModule,
+  MatFormFieldModule,
+  MatInputModule
+} from '@angular/material';
 import { TestBed, async } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -23,31 +30,42 @@ describe('categoryComponent', () => {
   const UserServiceStub = jasmine.createSpyObj('UserService', ['getUser']);
   const routerStub = jasmine.createSpyObj('Router', ['navigate']);
 
-
-  const angularFirestoreServiceStub = jasmine.createSpyObj('AngularFirestore', ['doc', 'collection']);
+  const angularFirestoreServiceStub = jasmine.createSpyObj('AngularFirestore', [
+    'doc',
+    'collection'
+  ]);
   angularFirestoreServiceStub.doc.and.returnValue({
-    'valueChanges': function () {
-      return of({})
+    valueChanges: () => {
+      return of({});
+    },
+    update: () => {
+      return new Promise(() => {return []});
     }
   });
 
   // mock collection to return array
   angularFirestoreServiceStub.collection.and.returnValue({
-    snapshotChanges: () => {return of([])}
+    snapshotChanges: () => {
+      return of([]);
+    },
+    update: () => {
+      return of([]);
+    },
+    add: () => {
+      return of([]);
+    }
   });
 
-  beforeEach(async (() => {
+  beforeEach(async(() => {
     activatedRouteStub = new ActivatedRouteStub();
 
-  const angularFireAuthServiceStub = jasmine.createSpyObj('AngularFireAuth', ['authenticate']);
-  angularFireAuthServiceStub.authState = of({
-    uid: '123456'
-  });
+    const angularFireAuthServiceStub = jasmine.createSpyObj('AngularFireAuth', ['authenticate']);
+    angularFireAuthServiceStub.authState = of({
+      uid: '123456'
+    });
 
     TestBed.configureTestingModule({
-      declarations: [
-        CategoryComponent
-      ],
+      declarations: [CategoryComponent],
       imports: [
         MatTableModule,
         MatRadioModule,
@@ -58,7 +76,8 @@ describe('categoryComponent', () => {
         ReactiveFormsModule
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
-      providers: [{
+      providers: [
+        {
           provide: AngularFirestore,
           useValue: angularFirestoreServiceStub
         },
@@ -90,20 +109,20 @@ describe('categoryComponent', () => {
     }).compileComponents();
   }));
 
-  it('should create the app', async (() => {
+  it('should create the app', async(() => {
     const fixture = TestBed.createComponent(CategoryComponent);
     const app = fixture.debugElement.componentInstance;
     expect(app).toBeTruthy();
   }));
 
-  it(`should have as title 'category'`, async (() => {
+  it(`should have as title 'category'`, async(() => {
     const fixture = TestBed.createComponent(CategoryComponent);
     const app = fixture.debugElement.componentInstance;
 
     expect(app.title).toEqual('Category');
   }));
 
-  it('should render title in a h1 tag', async (() => {
+  it('should render title in a h1 tag', async(() => {
     const fixture = TestBed.createComponent(CategoryComponent);
     fixture.detectChanges();
     const compiled = fixture.debugElement.nativeElement;
@@ -116,5 +135,13 @@ describe('categoryComponent', () => {
     fixture.componentInstance.cancel();
 
     expect(routerStub.navigate).toHaveBeenCalled();
-  })
+  });
+
+  it('should save the category based on details in form', () => {
+    const fixture = TestBed.createComponent(CategoryComponent);
+
+    fixture.componentInstance.onSubmit();
+
+    expect(angularFirestoreServiceStub.collection).toHaveBeenCalled();
+  });
 });
