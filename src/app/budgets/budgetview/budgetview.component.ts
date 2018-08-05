@@ -200,7 +200,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
             const id = b.payload.doc.id;
             return { id, ...data };
           });
-
+          console.log(budgetList);
           return budgetList;
         })
       );

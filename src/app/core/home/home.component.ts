@@ -8,7 +8,7 @@ import * as moment from 'moment';
 
 @Component({
   templateUrl: 'home.component.html',
-  styleUrls: ['./home.component.css']
+  styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
   items: Observable<any[]>;
@@ -22,17 +22,21 @@ export class HomeComponent implements OnInit {
     afAuth: AngularFireAuth
   ) {
     this.currentMonth = moment().format('YYYYMM');
-    afAuth.authState.subscribe((user) => {
+    afAuth.authState.subscribe(user => {
       if (!user) {
         this.router.navigate(['./login']);
         return;
       } else {
         // this.router.navigate(['./app/budget']);
-        let profile = this.db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
-          // get accounts
-          this.accounts = this.db.collection<any>('budgets/' + profile.activeBudget + '/accounts').valueChanges();
-
-        });
+        this.db
+          .doc<any>('users/' + user.uid)
+          .valueChanges()
+          .subscribe(profile => {
+            // get accounts
+            this.accounts = this.db
+              .collection<any>('budgets/' + profile.activeBudget + '/accounts')
+              .valueChanges();
+          });
       }
     });
   }

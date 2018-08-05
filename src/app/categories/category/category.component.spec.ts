@@ -38,11 +38,15 @@ describe('categoryComponent', () => {
     valueChanges: () => {
       return of({});
     },
-    update: () => {
-      return new Promise(() => {return []});
-    },
+    update: jasmine.createSpy().and.returnValue({
+      then: () => {}
+    }),
     add: () => {
-      {return new Promise(() => {return {}})};
+      {
+        return new Promise(() => {
+          return {};
+        });
+      }
     }
   });
 
@@ -55,7 +59,11 @@ describe('categoryComponent', () => {
       return of([]);
     },
     add: () => {
-      {return new Promise(() => {return {}})};
+      {
+        return new Promise(() => {
+          return {};
+        });
+      }
     }
   });
 
@@ -150,5 +158,34 @@ describe('categoryComponent', () => {
     component.onSubmit();
 
     expect(angularFirestoreServiceStub.collection).toHaveBeenCalled();
+  });
+
+  it('should load a category based on id passed in', () => {
+    activatedRouteStub.setParamMap({
+      id: 'CategoryIDString'
+    });
+
+    const fixture = TestBed.createComponent(CategoryComponent);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.categoryId).toBe('CategoryIDString');
+  });
+
+  it('should save an existing category with name change', () => {
+    activatedRouteStub.setParamMap({
+      id: 'CategoryIDString'
+    });
+    const fixture = TestBed.createComponent(CategoryComponent);
+    fixture.detectChanges();
+    fixture.componentInstance.activeBudget = 'abcde';
+    fixture.componentInstance.category.name = 'test category change';
+
+    fixture.componentInstance.onSubmit();
+    expect(angularFirestoreServiceStub.doc).toHaveBeenCalledWith(
+      'budgets/abcde/categories/CategoryIDString'
+    );
+    expect(angularFirestoreServiceStub.doc().update).toHaveBeenCalledWith(
+      jasmine.objectContaining({ name: 'test category change' })
+    );
   });
 });

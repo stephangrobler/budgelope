@@ -1,9 +1,0 @@
-router-outlet.router-flex + * {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-}
-
-.side-nav {
-  width: 200px;
-}

@@ -1,0 +1,12 @@
+@import "../../../styles";
+
+router-outlet.router-flex + * {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.side-nav {
+  width: 250px;
+  border-right: 1px solid lighten(mat-color($candy-app-primary), 50%);
+}

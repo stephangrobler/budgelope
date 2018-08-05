@@ -92,7 +92,7 @@ export class CategoryComponent implements OnInit {
   }
 
   onSubmit() {
-    const ref = 'budgets/' + this.activeBudget + '/categories';
+    let ref = 'budgets/' + this.activeBudget + '/categories';
 
     if (this.parent && this.parent.name !== '') {
       this.category.parent = this.parent.name;
@@ -102,7 +102,7 @@ export class CategoryComponent implements OnInit {
       this.category.parentId = '';
     }
     this.category.type = this.category.type;
-    console.log(this.category);
+
     if (this.categoryId === 'add') {
       this.db
         .collection<Category>(ref)
@@ -117,7 +117,8 @@ export class CategoryComponent implements OnInit {
         .then(() => console.log('Add Successfull.'));
       // this.categoryService.createCategory(this.activeBudget, this.category);
     } else {
-      const dbRef = this.db
+      ref += '/' + this.categoryId;
+      this.db
         .doc(ref)
         .update({
           name: this.category.name,
