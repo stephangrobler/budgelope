@@ -1,56 +1,54 @@
-"budgets": {
-  "grobler": {
-    "mainbudget": {
-      "name": "budget",
-      "active": true,
-      "accounts": {
-        "main": true
+{
+  "budgets": {
+    "grobler": {
+      "mainbudget": {
+        "name": "budget",
+        "active": true,
+        "accounts": {
+          "main": true
+        }
       }
-    },
-  }
-},
-
-"payees": {
-  "grobler": {
-    "randomid": {
-      "name": "Spar",
-      "created_at": ""
-    },
-    "randomid": {
-      "name": "Engen",
-      "created_at" : ""
-    }
-  }
-}
-
-"accounts": {
-  "mainbudget": {
-    "main": {
-      "balance": 1500,
-      "budget": true,
-      "accounttypeid": "accounttypeid"
-    }
-  }
-},
-
-"accounttypes": {
-  "default": {
-    "type": "checking"
-  },
-  "accounttypeid": {
-    "type": "savings"
-  }
-},
-
-"categories": {
-  "default": {
-    "debt": {
-
     }
   },
-  "mainbudget": {
-    "debt": {
 
+  "payees": {
+    "grobler": {
+      "randomid1": {
+        "name": "Spar",
+        "created_at": ""
+      },
+      "randomid2": {
+        "name": "Engen",
+        "created_at": ""
+      }
+    }
+  },
+
+  "accounts": {
+    "mainbudget": {
+      "main": {
+        "balance": 1500,
+        "budget": true,
+        "accounttypeid": "accounttypeid"
+      }
+    }
+  },
+
+  "accounttypes": {
+    "default": {
+      "type": "checking"
+    },
+    "accounttypeid": {
+      "type": "savings"
+    }
+  },
+
+  "categories": {
+    "default": {
+      "debt": {}
+    },
+    "mainbudget": {
+      "debt": {}
     }
   }
 }

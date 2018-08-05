@@ -24,26 +24,33 @@ export class TransactionService {
    * @return          the observable for the transactions.
    */
   getTransactions(budgetId: string): Observable<Transaction[]> {
-    let transRef = '/budgets/' + budgetId + '/transactions';
+    const transRef = '/budgets/' + budgetId + '/transactions';
 
     return this.db
       .collection<Transaction>(transRef, ref => ref.orderBy('date', 'desc'))
       .snapshotChanges()
       .pipe(
-        map(actions => {
-          let stuff = actions.map(a => {
+        map(actions =>
+          actions.map(a => {
             const data = a.payload.doc.data() as Transaction;
             const id = a.payload.doc.id;
+            // convert timestamp object from firebase to date object if object
+            const dateObj = a.payload.doc.get('date');
+            if (typeof dateObj === 'string') {
+              data.date = new Date(dateObj);
+            } else if (typeof dateObj === 'object') {
+              data.date = dateObj.toDate();
+            }
+
             data.id = id;
             return { id, ...data };
-          });
-          return stuff;
-        })
+          })
+        )
       );
   }
 
   getTransaction(budgetId: string, transactionId: string): Observable<Transaction> {
-    let transRef = 'budgets/' + budgetId + '/transactions/' + transactionId;
+    const transRef = 'budgets/' + budgetId + '/transactions/' + transactionId;
     return this.db.doc<Transaction>(transRef).valueChanges();
   }
 
@@ -85,9 +92,7 @@ export class TransactionService {
       // budget.allocations[shortDate].expense += transaction.out;
     }
 
-    currentDoc.pipe(
-      take(1)
-    ).subscribe(currentTransaction => {
+    currentDoc.pipe(take(1)).subscribe(currentTransaction => {
       // update accounts if changes were made to it
       if (account && account.id !== currentTransaction.accountId) {
         // load original account to reset values.
@@ -98,9 +103,7 @@ export class TransactionService {
         this.db
           .doc<Category>(categoryRef + '/' + currentTransaction.categoryId)
           .valueChanges()
-          .pipe(
-            take(1)
-          )
+          .pipe(take(1))
           .subscribe(currentCategory => {
             currentCategory.balance -= transaction.amount;
             this.db.doc(categoryRef + '/' + currentTransaction.categoryId).update(currentCategory);
