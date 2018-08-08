@@ -21,15 +21,7 @@ import { CategoriesRoutingModule } from './categories-routing.module';
     CommonModule,
     FormsModule,
     CategoriesRoutingModule,
-    SharedModule,
-    MatCheckboxModule,
-    MatIconModule,
-    MatInputModule,
-    MatRadioModule,
-    MatDatepickerModule,
-    MatSelectModule,
-    MatCardModule,
-    MatButtonModule
+    SharedModule
   ],
   declarations: [CategoriesComponent, CategoryComponent],
   providers: []
