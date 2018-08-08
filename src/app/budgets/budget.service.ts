@@ -87,18 +87,21 @@ export class BudgetService {
             accountService.copyAccounts(currentBudgetId, docRef.id);
           }
 
-          const userObj = {
-            activeBudget: docRef.id,
-            availableBudgets: {}
-          };
-          userObj.availableBudgets[docRef.id] = { name: newName };
-
           // set user active budget
-          userStore.doc(userId).update(userObj);
+          userStore
+            .doc<any>(userId)
+            .valueChanges()
+            .subscribe(user => {
+              user.activeBudget = docRef.id;
+              if (!user.availableBudgets) {
+                user.availableBudgets = {};
+              }
+              user.availableBudgets[docRef.id] = { name: newName };
+              userStore.doc(userId).update(user);
+            });
 
           // copy categories
           categoryService.copyCategories(currentBudgetId, docRef.id);
-
           // copy payees
         });
       });
