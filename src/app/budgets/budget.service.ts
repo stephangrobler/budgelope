@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import * as firebase from 'firebase';
 import * as moment from 'moment';
 import { AngularFirestore } from 'angularfire2/firestore';
+import { AngularFireAuth } from 'angularfire2/auth';
 import { Observable } from 'rxjs';
-import { take, mergeMap } from 'rxjs/operators';
+import { take, mergeMap, map } from 'rxjs/operators';
 import { Budget } from '../shared/budget';
 import { CategoryService } from '../categories/category.service';
 import { AccountService } from '../accounts/account.service';
@@ -15,16 +16,24 @@ export class BudgetService {
   constructor(
     private db: AngularFirestore,
     private categoryService: CategoryService,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private afAuth: AngularFireAuth
   ) {}
 
   getActiveBudget$(): Observable<Budget> {
-    const currentUser = firebase.auth().currentUser;
-    // get the activebudget from the user object
-    return this.db
-      .doc<any>('users/' + currentUser.uid)
-      .valueChanges()
-      .pipe(mergeMap(user => this.db.doc<Budget>('budgets/' + user.activeBudget).valueChanges()));
+    const returnable = this.afAuth.authState.pipe(
+      mergeMap(currentUser => {
+        // get the activebudget from the user object
+        return this.db
+          .doc<any>('users/' + currentUser.uid)
+          .valueChanges()
+          .pipe(
+            mergeMap(user => this.db.doc<Budget>('budgets/' + user.activeBudget).valueChanges())
+          );
+      })
+    );
+
+    return returnable;
   }
 
   createBudget(budget: Budget) {
@@ -71,8 +80,7 @@ export class BudgetService {
 
         budgetStore.add(cBudget).then(function(docRef) {
           // rename old budget if not default
-          const newName =
-            cBudget.name + ' - FRESH START ' + moment().format('YYYY-MM-DD hh:mm:ss');
+          const newName = cBudget.name + ' - FRESH START ' + moment().format('YYYY-MM-DD hh:mm:ss');
           if (currentBudgetId !== 'default') {
             budgetStore.doc(currentBudgetId).update({ name: newName });
             accountService.copyAccounts(currentBudgetId, docRef.id);
