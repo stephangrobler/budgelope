@@ -42,7 +42,6 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log('running home');
     this._analytics.pageView('/');
   }
 }

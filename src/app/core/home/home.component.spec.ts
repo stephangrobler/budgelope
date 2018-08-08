@@ -9,7 +9,8 @@ import { of } from 'rxjs';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { Router } from '@angular/router';
-import { BrowserAnimationsModule } from '../../../../node_modules/@angular/platform-browser/animations';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import * as moment from 'moment';
 
 @Component({ selector: 'router-outlet', template: '' })
 class RouterOutletStubComponent {}
@@ -24,7 +25,7 @@ describe('HomeComponent', () => {
     analyticsServiceStub = jasmine.createSpyObj('AnalyticsService', ['pageView']);
     dbStub = jasmine.createSpyObj('AngularFirestore', ['doc', 'collection']);
     dbStub.doc.and.returnValue({
-        valueChanges: () => of({})
+        valueChanges: () => of({activeBudget: 'abcde'})
     });
     dbStub.collection.and.returnValue({
         valueChanges: () => of([])
@@ -69,4 +70,27 @@ describe('HomeComponent', () => {
     const app = fixture.debugElement.componentInstance;
     expect(app).toBeTruthy();
   }));
+
+  it('should call the pageView for the analytics', async(() => {
+    const fixture = TestBed.createComponent(HomeComponent);
+    fixture.detectChanges();
+    const app = fixture.debugElement.componentInstance;
+    expect(analyticsServiceStub.pageView).toHaveBeenCalled();
+  }));
+
+  it('should have the current month set on the component', async(() => {
+    const fixture = TestBed.createComponent(HomeComponent);
+    fixture.detectChanges();
+    const app = fixture.debugElement.componentInstance;
+    expect(app.currentMonth).toBe(moment().format('YYYYMM'));
+  }));
+
+  it('should call the accounts for the user', async(() => {
+    const fixture = TestBed.createComponent(HomeComponent);
+    fixture.detectChanges();
+    const app = fixture.debugElement.componentInstance;
+    expect(dbStub.collection).toHaveBeenCalledWith('budgets/abcde/accounts');
+  }));
+
+
 });
