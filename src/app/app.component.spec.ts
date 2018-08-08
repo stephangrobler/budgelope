@@ -9,7 +9,7 @@ class RouterOutletStubComponent { }
 
 
 describe('AppComponent', () => {
-  let userMockService = jasmine.createSpyObj('UserService', ['verifyUser']);
+  const userMockService = jasmine.createSpyObj('UserService', ['verifyUser']);
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
