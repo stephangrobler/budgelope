@@ -4,7 +4,7 @@ import * as moment from 'moment';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { Observable } from 'rxjs';
-import { take, mergeMap, map } from 'rxjs/operators';
+import { take, mergeMap, map, tap } from 'rxjs/operators';
 import { Budget } from '../shared/budget';
 import { CategoryService } from '../categories/category.service';
 import { AccountService } from '../accounts/account.service';
@@ -28,11 +28,12 @@ export class BudgetService {
           .doc<any>('users/' + currentUser.uid)
           .valueChanges()
           .pipe(
-            mergeMap(user => this.db.doc<Budget>('budgets/' + user.activeBudget).valueChanges())
+            mergeMap(user => {
+              return this.db.doc<Budget>('budgets/' + user.activeBudget).valueChanges();
+            })
           );
       })
     );
-
     return returnable;
   }
 
