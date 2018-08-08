@@ -1,18 +1,18 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { AngularFireDatabase, AngularFireList, AngularFireObject } from 'angularfire2/database';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { DragulaService } from 'ng2-dragula';
 import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import * as moment from 'moment';
+
 import { Account } from '../../shared/account';
 import { Category } from '../../shared/category';
 import { Budget } from '../../shared/budget';
 import { BudgetService } from '../budget.service';
 import { UserService } from '../../shared/user.service';
-import { switchMap } from 'rxjs/operators';
+import { CategoryService } from '../../categories/category.service';
 
 @Component({
   selector: 'app-budgetview',
@@ -20,10 +20,7 @@ import { switchMap } from 'rxjs/operators';
   styleUrls: ['./budgetview.component.scss']
 })
 export class BudgetviewComponent implements OnInit, OnDestroy {
-  categoriesAllocations: AngularFireList<any>;
   categories: any[];
-  allocations: AngularFireList<any>;
-  accounts: AngularFireList<Account[]>;
   userId: string;
   activeBudget: Budget;
 
@@ -47,6 +44,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
   constructor(
     private db: AngularFirestore,
     private budgetService: BudgetService,
+    private categoryService: CategoryService,
     private userService: UserService,
     private auth: AngularFireAuth,
     private dragulaService: DragulaService,
@@ -65,31 +63,8 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
         .doc<any>('users/' + user.uid)
         .valueChanges()
         .subscribe(profile => {
-          this.budgetList = [];
-          for (const i in profile.availableBudgets) {
-            if (profile.availableBudgets.hasOwnProperty(i)) {
-              const budget = {
-                id: i,
-                name: profile.availableBudgets[i].name
-              };
-              this.budgetList.push(budget);
-            }
-          }
-
-          this.db
-            .doc<Budget>('budgets/' + profile.activeBudget)
-            .valueChanges()
-            .subscribe(budget => {
-              budget.id = profile.activeBudget;
-              if (!budget.allocations[this.selectedMonth]) {
-                budget.allocations[this.selectedMonth] = {
-                  income: 0,
-                  expense: 0
-                };
-              }
-              this.getCategories(profile.activeBudget);
-              return (this.activeBudget = budget);
-            });
+          this.loadAvailableBudgets(profile);
+          this.loadActiveBudget(profile.activeBudget);
         });
     });
     // drag and drop bag setup
@@ -148,6 +123,45 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     }
   }
 
+  loadAvailableBudgets(profile) {
+    this.budgetList = [];
+    for (const i in profile.availableBudgets) {
+      if (profile.availableBudgets.hasOwnProperty(i)) {
+        const budget = {
+          id: i,
+          name: profile.availableBudgets[i].name
+        };
+        this.budgetList.push(budget);
+      }
+    }
+    console.log(this.budgetList);
+  }
+
+  loadActiveBudget(budgetId: string) {
+    this.db
+      .doc<Budget>('budgets/' + budgetId)
+      .valueChanges()
+      .subscribe(budget => {
+        budget.id = budgetId;
+        if (!budget.allocations[this.selectedMonth]) {
+          budget.allocations[this.selectedMonth] = {
+            income: 0,
+            expense: 0
+          };
+        }
+        this.loadCategories(budgetId);
+        return (this.activeBudget = budget);
+      });
+  }
+
+  loadCategories(budgetId: string): void {
+    const reference = 'budgets/' + budgetId + '/categories';
+    this.categoryService.getCategories(budgetId).subscribe(list => {
+      this.checkAllocations(list, this.selectedMonth);
+      this.sortList = list;
+    });
+  }
+
   onBudgetActivate(id: string) {
     this.db.doc<any>('users/' + this.userId).update({ activeBudget: id });
   }
@@ -183,31 +197,6 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
           actual: 0
         };
       }
-    });
-  }
-
-  getCategories(budgetId: string): void {
-    const reference = 'budgets/' + budgetId + '/categories';
-    const testList = this.db
-      .collection<Category>(reference, ref => ref.orderBy('sortingOrder'))
-      .snapshotChanges()
-      .pipe(
-        map(budget => {
-          const budgetList: any = budget.map(b => {
-            const thisRef = reference + '/' + b.payload.doc.id + '/categories';
-            const data = b.payload.doc.data() as Category;
-            const catRef = this.db.collection<Category>(thisRef).snapshotChanges();
-            const id = b.payload.doc.id;
-            return { id, ...data };
-          });
-          console.log(budgetList);
-          return budgetList;
-        })
-      );
-
-    testList.subscribe(list => {
-      this.checkAllocations(list, this.selectedMonth);
-      this.sortList = list;
     });
   }
 

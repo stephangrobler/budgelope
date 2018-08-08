@@ -46,12 +46,12 @@
           <div *ngFor="let item of sortList">
             <mat-list-item *ngIf="item.type != 'income'" [ngClass]="{'header': checkIsHeader(item)}">
               <div fxLayout="row" fxLayoutGap="10px" fxFlexFill fxLayoutAlign="center center">
-                <div fxFlex="40" fxFlexAlign="center">
+                <div fxFlex="55" fxFlexAlign="center">
                   <mat-icon color="primary" class="handle">drag_indicator</mat-icon>
                   {{item.name}}
                 </div>
-                <div class="planned-input text-right" fxFlex="25">
-                  <mat-form-field *ngIf="item.allocations && item.parent != ''">
+                <div class="planned-input text-right" fxFlex="15">
+                  <mat-form-field *ngIf="item.allocations && item.parent != ''" fxFlex="100">
                     <input matInput type="number" 
                       name="planned" 
                       class="text-right" 
@@ -59,6 +59,7 @@
                       (blur)="blur(item)" 
                       (focus)="focus(item)" 
                       tabindex="">
+                      
                   </mat-form-field>
                 </div>
                 <div class="actual text-right" *ngIf="item.parent != ''" fxFlex="15">

@@ -11,10 +11,10 @@ import { map } from 'rxjs/operators';
 export class CategoryService {
   constructor(private db: AngularFirestore) {}
 
-  getCategories(budgetId: string): Observable<CategoryId[]> {
+  getCategories(budgetId: string, sortBy: string = 'sortingOrder'): Observable<CategoryId[]> {
     return this.db
       .collection<Category>('budgets/' + budgetId + '/categories', ref =>
-        ref.orderBy('sortingOrder')
+        ref.orderBy(sortBy)
       )
       .snapshotChanges()
       .pipe(
