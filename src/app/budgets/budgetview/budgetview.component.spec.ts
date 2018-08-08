@@ -9,16 +9,18 @@ import { UserService } from '../../shared/user.service';
 import { DragulaService } from 'ng2-dragula';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
+import * as moment from 'moment';
 
 import { ActivatedRouteStub } from '../../../testing/activate-route-stub';
+import { CategoryService } from '../../categories/category.service';
 
 describe('BudgetviewComponent', () => {
   let component: BudgetviewComponent;
   let fixture: ComponentFixture<BudgetviewComponent>;
 
-  let budgetServiceStub: Partial<BudgetService>;
+  let budgetServiceStub;
   let userServiceStub: Partial<UserService>;
-  let dragulaServiceStub;
+  let dragulaServiceStub, categoryServiceStub;
   let activatedRouteStub: ActivatedRouteStub;
   let angularFirestoreServiceStub;
   let angularFireAuthServiceStub;
@@ -46,8 +48,15 @@ describe('BudgetviewComponent', () => {
     dragulaServiceStub = jasmine.createSpyObj('DragulaService', ['setOptions', 'find']);
     dragulaServiceStub.dropModel = of({});
 
-    budgetServiceStub = {};
+    budgetServiceStub = jasmine.createSpyObj('BudgetService', ['getActiveBudget$']);
+    budgetServiceStub.getActiveBudget$.and.returnValue(of({
+      id: '67890',
+      name: 'test budget',
+      allocations: {}
+    }));
     userServiceStub = {};
+    categoryServiceStub = jasmine.createSpyObj('CategoryService', ['getCategories']);
+
     TestBed.configureTestingModule({
       imports: [MatMenuModule],
       declarations: [BudgetviewComponent],
@@ -80,6 +89,10 @@ describe('BudgetviewComponent', () => {
         {
           provide: Router,
           useValue: routerSpy
+        },
+        {
+          provide: CategoryService,
+          useValue: categoryServiceStub
         }
       ]
     }).compileComponents();
@@ -91,7 +104,12 @@ describe('BudgetviewComponent', () => {
         return {
           valueChanges: function() {
             return of({
-              activeBudget: '67890'
+              activeBudget: '67890',
+              availableBudgets: {
+                testBudget: { name: 'TestBudget1' },
+                testBudget2: { name: 'TestBudget2' },
+                testBudget3: { name: 'TestBudget3' }
+              }
             });
           }
         };
@@ -120,4 +138,23 @@ describe('BudgetviewComponent', () => {
   it('should create a component', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should load the available budgets in an array of objects', () => {
+
+    expect(component.budgetList.length).toBe(3);
+    expect(component.budgetList[0]).toEqual({id: 'testBudget', name: 'TestBudget1'}, 'should equal the correct budget name');
+  });
+
+  it('should load the categories for the active budget', () => {
+    expect(categoryServiceStub.getCategories).toHaveBeenCalledWith('67890');
+  });
+
+  it('should load the active budget details and allocations', () => {
+    expect(budgetServiceStub.getActiveBudget$).toHaveBeenCalled();
+  });
+
+  it('should get the display month from the month param', () => {
+    const displayMonth = moment('20180501').format('MMMM YYYY')
+    expect(component.displayMonth).toEqual(displayMonth);
+  })
 });

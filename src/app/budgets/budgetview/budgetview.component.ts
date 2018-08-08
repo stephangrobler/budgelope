@@ -64,7 +64,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
         .valueChanges()
         .subscribe(profile => {
           this.loadAvailableBudgets(profile);
-          this.loadActiveBudget(profile.activeBudget);
+          this.loadActiveBudget();
         });
     });
     // drag and drop bag setup
@@ -78,31 +78,8 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     });
 
     // if the month is specified, use that, else use the current month
-    this.selectedMonth = this.route.paramMap.pipe(
-      switchMap((params: ParamMap) => {
-        return of({ month: params.get('month') });
-      })
-    );
-    this.selectedMonth.subscribe(monthObj => {
-      // check for null and object
-      if (monthObj && monthObj.month) {
-        const month = +monthObj.month.substr(-2, 2);
-        const year = +monthObj.month.substr(0, 4);
-
-        this.selectedMonth = monthObj.month;
-        this.nextMonth = moment()
-          .year(year)
-          .month(month - 1)
-          .add(1, 'months');
-        this.prevMonth = moment()
-          .year(year)
-          .month(month - 1)
-          .subtract(1, 'months');
-        this.displayMonth = moment(this.selectedMonth + '01').format('MMMM YYYY');
-      } else {
-        this.selectedMonth = moment().format('YYYYMM');
-        this.displayMonth = moment(this.selectedMonth + '01').format('MMMM YYYY');
-      }
+    this.route.paramMap.subscribe(params => {
+      this.checkMonthParam(params.get('month'));
 
       if (this.sortList) {
         this.checkAllocations(this.sortList, this.selectedMonth);
@@ -134,26 +111,31 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
         this.budgetList.push(budget);
       }
     }
-    console.log(this.budgetList);
   }
 
-  loadActiveBudget(budgetId: string) {
-    this.db
-      .doc<Budget>('budgets/' + budgetId)
-      .valueChanges()
-      .subscribe(budget => {
-        budget.id = budgetId;
-        if (!budget.allocations[this.selectedMonth]) {
-          budget.allocations[this.selectedMonth] = {
-            income: 0,
-            expense: 0
-          };
-        }
-        this.loadCategories(budgetId);
-        return (this.activeBudget = budget);
-      });
+  /**
+   * Loads the active budget from the budget service and sets the property
+   * on the component
+   */
+  loadActiveBudget(): void {
+    this.budgetService.getActiveBudget$().subscribe(budget => {
+      // set the current allocation for the selected month if there is none
+      if (!budget.allocations[this.selectedMonth]) {
+        budget.allocations[this.selectedMonth] = {
+          income: 0,
+          expense: 0
+        };
+      }
+
+      this.loadCategories(budget.id);
+      this.activeBudget = budget;
+    });
   }
 
+  /**
+   * Loads the categories to be used ond sets it as property on the component
+   * @param budgetId string
+   */
   loadCategories(budgetId: string): void {
     const reference = 'budgets/' + budgetId + '/categories';
     this.categoryService.getCategories(budgetId).subscribe(list => {
@@ -162,6 +144,33 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Checks the month parameter and sets the selected month and the display month
+   * on the component
+   * @param monthParam string The parameter passed into the component
+   */
+  checkMonthParam(monthParam: string) {
+    // check for null and object
+    if (monthParam) {
+      const month = +monthParam.substr(-2, 2);
+      const year = +monthParam.substr(0, 4);
+
+      this.selectedMonth = monthParam;
+      this.nextMonth = moment()
+        .year(year)
+        .month(month - 1)
+        .add(1, 'months');
+      this.prevMonth = moment()
+        .year(year)
+        .month(month - 1)
+        .subtract(1, 'months');
+      this.displayMonth = moment(this.selectedMonth + '01').format('MMMM YYYY');
+    } else {
+      this.selectedMonth = moment().format('YYYYMM');
+      this.displayMonth = moment(this.selectedMonth + '01').format('MMMM YYYY');
+    }
+  }
+  
   onBudgetActivate(id: string) {
     this.db.doc<any>('users/' + this.userId).update({ activeBudget: id });
   }
