@@ -1,24 +1,29 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AnalyticsService } from '../analytics.service';
 import { AngularFirestore } from 'angularfire2/firestore';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { AngularFireAuth } from 'angularfire2/auth';
 import * as moment from 'moment';
+import { ObservableMedia, MediaChange } from '@angular/flex-layout';
 
 @Component({
   templateUrl: 'home.component.html',
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   items: Observable<any[]>;
   accounts: Observable<Account[]>;
   currentMonth: string;
+  sideNavState: any= {};
+  watcher: Subscription;
+  activeMediaQuery = '';
 
   constructor(
     private _analytics: AnalyticsService,
     private db: AngularFirestore,
     private router: Router,
+    private media: ObservableMedia,
     afAuth: AngularFireAuth
   ) {
     this.currentMonth = moment().format('YYYYMM');
@@ -39,9 +44,24 @@ export class HomeComponent implements OnInit {
           });
       }
     });
+
+    this.watcher = media.subscribe((change: MediaChange) => {
+      this.activeMediaQuery = change ? `'${change.mqAlias}' = (${change.mediaQuery})` : '';
+      if (change.mqAlias === 'xs') {
+        this.sideNavState.mode = 'over';
+        this.sideNavState.opened = false;
+      } else {
+        this.sideNavState.mode = 'side';
+        this.sideNavState.opened = true;
+      }
+    });
   }
 
   ngOnInit() {
     this._analytics.pageView('/');
+  }
+
+  ngOnDestroy() {
+    this.watcher.unsubscribe();
   }
 }

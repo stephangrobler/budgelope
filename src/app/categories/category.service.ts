@@ -13,18 +13,17 @@ export class CategoryService {
 
   getCategories(budgetId: string, sortBy: string = 'sortingOrder'): Observable<CategoryId[]> {
     return this.db
-      .collection<Category>('budgets/' + budgetId + '/categories', ref =>
-        ref.orderBy(sortBy)
-      )
+      .collection<Category>('budgets/' + budgetId + '/categories', ref => ref.orderBy(sortBy))
       .snapshotChanges()
       .pipe(
         map(actions => {
-        return actions.map(a => {
-          const data = a.payload.doc.data() as CategoryId;
-          const id = a.payload.doc.id;
-          return { id, ...data };
-        });
-      }));
+          return actions.map(a => {
+            const data = a.payload.doc.data() as CategoryId;
+            const id = a.payload.doc.id;
+            return { id, ...data };
+          });
+        })
+      );
   }
 
   createCategory(budgetId: string, category: Category) {
@@ -49,8 +48,8 @@ export class CategoryService {
       sortingOrder: catData.sortingOrder,
       type: catData.type
     };
-    let currentAllocationMonthRef = '/allocations/' + budgetId + '/' + month;
-    let nextAllocationMonthRef = '/allocations/' + budgetId + '/' + nextMonth;
+    const currentAllocationMonthRef = '/allocations/' + budgetId + '/' + month;
+    const nextAllocationMonthRef = '/allocations/' + budgetId + '/' + nextMonth;
     return Promise.all([
       firebase
         .database()
@@ -82,10 +81,10 @@ export class CategoryService {
     category: { category: Category; in: number; out: number },
     shortDate: string
   ) {
-    let catStore = this.db.doc<Category>(
+    const catStore = this.db.doc<Category>(
       'budgets/' + budgetId + '/categories/' + category.category.id
     );
-    let amount = 0 + category.in - category.out;
+    const amount = 0 + category.in - category.out;
 
     category.category.balance += amount;
     if (!category.category.allocations[shortDate]) {
@@ -119,7 +118,7 @@ export class CategoryService {
 
         Object.keys(allResults).forEach(month => {
           // push all different items to the object
-          let refAll = '/allocations/' + budgetId + '/' + month + '/' + categoryId;
+          const refAll = '/allocations/' + budgetId + '/' + month + '/' + categoryId;
           updateObj[refAll + '/sortingOrder'] = category.sortingOrder;
           updateObj[refAll + '/name'] = category.name;
           updateObj[refAll + '/parent'] = category.parent;
@@ -138,9 +137,9 @@ export class CategoryService {
   deleteCategory(budgetId: string, category: Category) {}
 
   copyCategories(fromBudgetId: string, toBudgetId: string) {
-    let fromStore = 'budgets/' + fromBudgetId + '/categories',
+    const fromStore = 'budgets/' + fromBudgetId + '/categories',
       toStore = 'budgets/' + toBudgetId + '/categories';
-    let collections = this.db
+    const collections = this.db
       .collection<Category>(fromStore)
       .snapshotChanges()
       .pipe(
@@ -158,7 +157,7 @@ export class CategoryService {
       )
       .subscribe(cats => {
         cats.forEach(item => {
-          let doc = this.db.collection(toStore).doc(item.id);
+          const doc = this.db.collection(toStore).doc(item.id);
           delete item.id;
           doc.set(item);
         }, this);

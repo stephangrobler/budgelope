@@ -11,6 +11,7 @@ import { AngularFirestore } from 'angularfire2/firestore';
 import { Router } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import * as moment from 'moment';
+import { ObservableMedia } from '@angular/flex-layout';
 
 @Component({ selector: 'router-outlet', template: '' })
 class RouterOutletStubComponent {}
@@ -19,7 +20,7 @@ class RouterOutletStubComponent {}
 class NavigationBarStubComponent {}
 
 describe('HomeComponent', () => {
-  let analyticsServiceStub, dbStub, routerStub, authStub;
+  let analyticsServiceStub, dbStub, routerStub, authStub, mediaStub;
 
   beforeEach(async(() => {
     analyticsServiceStub = jasmine.createSpyObj('AnalyticsService', ['pageView']);
@@ -33,6 +34,7 @@ describe('HomeComponent', () => {
     routerStub = jasmine.createSpyObj('Router', ['navigate']);
     authStub = jasmine.createSpyObj('AngularFireAuth', ['login']);
     authStub.authState = of({ uid: '12345' });
+    mediaStub = of({});
 
     TestBed.configureTestingModule({
       declarations: [
@@ -59,6 +61,10 @@ describe('HomeComponent', () => {
         {
           provide: AngularFireAuth,
           useValue: authStub
+        },
+        {
+          provide: ObservableMedia,
+          useValue: mediaStub
         }
       ]
     }).compileComponents();
