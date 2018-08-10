@@ -9,18 +9,22 @@ import { TransactionService } from '../transactions/transaction.service';
 
 @Injectable()
 export class AccountService {
-  constructor(private db: AngularFirestore, private transactionService: TransactionService) {}
+  constructor(
+    private db: AngularFirestore
+  ) {}
 
   getAccounts(budgetId: string): Observable<Account[]> {
     return this.db
       .collection<Account>('budgets/' + budgetId + '/accounts')
       .snapshotChanges()
       .pipe(
-        map(actions => actions.map(a => {
+        map(actions =>
+          actions.map(a => {
             const data = a.payload.doc.data() as Account;
             const id = a.payload.doc.id;
             return { id, ...data };
-          }))
+          })
+        )
       );
   }
 
@@ -61,11 +65,13 @@ export class AccountService {
       .collection<Account>(fromRef)
       .snapshotChanges()
       .pipe(
-        map(actions => actions.map(a => {
-          const data = a.payload.doc.data() as Account;
-          const id = a.payload.doc.id;
-          return { id, ...data };
-        }))
+        map(actions =>
+          actions.map(a => {
+            const data = a.payload.doc.data() as Account;
+            const id = a.payload.doc.id;
+            return { id, ...data };
+          })
+        )
       )
       .subscribe(accounts => {
         accounts.forEach(function(item) {
