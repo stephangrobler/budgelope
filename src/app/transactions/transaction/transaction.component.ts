@@ -88,9 +88,12 @@ export class TransactionComponent implements OnInit {
 
     this.transactionForm = new FormGroup({
       account: new FormControl(null, [Validators.required]),
+      transferAccount: new FormControl(null),
+      transferAmount: new FormControl(null),
       date: new FormControl(date, Validators.required),
       payee: new FormControl(null, Validators.required),
       cleared: new FormControl(false),
+      transfer: new FormControl(false),
       categories: new FormArray([])
     });
     this.onAddCategory();
@@ -105,7 +108,7 @@ export class TransactionComponent implements OnInit {
         this.clearFormCategories(<FormArray>this.transactionForm.get('categories'));
 
         const selectedAccount = this.accounts.filter(
-          account => transaction.accountId === account.id
+          account => transaction.account.accountId === account.id
         )[0];
 
         this.transactionForm.get('account').setValue(selectedAccount);
@@ -208,16 +211,16 @@ export class TransactionComponent implements OnInit {
 
   create(form: FormGroup) {
     const transaction = new Transaction(form.value);
-    transaction.accountId = form.value.account.id;
-    transaction.accountName = form.value.account.name;
+    transaction.account = {
+      accountId: form.value.account.id,
+      accountName: form.value.account.name,
+    }
     // transaction.calculateAmount;
 
     if (form.value.categories.length > 1) {
-      transaction.categoryId = '';
-      transaction.categoryName = 'Split';
+      transaction.categoryDisplayName = 'Split';
     } else {
-      transaction.categoryId = form.value.categories[0].category.id;
-      transaction.categoryName = form.value.categories[0].category.name;
+      transaction.categoryDisplayName = form.value.categories[0].category.name;
     }
 
     this.transactionService

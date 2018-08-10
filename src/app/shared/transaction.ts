@@ -1,13 +1,15 @@
 import { Category } from './category';
 import { Account } from './account';
 
-export class Transaction{
+export class Transaction {
   id?: string;
-  categoryId: string;
-  categoryName: string;
-  categories: {categoryId: string, categoryName: string, in: number, out: number}[]; // object with category id for keys
-  accountId: string;
-  accountName: string;
+  categories: { categoryId: string; categoryName: string; in: number; out: number }[]; // object with category id for keys
+  categoryDisplayName: string;
+  account: { accountId: string; accountName: string };
+  accountDisplayName: string;
+  transferAccount: { accountId: string; accountName: string };
+  transferAccountDisplayName: string;
+  transferAmount: number;
   payeeId: string;
   payee: string;
   amount: number;
@@ -16,64 +18,51 @@ export class Transaction{
   date: Date;
   type: string; // income or expense
   cleared: boolean;
+  transfer: boolean;
 
-  constructor(transactionData?: any){
-
+  constructor(transactionData?: any) {
     if (transactionData) {
-      this.id = transactionData.id ? transactionData.id : null ;
-      this.categoryId = transactionData.categoryId ? transactionData.categoryId : null ;
-      this.categoryName = transactionData.category ? transactionData.category : null ;
-      if (transactionData.categories && transactionData.categories.length > 0){
-
-        let newCategories: {categoryId: string, categoryName: string, in: number, out: number}[] = [];
+      this.id = transactionData.id ? transactionData.id : null;
+      this.categoryDisplayName = transactionData.category ? transactionData.category : null;
+      if (transactionData.categories && transactionData.categories.length > 0) {
+        const newCategories: {
+          categoryId: string;
+          categoryName: string;
+          in: number;
+          out: number;
+        }[] = [];
         transactionData.categories.forEach(item => {
-          let newCategory = {
+          const newCategory = {
             categoryId: item.category.id,
             categoryName: item.category.name,
             in: item.in,
-            out: item.out,
-          }
+            out: item.out
+          };
           newCategories.push(newCategory);
         });
         this.categories = newCategories;
       }
-      this.accountId = transactionData.accountId ? transactionData.accountId : null ;
-      this.accountName = transactionData.account ? transactionData.account : null ;
-      this.payeeId = transactionData.payeeId ? transactionData.payeeId : null ;
-      this.payee = transactionData.payee ? transactionData.payee : null ;
-      this.amount = transactionData.amount ? transactionData.amount : null ;
-      this.in = transactionData.in ? transactionData.in : null ;
-      this.out = transactionData.out ? transactionData.out : null ;
-      this.type = transactionData.type ? transactionData.type : null ;
-      this.cleared = transactionData.cleared ? transactionData.cleared : null ;
-      this.date = transactionData.date ? transactionData.date : null ;
+      this.accountDisplayName = transactionData.account ? transactionData.account : null;
+      this.payeeId = transactionData.payeeId ? transactionData.payeeId : null;
+      this.payee = transactionData.payee ? transactionData.payee : null;
+      this.amount = transactionData.amount ? transactionData.amount : null;
+      this.in = transactionData.in ? transactionData.in : null;
+      this.out = transactionData.out ? transactionData.out : null;
+      this.type = transactionData.type ? transactionData.type : null;
+      this.cleared = transactionData.cleared ? transactionData.cleared : null;
+      this.date = transactionData.date ? transactionData.date : null;
     }
-  }
-
-  get calculateAmount(): number {
-    this.amount = 0;
-    this.categories.forEach(category => {
-      let amountIn: number = +category.in,
-        amountOut :number = +category.out;
-      this.amount = this.amount + amountIn - amountOut;
-    });
-    if (this.amount > 0){
-      this.in = this.amount;
-    } else {
-      this.out = Math.abs(this.amount);
-    }
-    return this.amount;
   }
 
   get toObject(): any {
-
-
     return {
-      categoryId: this.categoryId,
-      categoryName: this.categoryName,
       categories: this.categories,
-      accountId: this.accountId,
-      accountName: this.accountName,
+      categoryDisplayName: this.categoryDisplayName,
+      account: this.account,
+      accountDisplayName: this.accountDisplayName,
+      transferAccount: this.transferAccount,
+      transferAccountDisplayName: this.transferAccountDisplayName,
+      transferAmount: this.transferAmount,
       payeeId: this.payeeId,
       payee: this.payee,
       amount: this.amount,
@@ -81,7 +70,8 @@ export class Transaction{
       out: this.out,
       date: this.date,
       type: this.type, // income or expense
-      cleared: this.cleared
+      cleared: this.cleared,
+      transfer: this.transfer,
     };
   }
 }

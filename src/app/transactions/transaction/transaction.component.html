@@ -3,9 +3,15 @@
     <form class="form" [formGroup]="transactionForm" (ngSubmit)="onSubmit()">
       <mat-card class="transaction-card">
         <mat-card-content>
-          <div fxLayout="row" fxLayoutGap="10px" fxFlexFill>
+          <div fxLayout="row" fxLayout.xs="column" fxLayoutGap="10px" fxFlexFill>
 
-            <mat-form-field fxFlex="20">
+            <mat-form-field fxFlex="20" fxFlex.xs="100">
+              <input matInput [matDatepicker]="picker" placeholder="Choose a date" name="date" formControlName="date">
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field fxFlex="20" fxFlex.xs="100">
               <mat-select placeholder="Account" name="account" formControlName="account" required>
                 <mat-option>--</mat-option>
                 <mat-option [value]="account" *ngFor="let account of accounts">
@@ -14,22 +20,27 @@
               </mat-select>
             </mat-form-field>
 
-            <mat-form-field fxFlex="20">
-              <input matInput [matDatepicker]="picker" placeholder="Choose a date" name="date" formControlName="date">
-              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-              <mat-datepicker #picker></mat-datepicker>
-            </mat-form-field>
-
-            <mat-form-field fxFlex="60">
+            <mat-form-field fxFlex="60" *ngIf="!transferBox" fxFlex.xs="100">
               <input matInput placeholder="Payee" value="" type="text" name="payee" formControlName="payee" required>
             </mat-form-field>
+            <!-- transfer fields -->
+            <mat-form-field fxFlex="60" *ngIf="transferBox" fxFlex.xs="100">
+              <mat-select placeholder="Transfer Account" name="account" formControlName="transferAccount">
+                <mat-option>--</mat-option>
+                <mat-option [value]="account" *ngFor="let account of accounts">
+                  {{account.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
 
+            <mat-form-field fxFlex="25" fxFlex.xs="100" *ngIf="transferBox">
+              <input matInput placeholder="Amount" type="number" name="amount" formControlName="transferAmount">
+            </mat-form-field>
+            <!-- transfer fields : end -->
           </div>
 
-          <div formArrayName="categories">
-            <div fxLayout="row" fxLayoutGap="10px" fxFlexFill
-                *ngFor="let categoryControl of getControls(); let i = index"
-                [formGroupName]="i">
+          <div formArrayName="categories" *ngIf="!transferBox">
+            <div fxLayout="row" fxLayoutGap="10px" fxFlexFill *ngFor="let categoryControl of getControls(); let i = index" [formGroupName]="i">
               <mat-form-field fxFlex="50">
                 <mat-select placeholder="Category" required formControlName="category">
                   <mat-option>--</mat-option>
@@ -46,24 +57,26 @@
               <mat-form-field fxFlex="25">
                 <input matInput placeholder="In" type="number" name="in" formControlName="in">
               </mat-form-field>
-
             </div>
           </div>
         </mat-card-content>
         <mat-checkbox name="cleared" [labelPosition]="end" formControlName="cleared">
           Cleared
         </mat-checkbox>
-
+        &nbsp;
+        <mat-checkbox name="transfer" [labelPosition]="end" formControlName="transfer" [(ngModel)]="transferBox">
+          Transfer
+        </mat-checkbox>
         <mat-card-actions>
           <button mat-raised-button color="primary" type="submit" (click)="saveTransaction()" [disabled]="!transactionForm.valid">
-              Save Transaction
-            </button>
+            Save Transaction
+          </button>
           <button mat-raised-button color="basic" type="button" (click)="onAddCategory()">
-              Split
-            </button>
+            Split
+          </button>
           <button mat-raised-button color="warn" type="button" (click)="cancel()">
-              Cancel
-            </button>
+            Cancel
+          </button>
 
         </mat-card-actions>
       </mat-card>
