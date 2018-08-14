@@ -93,11 +93,11 @@ describe('Transaction Service to be thing', () => {
     budget.balance = 0;
 
     service
-      .createTransaction(transaction, account, categories, budget, 'CurrentUser', 'CurrentBudget')
+      .createTransaction(transaction, account, categories, budget, 'CurrentBudget')
       .then(
         response => {
           expect(budgetServiceMock.updateBudget).toHaveBeenCalledWith(resultBudget);
-          expect(accountServiceMock.updateAccount).toHaveBeenCalledWith(resultAccount);
+          expect(accountServiceMock.updateAccount).toHaveBeenCalledWith(resultAccount, 'CurrentBudget');
           done();
         },
         error => {

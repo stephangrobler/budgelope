@@ -9,9 +9,7 @@ import { TransactionService } from '../transactions/transaction.service';
 
 @Injectable()
 export class AccountService {
-  constructor(
-    private db: AngularFirestore
-  ) {}
+  constructor(private db: AngularFirestore) {}
 
   getAccounts(budgetId: string): Observable<Account[]> {
     return this.db
@@ -36,16 +34,18 @@ export class AccountService {
     // });
   }
 
-  updateAccount(update: Account) {
-    const dbRef = firebase
-      .database()
-      .ref('accounts')
-      .child(update.id)
+  updateAccount(update: Account, budgetId: string) {
+    const dbRef = 'budgets/' + budgetId + '/accounts/' + update.id;
+
+    this.db
+      .doc(dbRef)
       .update({
         name: update.name,
         balance: update.balance
+      })
+      .then(result => {
+        console.log('accountt updated', result);
       });
-    alert('account updated');
   }
 
   removeAccount(delAccount: Account) {

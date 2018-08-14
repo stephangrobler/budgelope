@@ -36,11 +36,7 @@ import { Category } from '../../shared/category';
 import { Budget } from '../../shared/budget';
 
 describe('TransactionsComponent', () => {
-  const TransactionServiceStub = jasmine.createSpyObj('TransactionService', [
-    'getTransactions',
-    'getTransaction'
-  ]);
-  TransactionServiceStub.getTransactions.and.returnValue(of([]));
+  let transactionServiceStub;
 
   const BudgetServiceStub = jasmine.createSpyObj('BudgetService', [
     'getTransactions',
@@ -67,6 +63,18 @@ describe('TransactionsComponent', () => {
     activatedRouteStub.setParamMap({
       id: '201805'
     });
+    transactionServiceStub = jasmine.createSpyObj('TransactionService', [
+      'getTransactions',
+      'getTransaction',
+      'createTransaction',
+      'calculateAmount'
+    ]);
+    transactionServiceStub.getTransactions.and.returnValue(of([]));
+    transactionServiceStub.createTransaction.and.returnValue({
+      then: (success, failure) => {
+        success();
+      }
+    });
     accountServiceStub = jasmine.createSpyObj('AccountService', ['getAccounts', 'updateAccount']);
     accountServiceStub.getAccounts.and.returnValue(of([]));
 
@@ -78,10 +86,11 @@ describe('TransactionsComponent', () => {
 
     matSnackBarStub = jasmine.createSpyObj('MatSnackBar', ['open']);
 
-    TransactionServiceStub.getTransaction.and.returnValue(
+    transactionServiceStub.getTransaction.and.returnValue(
       of({
         date: '2018-01-01',
-        payee: 'Test Payee'
+        payee: 'Test Payee',
+        categories: [{ categoryId: 'test', category: 'test cat name', in: 0, out: 500 }]
       })
     );
     UserServiceStub.getProfile$.and.returnValue(
@@ -122,7 +131,7 @@ describe('TransactionsComponent', () => {
         },
         {
           provide: TransactionService,
-          useValue: TransactionServiceStub
+          useValue: transactionServiceStub
         },
         {
           provide: BudgetService,
@@ -170,6 +179,8 @@ describe('TransactionsComponent', () => {
     const fixture = TestBed.createComponent(TransactionComponent);
     const account = new Account();
     const oldAccount = new Account();
+    const budget = (fixture.componentInstance.activeBudget = new Budget());
+    budget.id = 'CurrentBudgetID';
     account.balance = 500;
     oldAccount.balance = 500;
 
@@ -182,13 +193,16 @@ describe('TransactionsComponent', () => {
     const fixture = TestBed.createComponent(TransactionComponent);
     const account = new Account();
     const oldAccount = new Account();
+    const budget = (fixture.componentInstance.activeBudget = new Budget());
+    budget.id = 'CurrentBudgetID';
     account.balance = 500;
     oldAccount.balance = 500;
 
     fixture.componentInstance.updateAccount(500, oldAccount, account);
 
     expect(accountServiceStub.updateAccount).toHaveBeenCalledWith(
-      jasmine.objectContaining({ balance: 0 })
+      jasmine.objectContaining({ balance: 0 }),
+      'CurrentBudgetID'
     );
   });
 
@@ -196,6 +210,8 @@ describe('TransactionsComponent', () => {
     const fixture = TestBed.createComponent(TransactionComponent);
     const account = new Account();
     const oldAccount = new Account();
+    const budget = (fixture.componentInstance.activeBudget = new Budget());
+    budget.id = 'CurrentBudgetID';
 
     account.balance = 1000;
     oldAccount.balance = 0;
@@ -203,8 +219,15 @@ describe('TransactionsComponent', () => {
     fixture.componentInstance.updateAccount(-500, oldAccount, account);
 
     expect(accountServiceStub.updateAccount).toHaveBeenCalledWith(
-      jasmine.objectContaining({ balance: 500 })
+      jasmine.objectContaining({ balance: 500 }),
+      'CurrentBudgetID'
     );
+  });
+
+  it('should display an additional account drop down if type is transfer', () => {
+    const fixture = TestBed.createComponent(TransactionComponent);
+    fixture.detectChanges();
+    const comp = fixture.debugElement.componentInstance;
   });
 
   it('should update the categories and call update 3 times', () => {
@@ -309,7 +332,7 @@ describe('TransactionsComponent', () => {
         category: new FormControl(category2),
         in: new FormControl(0),
         out: new FormControl(80)
-      }),
+      })
     ]);
 
     const newCategories = new FormArray([
@@ -327,5 +350,76 @@ describe('TransactionsComponent', () => {
       [jasmine.anything(), jasmine.objectContaining({ balance: 180 })],
       [jasmine.anything(), jasmine.objectContaining({ balance: -80 })]
     ]);
+  });
+
+  it('should update the categories and call update with specific parameters reduced category count', () => {
+    const fixture = TestBed.createComponent(TransactionComponent);
+    const category1 = new Category(),
+      category2 = new Category(),
+      category3 = new Category();
+
+    fixture.componentInstance.activeBudget = new Budget();
+    fixture.componentInstance.activeBudget.id = 'TestBudgetID';
+
+    category1.balance = 0;
+    category2.balance = 100;
+    category3.balance = 100;
+
+    const oldCategories = new FormArray([
+      new FormGroup({
+        category: new FormControl(category1),
+        in: new FormControl(0),
+        out: new FormControl(100)
+      }),
+      new FormGroup({
+        category: new FormControl(category2),
+        in: new FormControl(0),
+        out: new FormControl(80)
+      })
+    ]);
+
+    const newCategories = new FormArray([
+      new FormGroup({
+        category: new FormControl(category3),
+        in: new FormControl(0),
+        out: new FormControl(180)
+      })
+    ]);
+
+    fixture.componentInstance.updateCategories(oldCategories, newCategories);
+
+    expect(categoryServiceStub.updateCategory.calls.allArgs()).toEqual([
+      [jasmine.anything(), jasmine.objectContaining({ balance: 100 })],
+      [jasmine.anything(), jasmine.objectContaining({ balance: 180 })],
+      [jasmine.anything(), jasmine.objectContaining({ balance: -80 })]
+    ]);
+  });
+
+  it('should create a new single category transaction', () => {
+    // arrange
+    activatedRouteStub.setParamMap({
+      
+    });
+    transactionServiceStub.calculateAmount.and.returnValue(500);
+    const fixture = TestBed.createComponent(TransactionComponent);
+    fixture.detectChanges();
+    const comp = fixture.componentInstance;
+    const form = fixture.componentInstance.transactionForm;
+    form.get('account').setValue({ id: 'acc1', name: 'acc1Name' });
+    form
+      .get('categories')
+      .setValue([{ category: { id: 'cat1', name: 'cat1Name' }, in: 0, out: 500 }]);
+
+    // action
+    comp.create(comp.transactionForm);
+
+    // assert
+    expect(transactionServiceStub.createTransaction).toHaveBeenCalledWith(
+      jasmine.objectContaining({amount: 500, in: 500}),
+      jasmine.any(Object),
+      jasmine.any(Object),
+      jasmine.any(Object),
+      jasmine.any(String)
+    );
   });
 });

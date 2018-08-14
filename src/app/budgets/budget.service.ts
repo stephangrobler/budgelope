@@ -49,6 +49,10 @@ export class BudgetService {
     });
   }
 
+  updateBudget(budget) {
+    
+  }
+
   /**
    * Creates a new budget with current accounts and categories of existing budget
    * to start a new with tracking etc

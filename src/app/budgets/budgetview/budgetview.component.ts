@@ -170,7 +170,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
       this.displayMonth = moment(this.selectedMonth + '01').format('MMMM YYYY');
     }
   }
-  
+
   onBudgetActivate(id: string) {
     this.db.doc<any>('users/' + this.userId).update({ activeBudget: id });
   }

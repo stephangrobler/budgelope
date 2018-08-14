@@ -98,11 +98,7 @@ export class TransactionService {
       amount = amount + amountIn - amountOut;
     });
 
-    if (amount > 0) {
-      transaction.in = amount;
-    } else {
-      transaction.out = Math.abs(amount);
-    };
+
     return amount;
   }
   /**
@@ -121,7 +117,6 @@ export class TransactionService {
     account: Account,
     categories: { category: Category; in: number; out: number }[],
     budget: Budget,
-    userId: string,
     budgetId: string
   ) {
     const items = this.db.collection<Transaction>('budgets/' + budgetId + '/transactions'),
@@ -149,8 +144,7 @@ export class TransactionService {
           categories.forEach(category => {
             this.categoryService.updateCategoryBudget(budgetId, category, shortDate);
           });
-          console.log(account);
-          this.accountService.updateAccount(account);
+          this.accountService.updateAccount(account, budgetId);
           this.budgetService.updateBudget(budget);
           resolve(response);
         },

@@ -7,9 +7,9 @@ export class Transaction {
   categoryDisplayName: string;
   account: { accountId: string; accountName: string };
   accountDisplayName: string;
-  transferAccount: { accountId: string; accountName: string };
-  transferAccountDisplayName: string;
-  transferAmount: number;
+  transferAccount: { accountId: string; accountName: string } = null;
+  transferAccountDisplayName: string = null;
+  transferAmount = 0;
   payeeId: string;
   payee: string;
   amount: number;
@@ -18,7 +18,7 @@ export class Transaction {
   date: Date;
   type: string; // income or expense
   cleared: boolean;
-  transfer: boolean;
+  transfer = false;
 
   constructor(transactionData?: any) {
     if (transactionData) {
@@ -41,8 +41,7 @@ export class Transaction {
           newCategories.push(newCategory);
         });
         this.categories = newCategories;
-      }
-      this.accountDisplayName = transactionData.account ? transactionData.account : null;
+      };
       this.payeeId = transactionData.payeeId ? transactionData.payeeId : null;
       this.payee = transactionData.payee ? transactionData.payee : null;
       this.amount = transactionData.amount ? transactionData.amount : null;

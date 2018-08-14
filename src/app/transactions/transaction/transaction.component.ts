@@ -102,9 +102,10 @@ export class TransactionComponent implements OnInit {
   loadTransaction(transactionId: string, budgetId: string) {
     this.transactionService
       .getTransaction(budgetId, transactionId)
-      .pipe(
-        take(1)
-      ).subscribe(transaction => {
+      .pipe(take(1))
+      .subscribe(transaction => {
+        this.mapTransaction(transaction);
+
         this.clearFormCategories(<FormArray>this.transactionForm.get('categories'));
 
         const selectedAccount = this.accounts.filter(
@@ -129,6 +130,24 @@ export class TransactionComponent implements OnInit {
           });
         }
       });
+  }
+
+  mapTransaction(transaction: any): Transaction {
+
+    transaction.account = {
+      accountId : transaction['accountId'],
+      accountName : transaction['accountName']
+    }
+    transaction.accountDisplayName = transaction['accountName'];
+    if (transaction.categories.length > 1) {
+      transaction.categoryDisplayName = 'Split (' + transaction.categories.length + ')';
+    } else {
+      transaction.categoryDisplayName = transaction.categories[0].categoryName;
+    }
+    if (typeof(transaction.date) === 'object') {
+      transaction.date = transaction['date'].toDate();
+    }
+    return transaction;
   }
 
   onSubmit() {
@@ -168,12 +187,12 @@ export class TransactionComponent implements OnInit {
   updateAccount(amount: number, oldAccount: Account, newAccount: Account) {
     oldAccount.balance -= amount;
     newAccount.balance += amount;
-    this.accountService.updateAccount(oldAccount);
-    this.accountService.updateAccount(newAccount);
+    this.accountService.updateAccount(oldAccount, this.activeBudget.id);
+    this.accountService.updateAccount(newAccount, this.activeBudget.id);
   }
 
   /**
-   * Updates the categories for the transaction based on changes made to saved 
+   * Updates the categories for the transaction based on changes made to saved
    * transactions
    *
    * @param oldCategories FormArray
@@ -213,8 +232,9 @@ export class TransactionComponent implements OnInit {
     const transaction = new Transaction(form.value);
     transaction.account = {
       accountId: form.value.account.id,
-      accountName: form.value.account.name,
-    }
+      accountName: form.value.account.name
+    };
+    transaction.accountDisplayName = transaction.account.accountName;
     // transaction.calculateAmount;
 
     if (form.value.categories.length > 1) {
@@ -223,13 +243,20 @@ export class TransactionComponent implements OnInit {
       transaction.categoryDisplayName = form.value.categories[0].category.name;
     }
 
+    // calculate the amount and set the in or out values
+    transaction.amount = this.transactionService.calculateAmount(transaction);
+    if (transaction.amount > 0) {
+      transaction.in = transaction.amount;
+    } else {
+      transaction.out = Math.abs(transaction.amount);
+    };
+    
     this.transactionService
       .createTransaction(
         transaction,
         form.value.account,
         form.value.categories,
         this.activeBudget,
-        this.userId,
         this.activeBudget.id
       )
       .then(response => {
