@@ -61,22 +61,22 @@ describe('Transaction Service to be thing', () => {
     expect(dbMock.doc).toHaveBeenCalledWith('budgets/string/transactions/string2');
   });
 
-  it('should create a transaction with the correct values', (done: DoneFn) => {
+  it('should create a transaction with the correct income transaction', (done: DoneFn) => {
     account.name = 'test';
     account.balance = 0;
 
     const resultAccount = new Account();
     resultAccount.name = 'test';
-    resultAccount.balance = 5;
+    resultAccount.balance = 500;
 
     const resultBudget = new Budget();
     resultBudget.allocations = {
       201801: {
         expense: 0,
-        income: 5
+        income: 500
       }
     };
-    resultBudget.balance = 5;
+    resultBudget.balance = 500;
 
     const categories = [
       {
@@ -85,12 +85,62 @@ describe('Transaction Service to be thing', () => {
         out: 100
       }
     ];
-    transaction.amount = 5;
-    transaction.in = 5;
+    transaction.amount = 500;
+    transaction.in = 500;
     transaction.date = new Date('2018-01-01');
 
     budget.allocations = {};
     budget.balance = 0;
+
+    service
+      .createTransaction(transaction, account, categories, budget, 'CurrentBudget')
+      .then(
+        response => {
+          console.log(budget);
+          expect(budgetServiceMock.updateBudget).toHaveBeenCalledWith(resultBudget);
+          expect(accountServiceMock.updateAccount).toHaveBeenCalledWith(resultAccount, 'CurrentBudget');
+          done();
+        },
+        error => {
+          expect(error).toBe('Error thrown');
+          console.log('ERROR:', error);
+          done();
+        }
+      );
+
+    // expect(transaction.amount).toBe(5);
+  });
+
+  it('should create a transaction with the correct expense transaction', (done: DoneFn) => {
+    account.name = 'test';
+    account.balance = 0;
+
+    const resultAccount = new Account();
+    resultAccount.name = 'test';
+    resultAccount.balance = -500;
+
+    const resultBudget = new Budget();
+    resultBudget.allocations = {
+      201801: {
+        expense: 500,
+        income: 0
+      }
+    };
+    resultBudget.balance = 500;
+
+    const categories = [
+      {
+        category: category,
+        in: 0,
+        out: 500
+      }
+    ];
+    transaction.amount = -500;
+    transaction.out = 500;
+    transaction.date = new Date('2018-01-01');
+
+    budget.allocations = {};
+    budget.balance = 500;
 
     service
       .createTransaction(transaction, account, categories, budget, 'CurrentBudget')

@@ -49,8 +49,8 @@ export class BudgetService {
     });
   }
 
-  updateBudget(budget) {
-    
+  updateBudget(budget: Budget) {
+    this.db.doc('budgets/' + budget.id).update(budget);
   }
 
   /**

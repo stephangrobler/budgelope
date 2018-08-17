@@ -2,11 +2,7 @@ import { Component, OnInit, OnChanges, Input, SimpleChange } from '@angular/core
 import { FormGroup, FormControl, FormArray, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, Params, ParamMap } from '@angular/router';
 import { AngularFireAuth } from 'angularfire2/auth';
-import {
-  AngularFirestore,
-  AngularFirestoreDocument,
-  AngularFirestoreCollection
-} from 'angularfire2/firestore';
+import { AngularFirestore, AngularFirestoreDocument, AngularFirestoreCollection } from 'angularfire2/firestore';
 
 import { MatSnackBar } from '@angular/material';
 import { Observable } from 'rxjs';
@@ -250,7 +246,7 @@ export class TransactionComponent implements OnInit {
     } else {
       transaction.out = Math.abs(transaction.amount);
     };
-    
+
     this.transactionService
       .createTransaction(
         transaction,

@@ -8,7 +8,6 @@
       </button>
       <mat-menu #menu="matMenu" >
         <button mat-menu-item *ngFor="let budget of budgetList; index as i" (click)="onBudgetActivate(budget.id)">
-
           <span>{{budget.name}}</span>
         </button>
         <button mat-menu-item (click)="onFreshStart()">
@@ -16,7 +15,7 @@
         </button>
       </mat-menu>
     </mat-card-title>
-    <mat-card-content>
+    <mat-card-content>      
       <mat-list>
         <mat-list-item>Available : {{ activeBudget.balance | number: '1.2'}}</mat-list-item>
         <mat-list-item>Income : {{ activeBudget.allocations[selectedMonth].income | number: '1.2'}}</mat-list-item>
@@ -46,11 +45,11 @@
           <div *ngFor="let item of sortList">
             <mat-list-item *ngIf="item.type != 'income'" [ngClass]="{'header': checkIsHeader(item)}">
               <div fxLayout="row" fxLayoutGap="10px" fxFlexFill fxLayoutAlign="center center">
-                <div fxFlex="55" fxFlexAlign="center">
-                  <mat-icon color="primary" class="handle">drag_indicator</mat-icon>
+                <div fxFlex="55" fxFlex.xs="70" fxFlexAlign="center">
+                  <mat-icon color="primary" class="handle" fxHide.xs>drag_indicator</mat-icon>
                   {{item.name}}
                 </div>
-                <div class="planned-input text-right" fxFlex="15">
+                <div class="planned-input text-right" fxFlex="15" fxHide.xs>
                   <mat-form-field *ngIf="item.allocations && item.parent != ''" fxFlex="100">
                     <input matInput type="number" 
                       name="planned" 
@@ -62,17 +61,17 @@
                       
                   </mat-form-field>
                 </div>
-                <div class="actual text-right" *ngIf="item.parent != ''" fxFlex="15">
+                <div class="actual text-right" *ngIf="item.parent != ''" fxFlex="15" fxHide.xs>
                   <span *ngIf="item.allocations">
                         {{item.allocations[selectedMonth].actual | number:'1.2'}}
                   </span>
                 </div>
-                <div class="actual text-right" *ngIf="item.parent == ''" fxFlex="15">
+                <div class="actual text-right" *ngIf="item.parent == ''" fxFlex="15" fxHide.xs>
                   <span *ngIf="item.allocations">
                         &nbsp;
                   </span>
                 </div>
-                <div class="balance text-right" *ngIf="item.parent != ''" fxFlex="15">
+                <div class="balance text-right" *ngIf="item.parent != ''" fxFlex="15" fxFlex.xs="30">
                   {{item.balance | number:'1.2'}}
                 </div>
                 <div class="balance text-right" *ngIf="item.parent == ''" fxFlex="15">

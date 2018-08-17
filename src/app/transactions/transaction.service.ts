@@ -49,6 +49,19 @@ export class TransactionService {
               data.date = dateObj.toDate();
             }
 
+            data.account = {
+              accountId : data['accountId'],
+              accountName : data['accountName']
+            }
+            if (data['accountName']) {
+              data.accountDisplayName = data['accountName'];
+            }
+            if (data.categories && data.categories.length > 1) {
+              data.categoryDisplayName = 'Split (' + data.categories.length + ')';
+            } else if (data.categories && data.categories.length === 1) {
+              data.categoryDisplayName = data.categories[0].categoryName;
+            }
+
             data.id = id;
             return { id, ...data };
           })
