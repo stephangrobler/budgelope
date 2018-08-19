@@ -114,6 +114,21 @@ export class TransactionService {
 
     return amount;
   }
+
+  transferTransaction(transaction: Transaction, budgetId: string) {
+    // transfer categories
+    this.categoryService.getCategories(budgetId).pipe(
+      take(1)
+    ).subscribe(categories => {
+      const toCategory = categories.find(cat => cat.name === 'Transfer In');
+      const fromCategory = categories.find(cat => cat.name === 'Transfer Out');
+
+
+      
+    });
+
+  }
+
   /**
    * Creates a new transaction and updates the relevant paths with the correct
    * data sets
@@ -135,30 +150,15 @@ export class TransactionService {
     const items = this.db.collection<Transaction>('budgets/' + budgetId + '/transactions'),
       shortDate = moment(transaction.date).format('YYYYMM');
 
-    if (!budget.allocations[shortDate]) {
-      budget.allocations[shortDate] = {
-        expense: 0,
-        income: 0
-      };
-    }
-
-    // ensure value is negative if it is an expense.
-    if (transaction.amount > 0) {
-      budget.balance += transaction.amount;
-      budget.allocations[shortDate].income += transaction.amount;
-    } else {
-      budget.allocations[shortDate].expense += Math.abs(transaction.amount);
-    }
-
     return new Promise((resolve, reject) => {
       items.add(transaction.toObject).then(
         response => {
-          account.balance += transaction.amount;
+          
           categories.forEach(category => {
             this.categoryService.updateCategoryBudget(budgetId, category, shortDate);
           });
-          this.accountService.updateAccount(account, budgetId);
-          this.budgetService.updateBudget(budget);
+          this.accountService.updateAccountBalance(account.id, budgetId, transaction.amount);
+          this.budgetService.updateBudgetBalance(budget.id, transaction.date, transaction.amount);
           resolve(response);
         },
         error => {
