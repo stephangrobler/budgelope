@@ -183,8 +183,8 @@ export class TransactionComponent implements OnInit {
   updateAccount(amount: number, oldAccount: Account, newAccount: Account) {
     oldAccount.balance -= amount;
     newAccount.balance += amount;
-    this.accountService.updateAccount(oldAccount, this.activeBudget.id);
-    this.accountService.updateAccount(newAccount, this.activeBudget.id);
+    this.accountService.updateAccountBalance(oldAccount.id, this.activeBudget.id, amount);
+    this.accountService.updateAccountBalance(newAccount.id, this.activeBudget.id, amount);
   }
 
   /**
