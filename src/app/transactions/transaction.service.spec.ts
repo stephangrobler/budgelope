@@ -12,7 +12,14 @@ import { resolve } from 'path';
 
 describe('Transaction Service to be thing', () => {
   let service: TransactionService;
-  let dbMock, categoryServiceMock, accountServiceMock, budgetServiceMock, account, category, budget, transaction;
+  let dbMock,
+    categoryServiceMock,
+    accountServiceMock,
+    budgetServiceMock,
+    account,
+    category,
+    budget,
+    transaction;
 
   beforeEach(() => {
     account = new Account();
@@ -38,11 +45,18 @@ describe('Transaction Service to be thing', () => {
         };
       },
       add: () => {
-        return { then: (success, failure) => { success(); } };
+        return {
+          then: (success, failure) => {
+            success();
+          }
+        };
       }
     });
-    categoryServiceMock = jasmine.createSpyObj('CategoryService', ['updateCategoryBudget']);
-    accountServiceMock = jasmine.createSpyObj('AccountService', ['updateAccount']);
+    categoryServiceMock = jasmine.createSpyObj('CategoryService', [
+      'updateCategoryBudget',
+      'getCategories'
+    ]);
+    accountServiceMock = jasmine.createSpyObj('AccountService', ['updateAccount', 'getAccounts']);
     budgetServiceMock = jasmine.createSpyObj('BudgetService', ['updateBudget']);
     TestBed.configureTestingModule({
       providers: [
@@ -53,7 +67,12 @@ describe('Transaction Service to be thing', () => {
       ]
     });
 
-    service = new TransactionService(dbMock, categoryServiceMock, accountServiceMock, budgetServiceMock);
+    service = new TransactionService(
+      dbMock,
+      categoryServiceMock,
+      accountServiceMock,
+      budgetServiceMock
+    );
   });
 
   it('should register as a service', () => {
@@ -92,21 +111,22 @@ describe('Transaction Service to be thing', () => {
     budget.allocations = {};
     budget.balance = 0;
 
-    service
-      .createTransaction(transaction, account, categories, budget, 'CurrentBudget')
-      .then(
-        response => {
-          console.log(budget);
-          expect(budgetServiceMock.updateBudget).toHaveBeenCalledWith(resultBudget);
-          expect(accountServiceMock.updateAccount).toHaveBeenCalledWith(resultAccount, 'CurrentBudget');
-          done();
-        },
-        error => {
-          expect(error).toBe('Error thrown');
-          console.log('ERROR:', error);
-          done();
-        }
-      );
+    service.createTransaction(transaction, account, categories, budget, 'CurrentBudget').then(
+      response => {
+        console.log(budget);
+        expect(budgetServiceMock.updateBudget).toHaveBeenCalledWith(resultBudget);
+        expect(accountServiceMock.updateAccount).toHaveBeenCalledWith(
+          resultAccount,
+          'CurrentBudget'
+        );
+        done();
+      },
+      error => {
+        expect(error).toBe('Error thrown');
+        console.log('ERROR:', error);
+        done();
+      }
+    );
 
     // expect(transaction.amount).toBe(5);
   });
@@ -142,21 +162,129 @@ describe('Transaction Service to be thing', () => {
     budget.allocations = {};
     budget.balance = 500;
 
-    service
-      .createTransaction(transaction, account, categories, budget, 'CurrentBudget')
-      .then(
-        response => {
-          expect(budgetServiceMock.updateBudget).toHaveBeenCalledWith(resultBudget);
-          expect(accountServiceMock.updateAccount).toHaveBeenCalledWith(resultAccount, 'CurrentBudget');
-          done();
-        },
-        error => {
-          expect(error).toBe('Error thrown');
-          console.log('ERROR:', error);
-          done();
-        }
-      );
+    service.createTransaction(transaction, account, categories, budget, 'CurrentBudget').then(
+      response => {
+        expect(budgetServiceMock.updateBudget).toHaveBeenCalledWith(resultBudget);
+        expect(accountServiceMock.updateAccount).toHaveBeenCalledWith(
+          resultAccount,
+          'CurrentBudget'
+        );
+        done();
+      },
+      error => {
+        expect(error).toBe('Error thrown');
+        console.log('ERROR:', error);
+        done();
+      }
+    );
 
     // expect(transaction.amount).toBe(5);
+  });
+
+  it('should call create transaction 2 times', (done: DoneFn) => {
+    categoryServiceMock.getCategories.and.returnValue(
+      of([{ name: 'Transfer In', balance: 0 }, { name: 'Transfer Out', balance: 0 }])
+    );
+
+    accountServiceMock.getAccounts.and.returnValue(
+      of([
+        { name: 'Test Account 1', id: 1, balance: 1000 },
+        { name: 'Test Account 2', id: 2, balance: 0 }
+      ])
+    );
+
+    transaction.account = {
+      accountId: 1,
+      accountName: 'Test Account 1'
+    };
+    transaction.transferAccount = {
+      accountId: 2,
+      accountName: 'Test Account 2'
+    }
+    transaction.transferAmount = 500;
+    transaction.date = new Date('2018-01-01');
+
+    budget.allocations = {};
+    budget.balance = 500;
+    spyOn(service, 'createTransaction');
+
+    service.transferTransaction(transaction, 'CurrentBudget');
+
+    expect(service.createTransaction).toHaveBeenCalledTimes(2);
+  });
+
+  it('should create a transaction for the from account', (done: DoneFn) => {
+    categoryServiceMock.getCategories.and.returnValue(
+      of([{ name: 'Transfer In', balance: 0 }, { name: 'Transfer Out', balance: 0 }])
+    );
+
+    accountServiceMock.getAccounts.and.returnValue(
+      of([
+        { name: 'Test Account 1', id: 1, balance: 1000 },
+        { name: 'Test Account 2', id: 2, balance: 0 }
+      ])
+    );
+
+    transaction.account = {
+      accountId: 1,
+      accountName: 'Test Account 1'
+    };
+    transaction.transferAccount = {
+      accountId: 2,
+      accountName: 'Test Account 2'
+    }
+    transaction.transferAmount = 500;
+    transaction.date = new Date('2018-01-01');
+
+    budget.allocations = {};
+    budget.balance = 500;
+
+    const toAccount = new Account();
+    toAccount.name = 'Test Account 2';
+    toAccount.balance = 500;
+
+    spyOn(service, 'createTransaction');
+
+    service.transferTransaction(transaction, 'CurrentBudget');
+
+    expect(service.createTransaction).toHaveBeenCalledWith(
+      transaction,
+      toAccount,
+      jasmine.any(Object),
+      jasmine.any(Object),
+      jasmine.any(String),
+    );
+  });
+
+  it('should create a transaction for the to account', (done: DoneFn) => {
+    categoryServiceMock.getCategories.and.returnValue(
+      of([{ name: 'Transfer In', balance: 0 }, { name: 'Transfer Out', balance: 0 }])
+    );
+
+    accountServiceMock.getAccounts.and.returnValue(
+      of([
+        { name: 'Test Account 1', id: 1, balance: 1000 },
+        { name: 'Test Account 2', id: 2, balance: 0 }
+      ])
+    );
+
+    transaction.account = {
+      accountId: 1,
+      accountName: 'Test Account 1'
+    };
+    transaction.transferAccount = {
+      accountId: 2,
+      accountName: 'Test Account 2'
+    }
+    transaction.transferAmount = 500;
+    transaction.date = new Date('2018-01-01');
+
+    budget.allocations = {};
+    budget.balance = 500;
+    spyOn(service, 'createTransaction');
+
+    service.transferTransaction(transaction, 'CurrentBudget');
+
+    expect(service.createTransaction).toHaveBeenCalledTimes(2);
   });
 });
