@@ -7,14 +7,17 @@ import * as moment from 'moment';
 import { BudgetService } from './budget.service';
 import { CategoryService } from '../categories/category.service';
 import { AccountService } from '../accounts/account.service';
+import { FirebaseApp } from 'angularfire2';
 
 describe('Budget service', () => {
   let budgetService: BudgetService;
-  let categoryServiceSpy, accountServiceSpy, dbSpy, docObject, docReturnObj, authSpy;
+  let categoryServiceSpy, accountServiceSpy, dbSpy, docObject, docReturnObj, authSpy, firebaseAppSpy;
 
   beforeEach(() => {
     categoryServiceSpy = jasmine.createSpyObj('CategoryService', ['copyCategories']);
     accountServiceSpy = jasmine.createSpyObj('AccountService', ['copyAccounts']);
+    firebaseAppSpy = jasmine.createSpyObj('FirebaseApp', ['runTransaction']);
+
     dbSpy = jasmine.createSpyObj('AngularFirestore', ['doc', 'collection']);
     dbSpy.doc.and.callFake(params => {
       if (params === 'users/abcde') {
@@ -75,7 +78,12 @@ describe('Budget service', () => {
         {
           provide: AngularFireAuth,
           useValue: authSpy
-        }
+        },
+        {
+          provide: FirebaseApp,
+          useValue: firebaseAppSpy
+        },
+
       ]
     });
     // Inject both the service-to-test and its (spy) dependency
