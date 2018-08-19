@@ -8,6 +8,7 @@ import { take, mergeMap, map, tap } from 'rxjs/operators';
 import { Budget } from '../shared/budget';
 import { CategoryService } from '../categories/category.service';
 import { AccountService } from '../accounts/account.service';
+import { FirebaseApp } from 'angularfire2';
 
 @Injectable()
 export class BudgetService {
@@ -17,7 +18,8 @@ export class BudgetService {
     private db: AngularFirestore,
     private categoryService: CategoryService,
     private accountService: AccountService,
-    private afAuth: AngularFireAuth
+    private afAuth: AngularFireAuth,
+    private fb: FirebaseApp
   ) {}
 
   getActiveBudget$(): Observable<Budget> {
@@ -49,8 +51,46 @@ export class BudgetService {
     });
   }
 
-  updateBudget(budget: Budget) {
-    this.db.doc('budgets/' + budget.id).update(budget);
+  /**
+   * Update the balances of the budget in a db transaction
+   * 
+   * @param budgetId The id of the budget to update
+   * @param date The date of the transaction
+   * @param amount The amount of the transaction
+   */
+  updateBudgetBalance(budgetId: string, date: Date, amount: number) {
+    const docRef = this.db.doc('budgets/' + budgetId).ref;
+
+    this.fb.firestore().runTransaction(transaction => {
+      return transaction.get(docRef).then(
+        budgetRaw => {
+          const shortDate = moment(date).format('YYYYMM');
+          const budget = budgetRaw.data();
+
+          if (!budget.allocations[shortDate]) {
+            budget.allocations[shortDate] = {
+              expense: 0,
+              income: 0
+            };
+          }
+
+          // ensure value is negative if it is an expense.
+          if (amount > 0) {
+            budget.balance += amount;
+            budget.allocations[shortDate].income += amount;
+          } else {
+            budget.allocations[shortDate].expense += Math.abs(amount);
+          }
+          transaction.update(docRef, budget);
+        },
+        error => {
+          console.log(
+            'There was an error updating the budget: ' + budgetId + ' - ' + date + ' - ' + amount,
+            error
+          );
+        }
+      );
+    });
   }
 
   /**
