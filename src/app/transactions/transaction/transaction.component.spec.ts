@@ -75,7 +75,7 @@ describe('TransactionsComponent', () => {
         success();
       }
     });
-    accountServiceStub = jasmine.createSpyObj('AccountService', ['getAccounts', 'updateAccount']);
+    accountServiceStub = jasmine.createSpyObj('AccountService', ['getAccounts', 'updateAccountBalance']);
     accountServiceStub.getAccounts.and.returnValue(of([]));
 
     categoryServiceStub = jasmine.createSpyObj('CategoryService', [
@@ -186,7 +186,7 @@ describe('TransactionsComponent', () => {
 
     fixture.componentInstance.updateAccount(500, oldAccount, account);
 
-    expect(accountServiceStub.updateAccount).toHaveBeenCalledTimes(2);
+    expect(accountServiceStub.updateAccountBalance).toHaveBeenCalledTimes(2);
   });
 
   it('should update the old account and new selected account', () => {
@@ -195,14 +195,17 @@ describe('TransactionsComponent', () => {
     const oldAccount = new Account();
     const budget = (fixture.componentInstance.activeBudget = new Budget());
     budget.id = 'CurrentBudgetID';
+    account.id = 'acc1';
     account.balance = 500;
+    oldAccount.id = 'acc2';
     oldAccount.balance = 500;
 
     fixture.componentInstance.updateAccount(500, oldAccount, account);
 
-    expect(accountServiceStub.updateAccount).toHaveBeenCalledWith(
-      jasmine.objectContaining({ balance: 0 }),
-      'CurrentBudgetID'
+    expect(accountServiceStub.updateAccountBalance).toHaveBeenCalledWith(
+      'acc2',
+      'CurrentBudgetID',
+      500
     );
   });
 
@@ -213,14 +216,17 @@ describe('TransactionsComponent', () => {
     const budget = (fixture.componentInstance.activeBudget = new Budget());
     budget.id = 'CurrentBudgetID';
 
+    account.id = 'acc1';
     account.balance = 1000;
+    oldAccount.id = 'acc2';
     oldAccount.balance = 0;
 
     fixture.componentInstance.updateAccount(-500, oldAccount, account);
 
-    expect(accountServiceStub.updateAccount).toHaveBeenCalledWith(
-      jasmine.objectContaining({ balance: 500 }),
-      'CurrentBudgetID'
+    expect(accountServiceStub.updateAccountBalance).toHaveBeenCalledWith(
+      'acc1',
+      'CurrentBudgetID',
+      -500
     );
   });
 

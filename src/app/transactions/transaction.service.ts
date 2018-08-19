@@ -158,7 +158,7 @@ export class TransactionService {
             this.categoryService.updateCategoryBudget(budgetId, category, shortDate);
           });
           this.accountService.updateAccountBalance(account.id, budgetId, transaction.amount);
-          this.budgetService.updateBudgetBalance(budget.id, transaction.date, transaction.amount);
+          this.budgetService.updateBudgetBalance(budgetId, transaction.date, transaction.amount);
           resolve(response);
         },
         error => {
