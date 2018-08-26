@@ -49,6 +49,7 @@ export class Transaction {
         this.transferAccount = transactionData.transferAccount;
       }
       this.transferAmount = transactionData.transferAmount ? transactionData.transferAmount : 0;
+      this.transfer = transactionData.transfer ? transactionData.transfer : false;
       this.payeeId = transactionData.payeeId ? transactionData.payeeId : null;
       this.payee = transactionData.payee ? transactionData.payee : null;
       this.amount = transactionData.amount ? transactionData.amount : null;

@@ -177,6 +177,9 @@ export class TransactionComponent implements OnInit {
     if (this.transactionId != null) {
       console.log('updating ', this.transactionId);
       // this.update(this.transactionForm);
+    } else if (this.transactionForm.get('transfer').value) {
+      console.log('transferring...');
+      this.transfer(this.transactionForm);
     } else {
       console.log('creating...');
       this.create(this.transactionForm);
@@ -228,58 +231,58 @@ export class TransactionComponent implements OnInit {
   }
 
   transfer(form: FormGroup) {
-    const transaction = new Transaction(form.value);
+    const fromTransaction = new Transaction(form.value);
+    const toTransaction = new Transaction(form.value);
     const fromAccount = form.get('account').value;
     const toAccount = form.get('transferAccount').value;
 
-    transaction.account = {
-      accountId: fromAccount.id,
-      accountName: fromAccount.name
-    };
-    transaction.accountDisplayName = transaction.account.accountName;
-
-    if (transaction.amount > 0) {
-      transaction.in = transaction.amount;
-    } else {
-      transaction.out = Math.abs(transaction.amount);
-    }
     const toCategory = this.categories.find(cat => cat.name === 'Transfer In');
     const fromCategory = this.categories.find(cat => cat.name === 'Transfer Out');
 
-    transaction.categories = [
+    // first the from account transaction
+    fromTransaction.account = {
+      accountId: fromAccount.id,
+      accountName: fromAccount.name
+    };
+    fromTransaction.accountDisplayName = fromTransaction.account.accountName;
+
+    fromTransaction.categories = [
       {
         categoryId: fromCategory.id,
         categoryName: fromCategory.name,
         in: 0,
-        out: transaction.transferAmount
+        out: fromTransaction.transferAmount
       }
     ];
+    fromTransaction.amount = 0 - fromTransaction.transferAmount;
+    fromTransaction.out = 0 - fromTransaction.transferAmount;
 
-    console.log('from', transaction.account.accountName);
-    this.transactionService.createTransaction(transaction, this.activeBudget.id);
+    // console.log('from', fromTransaction);
+    this.transactionService.createTransaction(fromTransaction, this.activeBudget.id);
 
     // switch accounts to let the correct things get updated
-    const tempAccount = transaction.account;
-    transaction.account = {
+    toTransaction.account = {
       accountId: toAccount.id,
       accountName: toAccount.name
     };
-    transaction.transferAccount = {
+    toTransaction.transferAccount = {
       accountId: fromAccount.id,
       accountName: fromAccount.name
     };
-
-    transaction.categories = [
+    toTransaction.accountDisplayName = toTransaction.account.accountName;
+    toTransaction.categories = [
       {
         categoryId: toCategory.id,
         categoryName: toCategory.name,
-        in: transaction.transferAmount,
+        in: toTransaction.transferAmount,
         out: 0
       }
     ];
+    toTransaction.amount = toTransaction.transferAmount;
+    toTransaction.in = toTransaction.transferAmount;
 
-    console.log('to', transaction.account.accountName);
-    this.transactionService.createTransaction(transaction, this.activeBudget.id);
+    // console.log('to', toTransaction);
+    this.transactionService.createTransaction(toTransaction, this.activeBudget.id);
   }
 
   create(form: FormGroup) {

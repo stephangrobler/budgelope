@@ -142,6 +142,13 @@ export class TransactionService {
     return new Promise((resolve, reject) => {
       items.add(transaction.toObject).then(
         response => {
+          // after successfull response, we update the account budgets (could go to cloud functions)
+          this.accountService.updateAccountBalance(
+            transaction.account.accountId,
+            budgetId,
+            transaction.amount
+          );
+
           // after successfull response, we update the category budgets (could go to cloud functions)
           transaction.categories.forEach(category => {
             this.categoryService.updateCategoryBudget(
@@ -152,14 +159,11 @@ export class TransactionService {
               category.out
             );
           });
-          // after successfull response, we update the account budgets (could go to cloud functions)
-          this.accountService.updateAccountBalance(
-            transaction.account.accountId,
-            budgetId,
-            transaction.amount
-          );
+          if (!transaction.transfer) {
+           console.log('updating budget', transaction); 
           // after successfull response, we update the budget budgets (could go to cloud functions)
           this.budgetService.updateBudgetBalance(budgetId, transaction.date, transaction.amount);
+          }
           resolve(response);
         },
         error => {

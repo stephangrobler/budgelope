@@ -34,6 +34,7 @@ import { ActivatedRouteStub } from '../../../testing/activate-route-stub';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Category } from '../../shared/category';
 import { Budget } from '../../shared/budget';
+import { Transaction } from '../../shared/transaction';
 
 describe('TransactionsComponent', () => {
   let transactionServiceStub;
@@ -75,7 +76,10 @@ describe('TransactionsComponent', () => {
         success();
       }
     });
-    accountServiceStub = jasmine.createSpyObj('AccountService', ['getAccounts', 'updateAccountBalance']);
+    accountServiceStub = jasmine.createSpyObj('AccountService', [
+      'getAccounts',
+      'updateAccountBalance'
+    ]);
     accountServiceStub.getAccounts.and.returnValue(of([]));
 
     categoryServiceStub = jasmine.createSpyObj('CategoryService', [
@@ -237,24 +241,88 @@ describe('TransactionsComponent', () => {
   });
 
   it('should call the transfer function', () => {
-    categoryServiceStub.getCategories.and.returnValue(of([
-      {id: 'cat1', name: 'Transfer In'},
-      {id: 'cat2', name: 'Transfer Out'},
-    ]));
+    categoryServiceStub.getCategories.and.returnValue(
+      of([{ id: 'cat1', name: 'Transfer In' }, { id: 'cat2', name: 'Transfer Out' }])
+    );
 
     const fixture = TestBed.createComponent(TransactionComponent);
     fixture.detectChanges();
     const comp = fixture.debugElement.componentInstance;
     const form = fixture.componentInstance.transactionForm;
     form.get('account').setValue({ id: 'acc1', name: 'acc1Name' });
-    form.get('transferAccount').setValue({id: 'acc2', name: 'Test Account 2'});
+    form.get('transferAccount').setValue({ id: 'acc2', name: 'Test Account 2' });
     form.get('transferAmount').setValue(500);
     form.get('transfer').setValue(true);
 
     comp.transfer(form);
 
     expect(transactionServiceStub.createTransaction).toHaveBeenCalledTimes(2);
-  })
+  });
+
+  it('should call the transfer function with a from Transaction of values', () => {
+    categoryServiceStub.getCategories.and.returnValue(
+      of([{ id: 'cat1', name: 'Transfer In' }, { id: 'cat2', name: 'Transfer Out' }])
+    );
+
+    const fixture = TestBed.createComponent(TransactionComponent);
+    fixture.detectChanges();
+    const comp = fixture.debugElement.componentInstance;
+    const form = fixture.componentInstance.transactionForm;
+    form.get('account').setValue({ id: 'acc1', name: 'acc1Name' });
+    form.get('transferAccount').setValue({ id: 'acc2', name: 'Test Account 2' });
+    form.get('transferAmount').setValue(500);
+    form.get('transfer').setValue(true);
+
+    const transaction = new Transaction(form.value);
+    transaction.account = {
+      accountId: 'acc1',
+      accountName: 'acc1Name'
+    };
+    transaction.accountDisplayName = transaction.account.accountName;
+    transaction.categories = [
+      { categoryId: 'cat2', categoryName: 'Transfer Out', in: 0, out: 500 }
+    ];
+    transaction.amount = -500;
+    transaction.out = -500;
+
+    comp.transfer(form);
+
+    expect(transactionServiceStub.createTransaction).toHaveBeenCalledWith(transaction, '54321');
+  });
+
+  it('should call the transfer function with a to Transaction of values', () => {
+    categoryServiceStub.getCategories.and.returnValue(
+      of([{ id: 'cat1', name: 'Transfer In' }, { id: 'cat2', name: 'Transfer Out' }])
+    );
+
+    const fixture = TestBed.createComponent(TransactionComponent);
+    fixture.detectChanges();
+    const comp = fixture.debugElement.componentInstance;
+    const form = fixture.componentInstance.transactionForm;
+    form.get('account').setValue({ id: 'acc1', name: 'acc1Name' });
+    form.get('transferAccount').setValue({ id: 'acc2', name: 'Test Account 2' });
+    form.get('transferAmount').setValue(500);
+    form.get('transfer').setValue(true);
+
+    const transaction = new Transaction(form.value);
+    transaction.account = {
+      accountId: 'acc2',
+      accountName: 'Test Account 2'
+    };
+    transaction.transferAccount = {
+      accountId: 'acc1',
+      accountName: 'acc1Name'
+    };
+    transaction.accountDisplayName = transaction.account.accountName;
+    transaction.categories = [{ categoryId: 'cat1', categoryName: 'Transfer In', in: 500, out: 0 }];
+
+    transaction.amount = 500;
+    transaction.in = 500;
+
+    comp.transfer(form);
+
+    expect(transactionServiceStub.createTransaction).toHaveBeenCalledWith(transaction, '54321');
+  });
 
   it('should update the categories and call update 3 times', () => {
     const fixture = TestBed.createComponent(TransactionComponent);
@@ -423,8 +491,7 @@ describe('TransactionsComponent', () => {
 
   it('should create a new single category transaction', () => {
     // arrange
-    activatedRouteStub.setParamMap({
-    });
+    activatedRouteStub.setParamMap({});
     transactionServiceStub.calculateAmount.and.returnValue(500);
     const fixture = TestBed.createComponent(TransactionComponent);
     fixture.detectChanges();
@@ -440,7 +507,7 @@ describe('TransactionsComponent', () => {
 
     // assert
     expect(transactionServiceStub.createTransaction).toHaveBeenCalledWith(
-      jasmine.objectContaining({amount: 500, in: 500}),
+      jasmine.objectContaining({ amount: 500, in: 500 }),
       jasmine.any(String)
     );
   });
