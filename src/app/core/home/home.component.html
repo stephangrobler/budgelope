@@ -8,8 +8,8 @@
         <a mat-list-item routerLink="/app/transactions?accountId={{account.id}}"
           *ngFor="let account of accounts | async"
           routerLinkActive="active">
-          <div>{{account.name}}</div>
-          <span class="small">{{account.balance | currency: 'ZAR' : 'symbol-narrow'}}</span>
+          <h4 matLine>{{account.name}}</h4>
+          <div class="small" matLine [ngClass]="{'primary-text': account.balance >= 0, 'secondary-text': account.balance < 0}">{{account.balance | currency: 'ZAR' : 'symbol-narrow'}}</div>
         </a>
       </mat-nav-list>
 

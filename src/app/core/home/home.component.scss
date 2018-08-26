@@ -9,4 +9,17 @@ router-outlet.router-flex + * {
 .side-nav {
   width: 250px;
   border-right: 1px solid lighten(mat-color($candy-app-primary), 50%);
+
+  .small {
+    clear: both;
+    font-size: 80%;
+  }
+
+  .primary-text {
+    color: black;
+  }
+
+  .secondary-text {
+    color: red;
+  }
 }
