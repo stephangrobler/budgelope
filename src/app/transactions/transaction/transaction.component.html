@@ -64,7 +64,7 @@
           Cleared
         </mat-checkbox>
         &nbsp;
-        <mat-checkbox name="transfer" [labelPosition]="end" formControlName="transfer" [(ngModel)]="transferBox">
+        <mat-checkbox name="transfer" [labelPosition]="end" formControlName="transfer" (change)="onToggleTransfer()" >
           Transfer
         </mat-checkbox>
         <mat-card-actions>

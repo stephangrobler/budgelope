@@ -40,6 +40,7 @@ export class TransactionComponent implements OnInit {
   accounts: Account[];
   categories: CategoryId[];
   selectedAccount: Account;
+  transferBox = false;
 
   constructor(
     private userService: UserService,
@@ -163,6 +164,10 @@ export class TransactionComponent implements OnInit {
     (<FormArray>this.transactionForm.get('categories')).push(categoryGroup);
   }
 
+  onToggleTransfer() {
+    console.log('boom');
+    this.transferBox = !this.transferBox;
+  }
   clearFormCategories(formArray: FormArray) {
     while (formArray.length !== 0) {
       formArray.removeAt(0);

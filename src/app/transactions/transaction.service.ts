@@ -160,7 +160,6 @@ export class TransactionService {
             );
           });
           if (!transaction.transfer) {
-           console.log('updating budget', transaction); 
           // after successfull response, we update the budget budgets (could go to cloud functions)
           this.budgetService.updateBudgetBalance(budgetId, transaction.date, transaction.amount);
           }
