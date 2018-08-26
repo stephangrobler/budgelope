@@ -2,7 +2,11 @@ import { Component, OnInit, OnChanges, Input, SimpleChange } from '@angular/core
 import { FormGroup, FormControl, FormArray, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, Params, ParamMap } from '@angular/router';
 import { AngularFireAuth } from 'angularfire2/auth';
-import { AngularFirestore, AngularFirestoreDocument, AngularFirestoreCollection } from 'angularfire2/firestore';
+import {
+  AngularFirestore,
+  AngularFirestoreDocument,
+  AngularFirestoreCollection
+} from 'angularfire2/firestore';
 
 import { MatSnackBar } from '@angular/material';
 import { Observable } from 'rxjs';
@@ -129,18 +133,17 @@ export class TransactionComponent implements OnInit {
   }
 
   mapTransaction(transaction: any): Transaction {
-
     transaction.account = {
-      accountId : transaction['accountId'],
-      accountName : transaction['accountName']
-    }
+      accountId: transaction['accountId'],
+      accountName: transaction['accountName']
+    };
     transaction.accountDisplayName = transaction['accountName'];
     if (transaction.categories.length > 1) {
       transaction.categoryDisplayName = 'Split (' + transaction.categories.length + ')';
     } else {
       transaction.categoryDisplayName = transaction.categories[0].categoryName;
     }
-    if (typeof(transaction.date) === 'object') {
+    if (typeof transaction.date === 'object') {
       transaction.date = transaction['date'].toDate();
     }
     return transaction;
@@ -224,6 +227,61 @@ export class TransactionComponent implements OnInit {
     );
   }
 
+  transfer(form: FormGroup) {
+    const transaction = new Transaction(form.value);
+    const fromAccount = form.get('account').value;
+    const toAccount = form.get('transferAccount').value;
+
+    transaction.account = {
+      accountId: fromAccount.id,
+      accountName: fromAccount.name
+    };
+    transaction.accountDisplayName = transaction.account.accountName;
+
+    if (transaction.amount > 0) {
+      transaction.in = transaction.amount;
+    } else {
+      transaction.out = Math.abs(transaction.amount);
+    }
+    const toCategory = this.categories.find(cat => cat.name === 'Transfer In');
+    const fromCategory = this.categories.find(cat => cat.name === 'Transfer Out');
+
+    transaction.categories = [
+      {
+        categoryId: fromCategory.id,
+        categoryName: fromCategory.name,
+        in: 0,
+        out: transaction.transferAmount
+      }
+    ];
+
+    console.log('from', transaction.account.accountName);
+    this.transactionService.createTransaction(transaction, this.activeBudget.id);
+
+    // switch accounts to let the correct things get updated
+    const tempAccount = transaction.account;
+    transaction.account = {
+      accountId: toAccount.id,
+      accountName: toAccount.name
+    };
+    transaction.transferAccount = {
+      accountId: fromAccount.id,
+      accountName: fromAccount.name
+    };
+
+    transaction.categories = [
+      {
+        categoryId: toCategory.id,
+        categoryName: toCategory.name,
+        in: transaction.transferAmount,
+        out: 0
+      }
+    ];
+
+    console.log('to', transaction.account.accountName);
+    this.transactionService.createTransaction(transaction, this.activeBudget.id);
+  }
+
   create(form: FormGroup) {
     const transaction = new Transaction(form.value);
     transaction.account = {
@@ -245,14 +303,11 @@ export class TransactionComponent implements OnInit {
       transaction.in = transaction.amount;
     } else {
       transaction.out = Math.abs(transaction.amount);
-    };
+    }
 
     this.transactionService
       .createTransaction(
         transaction,
-        form.value.account,
-        form.value.categories,
-        this.activeBudget,
         this.activeBudget.id
       )
       .then(response => {

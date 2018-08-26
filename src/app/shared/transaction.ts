@@ -32,16 +32,23 @@ export class Transaction {
           out: number;
         }[] = [];
         transactionData.categories.forEach(item => {
-          const newCategory = {
-            categoryId: item.category.id,
-            categoryName: item.category.name,
-            in: item.in,
-            out: item.out
-          };
-          newCategories.push(newCategory);
+          // it should have an id specified for later use
+          if (item.category && item.category.id) {
+            const newCategory = {
+              categoryId: item.category.id,
+              categoryName: item.category.name,
+              in: item.in,
+              out: item.out
+            };
+            newCategories.push(newCategory);
+          }
         });
         this.categories = newCategories;
-      };
+      }
+      if (transactionData.transferAccount) {
+        this.transferAccount = transactionData.transferAccount;
+      }
+      this.transferAmount = transactionData.transferAmount ? transactionData.transferAmount : 0;
       this.payeeId = transactionData.payeeId ? transactionData.payeeId : null;
       this.payee = transactionData.payee ? transactionData.payee : null;
       this.amount = transactionData.amount ? transactionData.amount : null;
@@ -70,7 +77,7 @@ export class Transaction {
       date: this.date,
       type: this.type, // income or expense
       cleared: this.cleared,
-      transfer: this.transfer,
+      transfer: this.transfer
     };
   }
 }

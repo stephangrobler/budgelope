@@ -6,10 +6,11 @@ import * as moment from 'moment';
 
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { FirebaseApp } from 'angularfire2';
 
 @Injectable()
 export class CategoryService {
-  constructor(private db: AngularFirestore) {}
+  constructor(private db: AngularFirestore, private fb: FirebaseApp) {}
 
   getCategories(budgetId: string, sortBy: string = 'sortingOrder'): Observable<CategoryId[]> {
     return this.db
@@ -76,25 +77,44 @@ export class CategoryService {
     });
   }
 
-  updateCategoryBudget(
-    budgetId: string,
-    category: { category: Category; in: number; out: number },
-    shortDate: string
-  ) {
-    const catStore = this.db.doc<Category>(
-      'budgets/' + budgetId + '/categories/' + category.category.id
-    );
-    const amount = 0 + category.in - category.out;
+  updateCategoryBudget(budgetId: string, categoryId: string, shortDate: string, inAmount: number, outAmount: number) {
+    const docRef = this.db.doc('budgets/' + budgetId + '/categories/' + categoryId).ref;
 
-    category.category.balance += amount;
-    if (!category.category.allocations[shortDate]) {
-      category.category.allocations[shortDate] = {
-        actual: 0,
-        planned: 0
-      };
-    }
-    category.category.allocations[shortDate].actual += amount;
-    catStore.update(category.category);
+    this.fb.firestore().runTransaction(transaction => {
+      return transaction.get(docRef).then(
+        categoryRaw => {
+          const category = categoryRaw.data() as Category;
+
+          if (!category['allocations']) {
+            category['allocations'] = {};
+          }
+          const amount = inAmount - outAmount;
+          category['balance'] += amount;
+
+          if (!category['allocations'][shortDate]) {
+            category['allocations'][shortDate] = {
+              actual: 0,
+              planned: 0
+            };
+          }
+          category['allocations'][shortDate].actual += amount;
+          transaction.update(docRef, category);
+        },
+        error => {
+          console.log(
+            'There was an error updating the category: ' +
+              budgetId +
+              ' - ' +
+              categoryId +
+              ' - ' +
+              shortDate +
+              ' - ' +
+              inAmount + ' - ' + outAmount,
+            error
+          );
+        }
+      );
+    });
   }
 
   updateCategory(budgetId: string, category: Category) {

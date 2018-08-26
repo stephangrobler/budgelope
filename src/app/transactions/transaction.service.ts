@@ -50,9 +50,9 @@ export class TransactionService {
             }
 
             data.account = {
-              accountId : data['accountId'],
-              accountName : data['accountName']
-            }
+              accountId: data['accountId'],
+              accountName: data['accountName']
+            };
             if (data['accountName']) {
               data.accountDisplayName = data['accountName'];
             }
@@ -102,31 +102,26 @@ export class TransactionService {
 
   createStartingBalance(account: Account, budget: Budget) {}
 
-
   calculateAmount(transaction: Transaction): number {
     let amount = 0;
     transaction.categories.forEach(category => {
       const amountIn = +category.in,
-            amountOut = +category.out;
+        amountOut = +category.out;
       amount = amount + amountIn - amountOut;
     });
-
 
     return amount;
   }
 
   transferTransaction(transaction: Transaction, budgetId: string) {
     // transfer categories
-    this.categoryService.getCategories(budgetId).pipe(
-      take(1)
-    ).subscribe(categories => {
-      const toCategory = categories.find(cat => cat.name === 'Transfer In');
-      const fromCategory = categories.find(cat => cat.name === 'Transfer Out');
-
-
-      
-    });
-
+    this.categoryService
+      .getCategories(budgetId)
+      .pipe(take(1))
+      .subscribe(categories => {
+        const toCategory = categories.find(cat => cat.name === 'Transfer In');
+        const fromCategory = categories.find(cat => cat.name === 'Transfer Out');
+      });
   }
 
   /**
@@ -140,24 +135,30 @@ export class TransactionService {
    * @param  {string} budgetId    [description]
    * @return {[type]}             [description]
    */
-  createTransaction(
-    transaction: Transaction,
-    account: Account,
-    categories: { category: Category; in: number; out: number }[],
-    budget: Budget,
-    budgetId: string
-  ) {
+  createTransaction(transaction: Transaction, budgetId: string) {
     const items = this.db.collection<Transaction>('budgets/' + budgetId + '/transactions'),
       shortDate = moment(transaction.date).format('YYYYMM');
 
     return new Promise((resolve, reject) => {
       items.add(transaction.toObject).then(
         response => {
-          
-          categories.forEach(category => {
-            this.categoryService.updateCategoryBudget(budgetId, category, shortDate);
+          // after successfull response, we update the category budgets (could go to cloud functions)
+          transaction.categories.forEach(category => {
+            this.categoryService.updateCategoryBudget(
+              budgetId,
+              category.categoryId,
+              shortDate,
+              category.in,
+              category.out
+            );
           });
-          this.accountService.updateAccountBalance(account.id, budgetId, transaction.amount);
+          // after successfull response, we update the account budgets (could go to cloud functions)
+          this.accountService.updateAccountBalance(
+            transaction.account.accountId,
+            budgetId,
+            transaction.amount
+          );
+          // after successfull response, we update the budget budgets (could go to cloud functions)
           this.budgetService.updateBudgetBalance(budgetId, transaction.date, transaction.amount);
           resolve(response);
         },

@@ -236,6 +236,26 @@ describe('TransactionsComponent', () => {
     const comp = fixture.debugElement.componentInstance;
   });
 
+  fit('should call the transfer function', () => {
+    categoryServiceStub.getCategories.and.returnValue(of([
+      {id: 'cat1', name: 'Transfer In'},
+      {id: 'cat2', name: 'Transfer Out'},
+    ]));
+
+    const fixture = TestBed.createComponent(TransactionComponent);
+    fixture.detectChanges();
+    const comp = fixture.debugElement.componentInstance;
+    const form = fixture.componentInstance.transactionForm;
+    form.get('account').setValue({ id: 'acc1', name: 'acc1Name' });
+    form.get('transferAccount').setValue({id: 'acc2', name: 'Test Account 2'});
+    form.get('transferAmount').setValue(500);
+    form.get('transfer').setValue(true);
+
+    comp.transfer(form);
+
+    expect(transactionServiceStub.createTransaction).toHaveBeenCalledTimes(2);
+  })
+
   it('should update the categories and call update 3 times', () => {
     const fixture = TestBed.createComponent(TransactionComponent);
 
