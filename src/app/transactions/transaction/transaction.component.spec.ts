@@ -236,7 +236,7 @@ describe('TransactionsComponent', () => {
     const comp = fixture.debugElement.componentInstance;
   });
 
-  fit('should call the transfer function', () => {
+  it('should call the transfer function', () => {
     categoryServiceStub.getCategories.and.returnValue(of([
       {id: 'cat1', name: 'Transfer In'},
       {id: 'cat2', name: 'Transfer Out'},
@@ -424,7 +424,6 @@ describe('TransactionsComponent', () => {
   it('should create a new single category transaction', () => {
     // arrange
     activatedRouteStub.setParamMap({
-      
     });
     transactionServiceStub.calculateAmount.and.returnValue(500);
     const fixture = TestBed.createComponent(TransactionComponent);
@@ -442,9 +441,6 @@ describe('TransactionsComponent', () => {
     // assert
     expect(transactionServiceStub.createTransaction).toHaveBeenCalledWith(
       jasmine.objectContaining({amount: 500, in: 500}),
-      jasmine.any(Object),
-      jasmine.any(Object),
-      jasmine.any(Object),
       jasmine.any(String)
     );
   });

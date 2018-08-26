@@ -84,11 +84,12 @@ describe('Transaction Service to be thing', () => {
   });
 
   it('should create a transaction with the correct income transaction', (done: DoneFn) => {
-    account.id = 'acc1';
-    account.name = 'test';
-    account.balance = 0;
+    transaction.account = {
+      accountId : 'acc1',
+      accountName : 'test',
+    };
 
-    const categories = [
+    transaction.categories = [
       {
         category: category,
         in: 0,
@@ -102,7 +103,7 @@ describe('Transaction Service to be thing', () => {
     budget.allocations = {};
     budget.balance = 0;
 
-    service.createTransaction(transaction, account, categories, budget, 'CurrentBudget').then(
+    service.createTransaction(transaction, 'CurrentBudget').then(
       response => {
         expect(budgetServiceMock.updateBudgetBalance).toHaveBeenCalledWith(
           'CurrentBudget',
@@ -123,11 +124,12 @@ describe('Transaction Service to be thing', () => {
   });
 
   it('should create a transaction with the correct expense transaction', (done: DoneFn) => {
-    account.id = 'acc1';
-    account.name = 'test';
-    account.balance = 0;
+    transaction.account = {
+      accountId : 'acc1',
+      accountName : 'test',
+    };
 
-    const categories = [
+    transaction.categories = [
       {
         category: category,
         in: 0,
@@ -138,7 +140,7 @@ describe('Transaction Service to be thing', () => {
     transaction.out = 500;
     transaction.date = new Date('2018-01-01');
 
-    service.createTransaction(transaction, account, categories, budget, 'CurrentBudget').then(
+    service.createTransaction(transaction, 'CurrentBudget').then(
       response => {
         expect(budgetServiceMock.updateBudgetBalance).toHaveBeenCalledWith(
           'CurrentBudget',
