@@ -30,43 +30,47 @@ export class TransactionService {
    * @param  budgetId Current active budget for the user id
    * @return          the observable for the transactions.
    */
-  getTransactions(budgetId: string): Observable<Transaction[]> {
+  getTransactions(budgetId: string, accountId?: string): Observable<Transaction[]> {
     const transRef = '/budgets/' + budgetId + '/transactions';
+    let collection = this.db.collection<Transaction>(transRef, ref => ref.orderBy('date', 'desc'));
 
-    return this.db
-      .collection<Transaction>(transRef, ref => ref.orderBy('date', 'desc'))
-      .snapshotChanges()
-      .pipe(
-        map(actions =>
-          actions.map(a => {
-            const data = a.payload.doc.data() as Transaction;
-            const id = a.payload.doc.id;
-            // convert timestamp object from firebase to date object if object
-            const dateObj = a.payload.doc.get('date');
-            if (typeof dateObj === 'string') {
-              data.date = new Date(dateObj);
-            } else if (typeof dateObj === 'object') {
-              data.date = dateObj.toDate();
-            }
-
-            data.account = {
-              accountId: data['accountId'],
-              accountName: data['accountName']
-            };
-            if (data['accountName']) {
-              data.accountDisplayName = data['accountName'];
-            }
-            if (data.categories && data.categories.length > 1) {
-              data.categoryDisplayName = 'Split (' + data.categories.length + ')';
-            } else if (data.categories && data.categories.length === 1) {
-              data.categoryDisplayName = data.categories[0].categoryName;
-            }
-
-            data.id = id;
-            return { id, ...data };
-          })
-        )
+    if (accountId) {
+      collection = this.db.collection<Transaction>(transRef, ref =>
+        ref.where('account.accountId', '==', accountId).orderBy('date', 'desc')
       );
+    }
+
+    return collection.snapshotChanges().pipe(
+      map(actions =>
+        actions.map(a => {
+          const data = a.payload.doc.data() as Transaction;
+          const id = a.payload.doc.id;
+          // convert timestamp object from firebase to date object if object
+          const dateObj = a.payload.doc.get('date');
+          if (typeof dateObj === 'string') {
+            data.date = new Date(dateObj);
+          } else if (typeof dateObj === 'object') {
+            data.date = dateObj.toDate();
+          }
+
+          data.account = {
+            accountId: data['accountId'],
+            accountName: data['accountName']
+          };
+          if (data['accountName']) {
+            data.accountDisplayName = data['accountName'];
+          }
+          if (data.categories && data.categories.length > 1) {
+            data.categoryDisplayName = 'Split (' + data.categories.length + ')';
+          } else if (data.categories && data.categories.length === 1) {
+            data.categoryDisplayName = data.categories[0].categoryName;
+          }
+
+          data.id = id;
+          return { id, ...data };
+        })
+      )
+    );
   }
 
   getTransaction(budgetId: string, transactionId: string): Observable<Transaction> {
@@ -160,8 +164,8 @@ export class TransactionService {
             );
           });
           if (!transaction.transfer) {
-          // after successfull response, we update the budget budgets (could go to cloud functions)
-          this.budgetService.updateBudgetBalance(budgetId, transaction.date, transaction.amount);
+            // after successfull response, we update the budget budgets (could go to cloud functions)
+            this.budgetService.updateBudgetBalance(budgetId, transaction.date, transaction.amount);
           }
           resolve(response);
         },

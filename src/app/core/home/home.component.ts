@@ -15,7 +15,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   items: Observable<any[]>;
   accounts: Observable<Account[]>;
   currentMonth: string;
-  sideNavState: any= {};
+  sideNavState: any = {};
   watcher: Subscription;
   activeMediaQuery = '';
 
@@ -63,5 +63,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.watcher.unsubscribe();
+  }
+
+  navigateTo(accountId) {
+    this.router.navigate(['/app/transactions', { accountId: accountId }]);
   }
 }

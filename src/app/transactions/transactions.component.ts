@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AngularFireDatabase, AngularFireList } from 'angularfire2/database';
 import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
@@ -19,6 +19,7 @@ export class TransactionsComponent implements OnInit {
   title = 'Transactions';
   userId: string;
   budgetId: string;
+  accountId: string;
   displayedColumns = ['date', 'account', 'payee', 'category', 'out', 'in'];
   dataSource: TransactionDataSource;
   newTransaction: Transaction;
@@ -30,6 +31,7 @@ export class TransactionsComponent implements OnInit {
     private budgetService: BudgetService,
     private userService: UserService,
     private router: Router,
+    private route: ActivatedRoute,
     private db: AngularFirestore,
     private af: AngularFireAuth
   ) {
@@ -45,7 +47,14 @@ export class TransactionsComponent implements OnInit {
       const profile = this.db.doc<any>('users/' + user.uid).valueChanges().subscribe(profileRead => {
         this.userId = user.uid;
         this.budgetId = profileRead.activeBudget;
-        this.dataSource = new TransactionDataSource(this.transService, profileRead.activeBudget);
+        this.route.paramMap.subscribe(params => {
+          if (params.get('accountId')) {
+            this.accountId = params.get('accountId');
+            this.dataSource = new TransactionDataSource(this.transService, profileRead.activeBudget, this.accountId);
+          } else {
+            this.dataSource = new TransactionDataSource(this.transService, profileRead.activeBudget);
+          }
+        })
       });
     });
     this.newTransaction = new Transaction({
@@ -62,12 +71,12 @@ export class TransactionsComponent implements OnInit {
 
 export class TransactionDataSource extends DataSource<any> {
 
-  constructor(private transService: TransactionService, private budgetId: string) {
+  constructor(private transService: TransactionService, private budgetId: string, private accountId?: string) {
     super();
   }
 
   connect() {
-    return this.transService.getTransactions(this.budgetId);
+    return this.transService.getTransactions(this.budgetId, this.accountId);
   }
 
   disconnect() {
