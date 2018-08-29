@@ -5,12 +5,14 @@ import { TransactionsComponent } from './transactions.component';
 import { TransactionService } from './transaction.service';
 import { BudgetService } from '../budgets/budget.service';
 import { UserService } from '../shared/user.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { Observable, of } from 'rxjs';
+import { ActivatedRouteStub } from 'testing/activate-route-stub';
 
 describe('TransactionsComponent', () => {
+  let activatedRouteStub;
 
   const TransactionServiceStub = jasmine.createSpyObj('TransactionService', ['getTransactions']);
   TransactionServiceStub.getTransactions.and.returnValue(of([]));
@@ -30,6 +32,9 @@ describe('TransactionsComponent', () => {
   });
 
   beforeEach(async (() => {
+    activatedRouteStub = new ActivatedRouteStub();
+    activatedRouteStub.setParamMap({});
+
     TestBed.configureTestingModule({
       declarations: [
         TransactionsComponent
@@ -62,6 +67,10 @@ describe('TransactionsComponent', () => {
           provide: Router,
           useValue: RouterStub
         },
+        {
+          provide: ActivatedRoute,
+          useValue: activatedRouteStub
+        }
       ]
     }).compileComponents();
   }));
