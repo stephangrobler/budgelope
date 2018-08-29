@@ -29,7 +29,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
   nextMonth: any = moment().add(1, 'months');
   prevMonth: any = moment().subtract(1, 'months');
   monthDisplay: Date;
-  
+  originalValue: number;
 
   sortList: any;
 
@@ -226,34 +226,36 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     // this.accounts = this.db.list(accRef);
   }
 
-  alert(key) {
-    console.log('key for', key);
-  }
-
-  calculateBalance(actual, planned) {
-    return parseFloat(planned) + parseFloat(actual);
+  trackCategory(index, category: Category) {
+    return category ? category.id : undefined;
   }
 
   focus(item) {
-    item.original = item.allocations[this.selectedMonth].planned;
+    this.originalValue = item.allocations[this.selectedMonth].planned;
+    console.log('original value', this.originalValue);
   }
 
   blur(item) {
-    const planned: number = item.allocations[this.selectedMonth].planned;
+    const planned: number = +item.allocations[this.selectedMonth].planned;
     const ref = 'budgets/' + this.activeBudget.id + '/categories/' + item.id,
       budgetRef = 'budgets/' + this.activeBudget.id;
 
-    if (planned !== item.original) {
-      item.balance = item.balance - item.original + planned;
+    if (typeof(this.originalValue) !== 'undefined' && planned !== +this.originalValue) {
+      if (isNaN(item.balance)) {
+        item.balance = 0;
+      }
+      item.balance = +item.balance - (+this.originalValue) + planned;
 
       // update the budget available balance
-      this.activeBudget.balance = this.activeBudget.balance - planned + item.original;
-
-      delete item.original;
-      delete item.id;
-
-      this.db.doc(ref).update(item);
-      this.db.doc(budgetRef).update(this.activeBudget);
+      if (isNaN(this.activeBudget.balance)) {
+        this.activeBudget.balance = 0;
+      }
+      this.activeBudget.balance = +this.activeBudget.balance - planned + (+this.originalValue);
+      console.log('item', item.balance, 'budget', this.activeBudget.balance);
+      if (!isNaN(item.balance) && !isNaN(this.activeBudget.balance)) {
+        this.categoryService.updateCategory(this.activeBudget.id, item);
+        this.db.doc(budgetRef).update(this.activeBudget);
+      }
     }
   }
 }
