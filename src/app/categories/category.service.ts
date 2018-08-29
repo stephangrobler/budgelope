@@ -77,7 +77,13 @@ export class CategoryService {
     });
   }
 
-  updateCategoryBudget(budgetId: string, categoryId: string, shortDate: string, inAmount: number, outAmount: number) {
+  updateCategoryBudget(
+    budgetId: string,
+    categoryId: string,
+    shortDate: string,
+    inAmount: number,
+    outAmount: number
+  ) {
     const docRef = this.db.doc('budgets/' + budgetId + '/categories/' + categoryId).ref;
 
     this.fb.firestore().runTransaction(transaction => {
@@ -109,7 +115,9 @@ export class CategoryService {
               ' - ' +
               shortDate +
               ' - ' +
-              inAmount + ' - ' + outAmount,
+              inAmount +
+              ' - ' +
+              outAmount,
             error
           );
         }
@@ -117,41 +125,10 @@ export class CategoryService {
     });
   }
 
-  updateCategory(budgetId: string, category: Category) {
-    // update main category
-    const dbRef = this.db.doc('categories/' + budgetId + '/' + category.$key);
-    const categoryId = category.$key;
+  updateCategory(budgetId: string, categoryParam: Category) {
+    const docRef = 'budgets/' + budgetId + '/categories/' + categoryParam.id;
 
-    // update allocations
-    const updateObj = {};
-
-    // get all allocations
-    const allocationsRef = '/categoryAllocations/' + budgetId + '/' + categoryId;
-    // update the allocations
-    const allocationLocations = firebase
-      .database()
-      .ref(allocationsRef)
-      .once('value')
-      .then(results => {
-        const allResults = results.val();
-        // update allocations
-
-        Object.keys(allResults).forEach(month => {
-          // push all different items to the object
-          const refAll = '/allocations/' + budgetId + '/' + month + '/' + categoryId;
-          updateObj[refAll + '/sortingOrder'] = category.sortingOrder;
-          updateObj[refAll + '/name'] = category.name;
-          updateObj[refAll + '/parent'] = category.parent;
-          updateObj[refAll + '/type'] = category.type;
-        });
-        return firebase
-          .database()
-          .ref('/')
-          .update(updateObj)
-          .then(() => {
-            console.log('Update Category ' + categoryId + ':' + category.name + ' complete.');
-          });
-      });
+    return this.db.doc(docRef).update(categoryParam);
   }
 
   deleteCategory(budgetId: string, category: Category) {}
