@@ -1,26 +1,39 @@
-<div fxLayout="column" fxLayoutGap="10px" fxLayoutAlign="center none">
+<div class="budget-view" fxLayout="column" fxLayoutGap="10px" fxLayoutAlign="center none">
 
   <mat-card *ngIf="activeBudget">
     <mat-card-title>
-      {{ this.displayMonth }}
-      <button mat-icon-button [matMenuTriggerFor]="menu">
-        <mat-icon>more_vert</mat-icon>
-      </button>
-      <mat-menu #menu="matMenu" >
-        <button mat-menu-item *ngFor="let budget of budgetList; index as i" (click)="onBudgetActivate(budget.id)">
-          <span>{{budget.name}}</span>
-        </button>
-        <button mat-menu-item (click)="onFreshStart()">
-          <span>Fresh Start</span>
-        </button>
-      </mat-menu>
+
     </mat-card-title>
-    <mat-card-content>      
-      <mat-list>
-        <mat-list-item>Available : {{ activeBudget.balance | number: '1.2'}}</mat-list-item>
-        <mat-list-item>Income : {{ activeBudget.allocations[selectedMonth].income | number: '1.2'}}</mat-list-item>
-        <mat-list-item>Expense : {{ activeBudget.allocations[selectedMonth].expense | number: '1.2'}}</mat-list-item>
-      </mat-list>
+    <mat-card-content class="budget-info" fxLayout="row" fxLayout.xs="column">
+      <div class="month" fxFlex="50">
+        {{ this.displayMonth }}
+      </div>
+      <div class="" fxFlex="40" fxFlex.xs="100">
+        <div class="balance" [ngClass]="{'positive': activeBudget.balance >= 0, 'negative': activeBudget.balance < 0}">
+          {{ activeBudget.balance | number: '1.2'}}
+        </div>
+        <div class="minor-balance" fxLayout="column">
+          <div fxFlex="50">
+            Income : {{ activeBudget.allocations[selectedMonth].income | number: '1.2'}}
+          </div>
+          <div fxFlex="50">
+            Expense : {{ activeBudget.allocations[selectedMonth].expense | number: '1.2'}}
+          </div>
+        </div>
+      </div>
+      <div class="menu-button" fxFlex="10">
+        <button mat-icon-button [matMenuTriggerFor]="menu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item *ngFor="let budget of budgetList; index as i" (click)="onBudgetActivate(budget.id)">
+            <span>{{budget.name}}</span>
+          </button>
+          <button mat-menu-item (click)="onFreshStart()">
+            <span>Fresh Start</span>
+          </button>
+        </mat-menu>
+      </div>
     </mat-card-content>
     <mat-card-actions>
       <button mat-raised-button color="basic" type="button" (click)="onPrevMonth()">
@@ -51,24 +64,19 @@
                 </div>
                 <div class="planned-input text-right" fxFlex="15" fxHide.xs>
                   <mat-form-field *ngIf="item.allocations && item.parent != ''" fxFlex="100">
-                    <input matInput type="text" 
-                      name="planned" 
-                      class="text-right" 
-                      [(ngModel)]="item.allocations[selectedMonth].planned" 
-                      (blur)="blur(item)" 
-                      (focus)="focus(item)" 
-                      tabindex="">
-                      
+                    <input matInput type="text" name="planned" class="text-right" [(ngModel)]="item.allocations[selectedMonth].planned" (blur)="blur(item)"
+                      (focus)="focus(item)" tabindex="">
+
                   </mat-form-field>
                 </div>
                 <div class="actual text-right" *ngIf="item.parent != ''" fxFlex="15" fxHide.xs>
                   <span *ngIf="item.allocations">
-                        {{item.allocations[selectedMonth].actual | number:'1.2'}}
+                    {{item.allocations[selectedMonth].actual | number:'1.2'}}
                   </span>
                 </div>
                 <div class="actual text-right" *ngIf="item.parent == ''" fxFlex="15" fxHide.xs>
                   <span *ngIf="item.allocations">
-                        &nbsp;
+                    &nbsp;
                   </span>
                 </div>
                 <div class="balance text-right" *ngIf="item.parent != ''" fxFlex="15" fxFlex.xs="30">

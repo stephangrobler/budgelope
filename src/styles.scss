@@ -19,6 +19,9 @@ $candy-app-warn:    mat-palette($mat-red);
 // Create the theme object (a Sass map containing all of the palettes).
 $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-app-warn);
 
+$custom-typography: mat-typography-config($font-family: '"Lato", sans-serif;');
+@include mat-core($custom-typography);
+
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.

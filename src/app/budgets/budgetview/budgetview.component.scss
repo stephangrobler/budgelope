@@ -1,8 +1,8 @@
-@import "../../../styles";
+@import '../../../styles';
 
 .header {
   background: mat-color($candy-app-accent);
-  color: mat-contrast($candy-app-accent,500) !important;
+  color: mat-contrast($candy-app-accent, 500) !important;
 }
 
 .handle {
@@ -10,24 +10,32 @@
 }
 
 .budget-view {
-      .mat-form-field-infix {
-        width: 80px;
-      }
-  /deep/ .ngx-dnd-container {
-      border: none !important;
-      padding: 0;
-      margin: 0;
+  .mat-form-field-infix {
+    width: 80px;
+  }
 
-      &:nth-child(odd){
-        background: transparent;
+  .budget-info {
+    .month {
+      font-size: 300%;
+      font-weight: bolder;
+    }
+    .balance {
+      font-size: 300%;
+      text-align: right;
+      &.positive {
+        color: GREEN;
       }
-
-      .ngx-dnd-item {
-        background: transparent;
-        border: none;
-        padding: 0;
-        margin: 0;
+      &.negative {
+        color: RED;
       }
+    }
 
+    .minor-balance {
+      text-align: right;
+    }
+
+    .menu-button {
+      text-align: right;
+    }
   }
 }
