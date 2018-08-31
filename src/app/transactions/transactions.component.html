@@ -30,6 +30,10 @@
             <mat-header-cell *matHeaderCellDef>In</mat-header-cell>
             <mat-cell *matCellDef="let transaction" style="text-align: right">{{transaction.in | number: '1.2'}}</mat-cell>
           </ng-container>
+          <ng-container matColumnDef="cleared">
+            <mat-header-cell *matHeaderCellDef>Cleared</mat-header-cell>
+            <mat-cell *matCellDef="let transaction">{{transaction.cleared}}</mat-cell>
+          </ng-container>
           <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
           <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectedRow(row)"></mat-row>
         </mat-table>

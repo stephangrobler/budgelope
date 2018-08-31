@@ -20,7 +20,7 @@ export class TransactionsComponent implements OnInit {
   userId: string;
   budgetId: string;
   accountId: string;
-  displayedColumns = ['date', 'account', 'payee', 'category', 'out', 'in'];
+  displayedColumns = ['date', 'account', 'payee', 'category', 'out', 'in', 'cleared'];
   dataSource: TransactionDataSource;
   newTransaction: Transaction;
 

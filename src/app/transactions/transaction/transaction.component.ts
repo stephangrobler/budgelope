@@ -1,11 +1,10 @@
-import { Component, OnInit, OnChanges, Input, SimpleChange } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, FormArray, Validators } from '@angular/forms';
-import { Router, ActivatedRoute, Params, ParamMap } from '@angular/router';
+import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { AngularFireAuth } from 'angularfire2/auth';
 import {
   AngularFirestore,
-  AngularFirestoreDocument,
-  AngularFirestoreCollection
+  AngularFirestoreDocument
 } from 'angularfire2/firestore';
 
 import { MatSnackBar } from '@angular/material';
@@ -82,10 +81,7 @@ export class TransactionComponent implements OnInit {
   }
 
   private initForm() {
-    const transactionAccount = '';
     const date = new Date();
-    const payee = '';
-    const amount = '';
 
     this.transactionForm = new FormGroup({
       account: new FormControl(null, [Validators.required]),
