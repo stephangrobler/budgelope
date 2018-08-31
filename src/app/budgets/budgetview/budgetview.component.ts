@@ -65,7 +65,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
         .valueChanges()
         .subscribe(profile => {
           this.loadAvailableBudgets(profile);
-          this.loadActiveBudget();
+          this.loadActiveBudget(profile.activeBudget);
         });
     });
     // drag and drop bag setup
@@ -118,8 +118,9 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
    * Loads the active budget from the budget service and sets the property
    * on the component
    */
-  loadActiveBudget(): void {
+  loadActiveBudget(budgetId: string): void {
     this.budgetService.getActiveBudget$().subscribe(budget => {
+      console.log(budget);
       // set the current allocation for the selected month if there is none
       if (!budget.allocations[this.selectedMonth]) {
         budget.allocations[this.selectedMonth] = {
@@ -128,7 +129,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
         };
       }
 
-      this.loadCategories(budget.id);
+      this.loadCategories(budgetId);
       this.activeBudget = budget;
     });
   }
