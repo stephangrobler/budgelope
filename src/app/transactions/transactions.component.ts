@@ -12,7 +12,8 @@ import { UserService } from '../shared/user.service';
 import { TransactionComponent } from './transaction/transaction.component';
 
 @Component({
-  templateUrl: 'transactions.component.html'
+  templateUrl: 'transactions.component.html',
+  styleUrls: ['./transactions.component.scss']
 })
 export class TransactionsComponent implements OnInit {
 
@@ -60,6 +61,11 @@ export class TransactionsComponent implements OnInit {
     this.newTransaction = new Transaction({
       date: new Date()
     });
+  }
+
+  toggleCleared(transaction: Transaction) {
+    transaction.cleared = !transaction.cleared;
+    console.log(transaction);
   }
 
   selectedRow(row) {

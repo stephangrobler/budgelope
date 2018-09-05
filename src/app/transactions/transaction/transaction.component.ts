@@ -55,7 +55,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.initForm();
 
-    this.userService.getProfile$().subscribe(profile => {
+    const profileSubscription = this.userService.getProfile$().subscribe(profile => {
       const budgetSubscription = this.budgetService.getActiveBudget$().subscribe(budget => {
         this.activeBudget = budget;
       });
@@ -72,7 +72,6 @@ export class TransactionComponent implements OnInit, OnDestroy {
         .pipe(take(1))
         .subscribe(categories => {
           this.categories = categories;
-          console.log('Getting Categories');
           this.route.paramMap.subscribe(params => {
             if (!params.get('id')) {
               return;
@@ -82,6 +81,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
         });
       this.subscriptions.add(categorySubscription);
     });
+    this.subscriptions.add(profileSubscription);
   }
 
   ngOnDestroy() {
@@ -109,7 +109,6 @@ export class TransactionComponent implements OnInit, OnDestroy {
       .getTransaction(budgetId, transactionId)
       .pipe(take(1))
       .subscribe(transaction => {
-        console.log('loading transaction');
         this.mapTransaction(transaction);
 
         this.clearFormCategories(<FormArray>this.transactionForm.get('categories'));
@@ -140,10 +139,10 @@ export class TransactionComponent implements OnInit, OnDestroy {
   }
 
   mapTransaction(transaction: any): Transaction {
-    transaction.account = {
-      accountId: transaction['accountId'],
-      accountName: transaction['accountName']
-    };
+    // transaction.account = {
+    //   accountId: transaction['accountId'],
+    //   accountName: transaction['accountName']
+    // };
     transaction.accountDisplayName = transaction['accountName'];
     if (transaction.categories.length > 1) {
       transaction.categoryDisplayName = 'Split (' + transaction.categories.length + ')';

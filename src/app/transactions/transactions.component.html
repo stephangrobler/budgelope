@@ -32,7 +32,12 @@
           </ng-container>
           <ng-container matColumnDef="cleared">
             <mat-header-cell *matHeaderCellDef>Cleared</mat-header-cell>
-            <mat-cell *matCellDef="let transaction">{{transaction.cleared}}</mat-cell>
+            <mat-cell *matCellDef="let transaction" class="cleared-box">
+              <mat-checkbox (click)="$event.stopPropagation()"
+                    (change)="$event ? toggleCleared(transaction) : null"
+                    [checked]="transaction.cleared">
+              </mat-checkbox>
+            </mat-cell>
           </ng-container>
           <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
           <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectedRow(row)"></mat-row>
