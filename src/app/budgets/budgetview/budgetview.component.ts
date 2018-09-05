@@ -67,6 +67,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
         .subscribe(profile => {
           this.loadAvailableBudgets(profile);
           this.loadActiveBudget(profile.activeBudget);
+          console.log('Current Active Budget: ', profile.activeBudget);
         });
       this.subscriptions.add(subscription);
     });
@@ -101,7 +102,6 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     if (this.dragulaService.find('order-bag') !== undefined) {
       this.dragulaService.destroy('order-bag');
     }
-    console.log('destroying budget view');
     this.subscriptions.unsubscribe();
   }
 
@@ -124,7 +124,6 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
    */
   loadActiveBudget(budgetId: string): void {
     const subscription = this.budgetService.getActiveBudget$().subscribe(budget => {
-      console.log(budget);
       // set the current allocation for the selected month if there is none
       if (!budget.allocations[this.selectedMonth]) {
         budget.allocations[this.selectedMonth] = {
@@ -144,11 +143,8 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
    * @param budgetId string
    */
   loadCategories(budgetId: string): void {
-    const reference = 'budgets/' + budgetId + '/categories';
-    console.log(budgetId);
     const subscription = this.categoryService.getCategories(budgetId).subscribe(list => {
       this.checkAllocations(list, this.selectedMonth);
-      console.log('Test Budget Categories', list);
       this.sortList = list;
     });
     this.subscriptions.add(subscription);

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, FormControl, FormArray, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { AngularFireAuth } from 'angularfire2/auth';
@@ -8,7 +8,7 @@ import {
 } from 'angularfire2/firestore';
 
 import { MatSnackBar } from '@angular/material';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { switchMap, take } from 'rxjs/operators';
 import * as moment from 'moment';
 import { Profile } from '../../shared/profile';
@@ -28,9 +28,10 @@ import { CategoryService } from '../../categories/category.service';
   templateUrl: 'transaction.component.html',
   styleUrls: ['./transaction.component.scss']
 })
-export class TransactionComponent implements OnInit {
+export class TransactionComponent implements OnInit, OnDestroy {
   transactionForm: FormGroup;
   transactionId: string;
+  subscriptions = new Subscription();
 
   title = 'Transaction';
   userId: string;
@@ -58,18 +59,19 @@ export class TransactionComponent implements OnInit {
     this.initForm();
 
     this.userService.getProfile$().subscribe(profile => {
-      this.budgetService.getActiveBudget$().subscribe(budget => {
+      const budgetSubscription = this.budgetService.getActiveBudget$().subscribe(budget => {
         this.activeBudget = budget;
       });
+      this.subscriptions.add(budgetSubscription);
 
       // get the budget accounts
       this.accountService
         .getAccounts(profile.activeBudget)
         .subscribe(accounts => (this.accounts = accounts));
 
-      this.categoryService.getCategories(profile.activeBudget).subscribe(categories => {
+      const categorySubscription = this.categoryService.getCategories(profile.activeBudget).subscribe(categories => {
         this.categories = categories;
-
+        console.log('Getting Categories');
         this.route.paramMap.subscribe(params => {
           if (!params.get('id')) {
             return;
@@ -77,7 +79,12 @@ export class TransactionComponent implements OnInit {
           this.loadTransaction(params.get('id'), profile.activeBudget);
         });
       });
+      this.subscriptions.add(categorySubscription);
     });
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
   }
 
   private initForm() {
@@ -97,10 +104,11 @@ export class TransactionComponent implements OnInit {
   }
 
   loadTransaction(transactionId: string, budgetId: string) {
-    this.transactionService
+    const subscription = this.transactionService
       .getTransaction(budgetId, transactionId)
       .pipe(take(1))
       .subscribe(transaction => {
+        console.log('loading transaction');
         this.mapTransaction(transaction);
 
         this.clearFormCategories(<FormArray>this.transactionForm.get('categories'));
@@ -127,6 +135,7 @@ export class TransactionComponent implements OnInit {
           });
         }
       });
+    this.subscriptions.add(subscription);
   }
 
   mapTransaction(transaction: any): Transaction {
