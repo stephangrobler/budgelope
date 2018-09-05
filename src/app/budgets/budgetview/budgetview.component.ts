@@ -3,7 +3,7 @@ import { AngularFirestore } from 'angularfire2/firestore';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { DragulaService } from 'ng2-dragula';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import * as moment from 'moment';
 
@@ -20,6 +20,7 @@ import { CategoryService } from '../../categories/category.service';
   styleUrls: ['./budgetview.component.scss']
 })
 export class BudgetviewComponent implements OnInit, OnDestroy {
+  subscriptions = new Subscription();
   categories: any[];
   userId: string;
   activeBudget: Budget;
@@ -60,13 +61,14 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
       }
       this.userId = user.uid;
       // get active budget TODO: move to service :P
-      this.db
+      const subscription = this.db
         .doc<any>('users/' + user.uid)
         .valueChanges()
         .subscribe(profile => {
           this.loadAvailableBudgets(profile);
           this.loadActiveBudget(profile.activeBudget);
         });
+      this.subscriptions.add(subscription);
     });
     // drag and drop bag setup
     this.dragulaService.setOptions('order-bag', {
@@ -99,6 +101,8 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     if (this.dragulaService.find('order-bag') !== undefined) {
       this.dragulaService.destroy('order-bag');
     }
+    console.log('destroying budget view');
+    this.subscriptions.unsubscribe();
   }
 
   loadAvailableBudgets(profile) {
@@ -119,7 +123,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
    * on the component
    */
   loadActiveBudget(budgetId: string): void {
-    this.budgetService.getActiveBudget$().subscribe(budget => {
+    const subscription = this.budgetService.getActiveBudget$().subscribe(budget => {
       console.log(budget);
       // set the current allocation for the selected month if there is none
       if (!budget.allocations[this.selectedMonth]) {
@@ -132,6 +136,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
       this.loadCategories(budgetId);
       this.activeBudget = budget;
     });
+    this.subscriptions.add(subscription);
   }
 
   /**
@@ -141,11 +146,13 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
   loadCategories(budgetId: string): void {
     const reference = 'budgets/' + budgetId + '/categories';
     console.log(budgetId);
-    this.categoryService.getCategories(budgetId).subscribe(list => {
+    const subscription = this.categoryService.getCategories(budgetId).subscribe(list => {
       this.checkAllocations(list, this.selectedMonth);
-      console.log(list);
+      console.log('Test Budget Categories', list);
       this.sortList = list;
     });
+    this.subscriptions.add(subscription);
+
   }
 
   /**
