@@ -13,6 +13,7 @@ import { Budget } from '../shared/budget';
 import { CategoryService } from '../categories/category.service';
 import { AccountService } from '../accounts/account.service';
 import { BudgetService } from '../budgets/budget.service';
+import { FirebaseApp } from 'angularfire2';
 
 @Injectable()
 export class TransactionService {
@@ -20,6 +21,7 @@ export class TransactionService {
 
   constructor(
     private db: AngularFirestore,
+    private fb: FirebaseApp,
     private categoryService: CategoryService,
     private accountService: AccountService,
     private budgetService: BudgetService
@@ -78,31 +80,30 @@ export class TransactionService {
     return this.db.doc<Transaction>(transRef).valueChanges();
   }
 
-  updateAccount(
-    budgetId: string,
-    currentTransaction: Transaction,
-    currentAccount: Account,
-    newAccount: Account
-  ) {
-    const accountRef = 'budgets/' + budgetId + '/accounts/' + currentTransaction.account.accountId;
-    currentAccount.balance -= currentTransaction.amount;
-    this.db.doc(accountRef).update(currentAccount);
-    currentTransaction.accountDisplayName = newAccount.name;
-    currentTransaction.account = {
-      accountId: newAccount.id,
-      accountName: newAccount.name
-    };
-    newAccount.balance += currentTransaction.amount;
-    this.db.doc('budgets/' + budgetId + '/accounts/' + newAccount.id).update(newAccount);
-  }
+  updateTransaction(budgetId: string, transactionParam: Transaction) {
+    const docRef = this.db.doc('budgets/' + budgetId + '/transactions/' + transactionParam.id).ref;
 
-  updateTransaction(
-    transactionId: string,
-    transaction: Transaction,
-    account: Account,
-    category: Category,
-    budget: Budget
-  ) {}
+    this.fb.firestore().runTransaction(dbTransaction => {
+      return dbTransaction.get(docRef).then(
+        readTransaction => {
+          const transaction = readTransaction.data();
+
+          dbTransaction.update(docRef, transaction);
+        },
+        error => {
+          console.log(
+            'There was an error updating the budget: ' +
+              budgetId +
+              ' - ' +
+              transactionParam.id +
+              ' - ' +
+              transactionParam.amount,
+            error
+          );
+        }
+      );
+    });
+  }
 
   createStartingBalance(account: Account, budget: Budget) {}
 
@@ -115,17 +116,6 @@ export class TransactionService {
     });
 
     return amount;
-  }
-
-  transferTransaction(transaction: Transaction, budgetId: string) {
-    // transfer categories
-    this.categoryService
-      .getCategories(budgetId)
-      .pipe(take(1))
-      .subscribe(categories => {
-        const toCategory = categories.find(cat => cat.name === 'Transfer In');
-        const fromCategory = categories.find(cat => cat.name === 'Transfer Out');
-      });
   }
 
   /**
