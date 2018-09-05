@@ -58,6 +58,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
     const profileSubscription = this.userService.getProfile$().subscribe(profile => {
       const budgetSubscription = this.budgetService.getActiveBudget$().subscribe(budget => {
         this.activeBudget = budget;
+        this.activeBudget.id = profile.activeBudget;
       });
       this.subscriptions.add(budgetSubscription);
 
@@ -110,7 +111,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
       .pipe(take(1))
       .subscribe(transaction => {
         this.mapTransaction(transaction);
-
+        
         this.clearFormCategories(<FormArray>this.transactionForm.get('categories'));
 
         const selectedAccount = this.accounts.filter(
@@ -143,6 +144,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
     //   accountId: transaction['accountId'],
     //   accountName: transaction['accountName']
     // };
+    transaction.id = this.transactionId;
     transaction.accountDisplayName = transaction['accountName'];
     if (transaction.categories.length > 1) {
       transaction.categoryDisplayName = 'Split (' + transaction.categories.length + ')';
@@ -231,11 +233,8 @@ export class TransactionComponent implements OnInit, OnDestroy {
     const payee: Payee = new Payee();
 
     this.transactionService.updateTransaction(
-      this.transactionId,
-      transaction,
-      acc,
-      cat,
-      this.activeBudget
+      this.activeBudget.id,
+      transaction
     );
   }
 

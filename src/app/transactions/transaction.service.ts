@@ -82,7 +82,7 @@ export class TransactionService {
 
   updateTransaction(budgetId: string, transactionParam: Transaction) {
     const docRef = this.db.doc('budgets/' + budgetId + '/transactions/' + transactionParam.id).ref;
-
+    
     this.fb.firestore().runTransaction(dbTransaction => {
       return dbTransaction.get(docRef).then(
         readTransaction => {
