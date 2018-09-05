@@ -148,7 +148,6 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
       this.sortList = list;
     });
     this.subscriptions.add(subscription);
-
   }
 
   /**

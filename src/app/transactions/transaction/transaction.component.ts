@@ -2,10 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, FormControl, FormArray, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { AngularFireAuth } from 'angularfire2/auth';
-import {
-  AngularFirestore,
-  AngularFirestoreDocument
-} from 'angularfire2/firestore';
+import { AngularFirestore, AngularFirestoreDocument } from 'angularfire2/firestore';
 
 import { MatSnackBar } from '@angular/material';
 import { Observable, Subscription } from 'rxjs';
@@ -67,18 +64,22 @@ export class TransactionComponent implements OnInit, OnDestroy {
       // get the budget accounts
       this.accountService
         .getAccounts(profile.activeBudget)
+        .pipe(take(1))
         .subscribe(accounts => (this.accounts = accounts));
 
-      const categorySubscription = this.categoryService.getCategories(profile.activeBudget).subscribe(categories => {
-        this.categories = categories;
-        console.log('Getting Categories');
-        this.route.paramMap.subscribe(params => {
-          if (!params.get('id')) {
-            return;
-          }
-          this.loadTransaction(params.get('id'), profile.activeBudget);
+      const categorySubscription = this.categoryService
+        .getCategories(profile.activeBudget)
+        .pipe(take(1))
+        .subscribe(categories => {
+          this.categories = categories;
+          console.log('Getting Categories');
+          this.route.paramMap.subscribe(params => {
+            if (!params.get('id')) {
+              return;
+            }
+            this.loadTransaction(params.get('id'), profile.activeBudget);
+          });
         });
-      });
       this.subscriptions.add(categorySubscription);
     });
   }
@@ -170,7 +171,6 @@ export class TransactionComponent implements OnInit, OnDestroy {
   }
 
   onToggleTransfer() {
-    console.log('boom');
     this.transferBox = !this.transferBox;
   }
   clearFormCategories(formArray: FormArray) {
@@ -318,15 +318,10 @@ export class TransactionComponent implements OnInit, OnDestroy {
       transaction.out = Math.abs(transaction.amount);
     }
 
-    this.transactionService
-      .createTransaction(
-        transaction,
-        this.activeBudget.id
-      )
-      .then(response => {
-        this.transactionForm.reset();
-        this.openSnackBar('Created transaction successfully');
-      });
+    this.transactionService.createTransaction(transaction, this.activeBudget.id).then(response => {
+      this.transactionForm.reset();
+      this.openSnackBar('Created transaction successfully');
+    });
   }
 
   openSnackBar(message: string) {
