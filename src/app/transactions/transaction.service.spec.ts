@@ -9,10 +9,12 @@ import { Transaction } from '../shared/transaction';
 import { Observable, of } from 'rxjs';
 import { AccountService } from '../accounts/account.service';
 import { resolve } from 'path';
+import { FirebaseApp } from 'angularfire2';
 
 describe('Transaction Service to be thing', () => {
   let service: TransactionService;
   let dbMock,
+    fbMock,
     categoryServiceMock,
     accountServiceMock,
     budgetServiceMock,
@@ -52,6 +54,11 @@ describe('Transaction Service to be thing', () => {
         };
       }
     });
+
+    fbMock = jasmine.createSpyObj('FirebaseApp', ['firestore']);
+    fbMock.firestore.and.returnValue({
+      runTransaction: () => {}
+    });
     categoryServiceMock = jasmine.createSpyObj('CategoryService', [
       'updateCategoryBudget',
       'getCategories'
@@ -66,12 +73,14 @@ describe('Transaction Service to be thing', () => {
         TransactionService,
         { provide: CategoryService, useValue: categoryServiceMock },
         { provide: AccountService, useValue: accountServiceMock },
-        { provide: AngularFirestore, useValue: dbMock }
+        { provide: AngularFirestore, useValue: dbMock },
+        { provide: FirebaseApp, useValue: fbMock }
       ]
     });
 
     service = new TransactionService(
       dbMock,
+      fbMock,
       categoryServiceMock,
       accountServiceMock,
       budgetServiceMock
@@ -85,8 +94,8 @@ describe('Transaction Service to be thing', () => {
 
   it('should create a transaction with the correct income transaction', (done: DoneFn) => {
     transaction.account = {
-      accountId : 'acc1',
-      accountName : 'test',
+      accountId: 'acc1',
+      accountName: 'test'
     };
 
     transaction.categories = [
@@ -110,7 +119,11 @@ describe('Transaction Service to be thing', () => {
           transaction.date,
           500
         );
-        expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledWith('acc1', 'CurrentBudget', 500);
+        expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledWith(
+          'acc1',
+          'CurrentBudget',
+          500
+        );
         done();
       },
       error => {
@@ -125,8 +138,8 @@ describe('Transaction Service to be thing', () => {
 
   it('should create a transaction with the correct expense transaction', (done: DoneFn) => {
     transaction.account = {
-      accountId : 'acc1',
-      accountName : 'test',
+      accountId: 'acc1',
+      accountName: 'test'
     };
 
     transaction.categories = [
@@ -160,114 +173,11 @@ describe('Transaction Service to be thing', () => {
         done();
       }
     );
-
-    // expect(transaction.amount).toBe(5);
   });
 
-  xit('should call create transaction 2 times', (done: DoneFn) => {
-    categoryServiceMock.getCategories.and.returnValue(
-      of([{ name: 'Transfer In', balance: 0 }, { name: 'Transfer Out', balance: 0 }])
-    );
+  it('should call the the firestore method on the firebase service', () => {
 
-    accountServiceMock.getAccounts.and.returnValue(
-      of([
-        { name: 'Test Account 1', id: 1, balance: 1000 },
-        { name: 'Test Account 2', id: 2, balance: 0 }
-      ])
-    );
-
-    transaction.account = {
-      accountId: 1,
-      accountName: 'Test Account 1'
-    };
-    transaction.transferAccount = {
-      accountId: 2,
-      accountName: 'Test Account 2'
-    };
-    transaction.transferAmount = 500;
-    transaction.date = new Date('2018-01-01');
-
-    budget.allocations = {};
-    budget.balance = 500;
-    spyOn(service, 'createTransaction');
-
-    service.transferTransaction(transaction, 'CurrentBudget');
-
-    expect(service.createTransaction).toHaveBeenCalledTimes(2);
-  });
-
-  xit('should create a transaction for the from account', (done: DoneFn) => {
-    categoryServiceMock.getCategories.and.returnValue(
-      of([{ name: 'Transfer In', balance: 0 }, { name: 'Transfer Out', balance: 0 }])
-    );
-
-    accountServiceMock.getAccounts.and.returnValue(
-      of([
-        { name: 'Test Account 1', id: 1, balance: 1000 },
-        { name: 'Test Account 2', id: 2, balance: 0 }
-      ])
-    );
-
-    transaction.account = {
-      accountId: 1,
-      accountName: 'Test Account 1'
-    };
-    transaction.transferAccount = {
-      accountId: 2,
-      accountName: 'Test Account 2'
-    };
-    transaction.transferAmount = 500;
-    transaction.date = new Date('2018-01-01');
-
-    budget.allocations = {};
-    budget.balance = 500;
-
-    const toAccount = new Account();
-    toAccount.name = 'Test Account 2';
-    toAccount.balance = 500;
-
-    spyOn(service, 'createTransaction');
-
-    service.transferTransaction(transaction, 'CurrentBudget');
-
-    expect(service.createTransaction).toHaveBeenCalledWith(
-      transaction,
-      toAccount,
-      jasmine.any(Object),
-      jasmine.any(Object),
-      jasmine.any(String)
-    );
-  });
-
-  xit('should create a transaction for the to account', (done: DoneFn) => {
-    categoryServiceMock.getCategories.and.returnValue(
-      of([{ name: 'Transfer In', balance: 0 }, { name: 'Transfer Out', balance: 0 }])
-    );
-
-    accountServiceMock.getAccounts.and.returnValue(
-      of([
-        { name: 'Test Account 1', id: 1, balance: 1000 },
-        { name: 'Test Account 2', id: 2, balance: 0 }
-      ])
-    );
-
-    transaction.account = {
-      accountId: 1,
-      accountName: 'Test Account 1'
-    };
-    transaction.transferAccount = {
-      accountId: 2,
-      accountName: 'Test Account 2'
-    };
-    transaction.transferAmount = 500;
-    transaction.date = new Date('2018-01-01');
-
-    budget.allocations = {};
-    budget.balance = 500;
-    spyOn(service, 'createTransaction');
-
-    service.transferTransaction(transaction, 'CurrentBudget');
-
-    expect(service.createTransaction).toHaveBeenCalledTimes(2);
+    service.updateTransaction('12345', transaction);
+    expect(fbMock.firestore).toHaveBeenCalled();
   });
 });

@@ -77,6 +77,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
             if (!params.get('id')) {
               return;
             }
+            this.transactionId = params.get('id');
             this.loadTransaction(params.get('id'), profile.activeBudget);
           });
         });
@@ -111,7 +112,6 @@ export class TransactionComponent implements OnInit, OnDestroy {
       .pipe(take(1))
       .subscribe(transaction => {
         this.mapTransaction(transaction);
-        
         this.clearFormCategories(<FormArray>this.transactionForm.get('categories'));
 
         const selectedAccount = this.accounts.filter(
@@ -185,15 +185,18 @@ export class TransactionComponent implements OnInit, OnDestroy {
   }
 
   saveTransaction() {
+    console.log(this.transactionId);
     if (this.transactionId != null) {
       console.log('updating ', this.transactionId);
-      // this.update(this.transactionForm);
+      this.update(this.transactionForm);
     } else if (this.transactionForm.get('transfer').value) {
       console.log('transferring...');
       this.transfer(this.transactionForm);
-    } else {
+    } else if (this.transactionId === null) {
       console.log('creating...');
       this.create(this.transactionForm);
+    } else {
+      console.log('Not doing anything');
     }
   }
 
@@ -227,17 +230,24 @@ export class TransactionComponent implements OnInit, OnDestroy {
     });
   }
 
-  update(transaction: Transaction) {
-    const cat: Category = this.transactionForm.get('category').value;
-    const acc: Account = this.selectedAccount;
-    const payee: Payee = new Payee();
-
+  /**
+   * Update the transaction
+   * 
+   * @param form FormGroup
+   */
+  update(form: FormGroup) {
+    const transaction = new Transaction(form.value);
     this.transactionService.updateTransaction(
       this.activeBudget.id,
       transaction
     );
   }
-
+  
+  /**
+   * Transfer from one account to another
+   *
+   * @param form FormGroup
+   */
   transfer(form: FormGroup) {
     const fromTransaction = new Transaction(form.value);
     const toTransaction = new Transaction(form.value);

@@ -1,14 +1,11 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { Observable } from 'rxjs';
-import { map, take } from 'rxjs/operators';
-import * as firebase from 'firebase';
+import { map } from 'rxjs/operators';
 import * as moment from 'moment';
 
 import { Transaction } from '../shared/transaction';
 import { Account } from '../shared/account';
-import { Category } from '../shared/category';
-import { Payee } from '../shared/payee';
 import { Budget } from '../shared/budget';
 import { CategoryService } from '../categories/category.service';
 import { AccountService } from '../accounts/account.service';

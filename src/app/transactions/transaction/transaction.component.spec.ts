@@ -99,7 +99,8 @@ describe('TransactionsComponent', () => {
     );
     UserServiceStub.getProfile$.and.returnValue(
       of({
-        uid: '09876'
+        uid: '09876',
+        activeBudget: '54321'
       })
     );
     BudgetServiceStub.getActiveBudget$.and.returnValue(
