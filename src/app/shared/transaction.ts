@@ -23,7 +23,20 @@ export class Transaction {
   constructor(transactionData?: any) {
     if (transactionData) {
       this.id = transactionData.id ? transactionData.id : null;
-      this.categoryDisplayName = transactionData.category ? transactionData.category : null;
+      if (transactionData.account) {
+        this.account = {
+          accountId: transactionData.account.id,
+          accountName: transactionData.account.name
+        };
+        this.accountDisplayName = transactionData.account.accountName;
+      }
+
+      if (transactionData.categories && transactionData.categories.length > 1) {
+        this.categoryDisplayName = 'Split';
+      } else if (transactionData.categories && transactionData.categories[0].category) {
+        this.categoryDisplayName = transactionData.categories[0].category.name;
+      }
+
       if (transactionData.categories && transactionData.categories.length > 0) {
         const newCategories: {
           categoryId: string;

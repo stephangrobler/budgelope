@@ -180,4 +180,11 @@ describe('Transaction Service to be thing', () => {
     service.updateTransaction('12345', transaction);
     expect(fbMock.firestore).toHaveBeenCalled();
   });
+
+  it('should call get on the transaction', () => {
+
+    service.updateTransaction('12345', transaction);
+    expect(fbMock.firestore).toHaveBeenCalled();
+  });
+
 });

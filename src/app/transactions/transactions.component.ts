@@ -65,7 +65,7 @@ export class TransactionsComponent implements OnInit {
 
   toggleCleared(transaction: Transaction) {
     transaction.cleared = !transaction.cleared;
-    console.log(transaction);
+    this.transService.updateClearedStatus(this.budgetId, transaction);
   }
 
   selectedRow(row) {

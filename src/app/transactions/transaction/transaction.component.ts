@@ -232,17 +232,35 @@ export class TransactionComponent implements OnInit, OnDestroy {
 
   /**
    * Update the transaction
-   * 
+   *
    * @param form FormGroup
    */
   update(form: FormGroup) {
     const transaction = new Transaction(form.value);
-    this.transactionService.updateTransaction(
-      this.activeBudget.id,
-      transaction
-    );
+    transaction.id = this.transactionId;
+    transaction.account = {
+      accountId: form.value.account.id,
+      accountName: form.value.account.name
+    };
+    transaction.accountDisplayName = transaction.account.accountName;
+    // transaction.calculateAmount;
+
+    if (form.value.categories.length > 1) {
+      transaction.categoryDisplayName = 'Split';
+    } else {
+      transaction.categoryDisplayName = form.value.categories[0].category.name;
+    }
+
+    // calculate the amount and set the in or out values
+    transaction.amount = this.transactionService.calculateAmount(transaction);
+    if (transaction.amount > 0) {
+      transaction.in = transaction.amount;
+    } else {
+      transaction.out = Math.abs(transaction.amount);
+    }
+    this.transactionService.updateTransaction(this.activeBudget.id, transaction);
   }
-  
+
   /**
    * Transfer from one account to another
    *
