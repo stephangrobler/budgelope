@@ -27,7 +27,7 @@ import { CategoryService } from '../../categories/category.service';
 })
 export class TransactionComponent implements OnInit, OnDestroy {
   transactionForm: FormGroup;
-  transactionId: string;
+  transactionId: string = null;
   subscriptions = new Subscription();
 
   title = 'Transaction';
@@ -192,7 +192,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
     } else if (this.transactionForm.get('transfer').value) {
       console.log('transferring...');
       this.transfer(this.transactionForm);
-    } else if (this.transactionId === null) {
+    } else if (!this.transactionId) {
       console.log('creating...');
       this.create(this.transactionForm);
     } else {

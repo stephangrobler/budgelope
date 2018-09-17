@@ -10,6 +10,7 @@ import { TransactionService } from './transaction.service';
 import { BudgetService } from '../budgets/budget.service';
 import { UserService } from '../shared/user.service';
 import { TransactionComponent } from './transaction/transaction.component';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   templateUrl: 'transactions.component.html',
@@ -24,6 +25,7 @@ export class TransactionsComponent implements OnInit {
   displayedColumns = ['date', 'account', 'payee', 'category', 'out', 'in', 'cleared'];
   dataSource: TransactionDataSource;
   newTransaction: Transaction;
+  showCleared = false;
 
   selectedTransaction: Transaction;
 
@@ -48,19 +50,23 @@ export class TransactionsComponent implements OnInit {
       const profile = this.db.doc<any>('users/' + user.uid).valueChanges().subscribe(profileRead => {
         this.userId = user.uid;
         this.budgetId = profileRead.activeBudget;
+        this.accountId = null;
+        this.dataSource = new TransactionDataSource(this.transService, profileRead.activeBudget);
         this.route.paramMap.subscribe(params => {
           if (params.get('accountId')) {
             this.accountId = params.get('accountId');
-            this.dataSource = new TransactionDataSource(this.transService, profileRead.activeBudget, this.accountId);
-          } else {
-            this.dataSource = new TransactionDataSource(this.transService, profileRead.activeBudget);
           }
-        })
+          this.dataSource.loadTransactions(this.accountId, this.showCleared);
+        });
       });
     });
     this.newTransaction = new Transaction({
       date: new Date()
     });
+  }
+
+  onFilterClearedToggle() {
+    this.dataSource.loadTransactions(this.accountId, this.showCleared);
   }
 
   toggleCleared(transaction: Transaction) {
@@ -77,15 +83,24 @@ export class TransactionsComponent implements OnInit {
 
 export class TransactionDataSource extends DataSource<any> {
 
-  constructor(private transService: TransactionService, private budgetId: string, private accountId?: string) {
+  private transactionsSubject = new BehaviorSubject<any>([]);
+
+  constructor(private transService: TransactionService, private budgetId: string) {
     super();
   }
 
   connect() {
-    return this.transService.getTransactions(this.budgetId, this.accountId);
+    return this.transactionsSubject.asObservable();
   }
 
   disconnect() {
-
+    this.transactionsSubject.complete();
   }
+
+  loadTransactions(accountId: string, showCleared: boolean) {
+    console.log('account', accountId, 'cleared', showCleared);
+    this.transService.getTransactions(this.budgetId, accountId, showCleared)
+      .subscribe(transactions => this.transactionsSubject.next(transactions));
+  }
+
 }

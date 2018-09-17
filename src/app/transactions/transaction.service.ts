@@ -3,6 +3,7 @@ import { AngularFirestore } from 'angularfire2/firestore';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import * as moment from 'moment';
+import * as firebase from 'firebase';
 
 import { Transaction } from '../shared/transaction';
 import { Account } from '../shared/account';
@@ -29,15 +30,25 @@ export class TransactionService {
    * @param  budgetId Current active budget for the user id
    * @return          the observable for the transactions.
    */
-  getTransactions(budgetId: string, accountId?: string): Observable<Transaction[]> {
+  getTransactions(
+    budgetId: string,
+    accountId?: string,
+    cleared?: boolean
+  ): Observable<Transaction[]> {
     const transRef = '/budgets/' + budgetId + '/transactions';
-    let collection = this.db.collection<Transaction>(transRef, ref => ref.where('cleared', '==', false).orderBy('date', 'desc'));
-
-    if (accountId) {
-      collection = this.db.collection<Transaction>(transRef, ref =>
-        ref.where('account.accountId', '==', accountId).orderBy('date', 'desc')
-      );
-    }
+    // should not display cleared transactions by default
+    const collection = this.db.collection<Transaction>(transRef, ref => {
+      let query: firebase.firestore.Query = ref;
+      if (!cleared) {
+        query = query.where('cleared', '==', false);
+      }
+      if (accountId) {
+        query = query.where('account.accountId', '==', accountId);
+      }
+      query = query.orderBy('date', 'desc');
+      
+      return query;
+    });
 
     return collection.snapshotChanges().pipe(
       map(actions =>

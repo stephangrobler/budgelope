@@ -69,7 +69,7 @@ export class Transaction {
       this.in = transactionData.in ? transactionData.in : null;
       this.out = transactionData.out ? transactionData.out : null;
       this.type = transactionData.type ? transactionData.type : null;
-      this.cleared = transactionData.cleared ? transactionData.cleared : null;
+      this.cleared = transactionData.cleared ? true : false;
       this.date = transactionData.date ? transactionData.date : null;
     }
   }

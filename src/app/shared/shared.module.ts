@@ -4,7 +4,8 @@ import { Router, RouterModule } from '@angular/router';
 
 import { MatToolbarModule, MatGridListModule, MatButtonModule, MatInputModule, MatNativeDateModule,
   MatListModule, MatCardModule, MatIconModule, MatSidenavModule, MatTableModule, MatCheckboxModule,
-  MatRadioModule, MatDatepickerModule, MatSelectModule, MatAutocompleteModule, MatSnackBarModule, MatMenuModule } from '@angular/material';
+  MatRadioModule, MatDatepickerModule, MatSelectModule, MatAutocompleteModule, MatSnackBarModule, MatMenuModule, 
+  MatSlideToggleModule } from '@angular/material';
 
 import { FlexLayoutModule } from '@angular/flex-layout';
 
@@ -30,6 +31,7 @@ import { AuthGuardService } from './auth-guard.service';
     MatRadioModule,
     MatDatepickerModule,
     MatSelectModule,
+    MatSlideToggleModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -56,6 +58,7 @@ import { AuthGuardService } from './auth-guard.service';
     MatIconModule,
     MatInputModule,
     MatSidenavModule,
+    MatSlideToggleModule,
     MatMenuModule
   ],
   declarations: [

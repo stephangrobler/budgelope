@@ -7,9 +7,8 @@ import { UserService } from '../shared/user.service';
 import { BudgetService } from '../budgets/budget.service';
 import { MatGridListModule, MatButtonModule } from '@angular/material';
 
-
 @Component({
-  templateUrl: 'login.component.html',
+  templateUrl: 'login.component.html'
 })
 export class LoginComponent implements OnInit {
   email: string;
@@ -21,40 +20,39 @@ export class LoginComponent implements OnInit {
     private router: Router,
     public afAuth: AngularFireAuth,
     private budgetService: BudgetService
-  ) {
-
-  }
+  ) {}
 
   ngOnInit() {
-
-    if (this.userSVC.authenticated){
+    if (this.userSVC.authenticated) {
       this.router.navigate(['/app/budget']);
     }
   }
 
-  login(loginEmail: string, loginPassword: string){
-    let router = this.router;
-    this.userSVC.login(this.email, this.password1).then(function(user){
-      router.navigate(['/app/budget']);
-    })
-    .catch(function(error) {
-      alert(`${error.message} Unable to login. Try again.`);
-    });
+  login(loginEmail: string, loginPassword: string) {
+    const router = this.router;
+    this.userSVC
+      .login(this.email, this.password1)
+      .then(function(user) {
+        router.navigate(['/app/budget']);
+      })
+      .catch(function(error) {
+        alert(`${error.message} Unable to login. Try again.`);
+      });
   }
 
   googleLogin() {
-    this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then((user) => {
+    this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(user => {
       this.userSVC.getProfile$();
       // check if the user has a profile
       this.router.navigate(['/app/budget']);
     });
   }
 
-  signUp(){
+  signUp() {
     this.router.navigate(['/signup']);
   }
 
-  cancel(){
+  cancel() {
     this.router.navigate(['/login']);
   }
 }

@@ -5,6 +5,16 @@
     </div>
     <mat-card>
       <mat-card-content>
+        <mat-slide-toggle          
+          color="primary"
+          [(ngModel)]="showCleared" (change)="onFilterClearedToggle()"
+          >
+        Show Cleared
+      </mat-slide-toggle>
+      </mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-content>
         <mat-table #table [dataSource]="dataSource">
           <ng-container matColumnDef="date">
             <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
