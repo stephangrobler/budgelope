@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from 'angularfire2/firestore';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, forkJoin, of } from 'rxjs';
+import { map, catchError, take } from 'rxjs/operators';
 import * as moment from 'moment';
 import * as firebase from 'firebase';
 
-import { Transaction } from '../shared/transaction';
+import { Transaction, TransactionTypes } from '../shared/transaction';
 import { Account } from '../shared/account';
 import { Budget } from '../shared/budget';
 import { CategoryService } from '../categories/category.service';
@@ -46,7 +46,6 @@ export class TransactionService {
         query = query.where('account.accountId', '==', accountId);
       }
       query = query.orderBy('date', 'desc');
-      
       return query;
     });
 
@@ -153,7 +152,40 @@ export class TransactionService {
     });
   }
 
-  createStartingBalance(account: Account, budget: Budget) {}
+  createStartingBalance(accountId: string, budgetId: string, amount: number) {
+    // load the account
+    const request = forkJoin(
+      this.categoryService.getCategory('STARTING_BALANCE', budgetId).pipe(take(1)),
+      this.accountService.getAccount(accountId, budgetId).pipe(take(1))
+    );
+
+    request.subscribe(([category, account]) => {
+      const transaction = new Transaction();
+      transaction.categories = [];
+      transaction.categories.push({
+        categoryId: 'STARTING_BALANCE',
+        categoryName: 'Starting balance',
+        in: 0,
+        out: 0
+      });
+      transaction.account = {
+        accountId: accountId,
+        accountName: account.name
+      };
+      transaction.accountDisplayName = account.name;
+      transaction.date = new Date();
+      transaction.in = 0;
+      transaction.out = 0;
+      transaction.amount = amount;
+      transaction.payee = 'Starting Balance';
+      transaction.cleared = false;
+      transaction.categoryDisplayName = 'Starting Balance';
+      transaction.transfer = false;
+      transaction.type = TransactionTypes.EXPENSE;
+
+      return this.createTransaction(transaction, budgetId);
+    });
+  }
 
   calculateAmount(transaction: Transaction): number {
     let amount = 0;

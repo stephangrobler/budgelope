@@ -27,6 +27,12 @@ export class AccountService {
       );
   }
 
+  getAccount(accountId: string, budgetId: string) {
+    const ref = 'budgets/' + budgetId + '/accounts/' + accountId;
+    console.log(ref);
+    return this.db.doc<Account>(ref).valueChanges();
+  }
+
   createAccount(budget: Budget, account: Account) {
     const accountStore = this.db.collection<Account>('budgets/' + budget.id + '/accounts');
     // add account then add starting account balance transaction to update the budget

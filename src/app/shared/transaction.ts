@@ -10,9 +10,9 @@ export class Transaction {
   transferAccount: { accountId: string; accountName: string } = null;
   transferAccountDisplayName: string = null;
   transferAmount = 0;
-  payeeId: string;
-  payee: string;
-  amount: number;
+  payeeId: string = null;
+  payee: string = null;
+  amount = 0;
   in: number;
   out: number;
   date: Date;
@@ -94,4 +94,10 @@ export class Transaction {
       transfer: this.transfer
     };
   }
+}
+
+export enum TransactionTypes {
+  INCOME = 'income',
+  EXPENSE = 'expense',
+  TRANSFER = 'transfer'
 }

@@ -27,6 +27,12 @@ export class CategoryService {
       );
   }
 
+  getCategory(categoryId: string, budgetId: string) {
+    const ref = 'budgets/' + budgetId + '/categories/' + categoryId;
+    console.log(ref);
+    return this.db.doc<Category>(ref).valueChanges();
+  }
+
   createCategory(budgetId: string, category: Category) {
     const dbRef = this.db.collection('categories/' + budgetId);
     const newCat = dbRef.add(category);

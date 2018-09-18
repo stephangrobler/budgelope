@@ -65,6 +65,11 @@ export class TransactionsComponent implements OnInit {
     });
   }
 
+  onZeroStartingBalanceClick() {
+    console.log(this.accountId, this.budgetId, 0);
+    this.transService.createStartingBalance(this.accountId, this.budgetId, 0);
+  }
+
   onFilterClearedToggle() {
     this.dataSource.loadTransactions(this.accountId, this.showCleared);
   }
