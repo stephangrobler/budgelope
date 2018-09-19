@@ -93,58 +93,58 @@ export class TransactionService {
       .update({ cleared: transaction.cleared });
   }
 
-  updateTransaction(budgetId: string, transactionParam: Transaction) {
-    const docRef = this.db.doc('budgets/' + budgetId + '/transactions/' + transactionParam.id).ref;
-    console.log(transactionParam);
+  updateTransaction(budgetId: string, newTransaction: Transaction) {
+    const docRef = this.db.doc('budgets/' + budgetId + '/transactions/' + newTransaction.id).ref;
+    console.log(newTransaction);
     this.fb.firestore().runTransaction(dbTransaction => {
       return dbTransaction.get(docRef).then(
         readTransaction => {
-          const transactionOld = readTransaction.data();
+          const currentTransaction = readTransaction.data();
           // check if the account has changed
           if (
-            transactionOld.account &&
-            transactionOld.account.accountId !== transactionParam.account.accountId
+            currentTransaction.account &&
+            currentTransaction.account.accountId !== newTransaction.account.accountId
           ) {
             // if it was a expense/negative number
-            if (transactionOld.amount < 0) {
+            if (currentTransaction.amount < 0) {
               // add the amount to the previous account
               this.accountService.updateAccountBalance(
-                transactionOld.account.accountId,
+                currentTransaction.account.accountId,
                 budgetId,
-                Math.abs(transactionOld.amount)
+                Math.abs(currentTransaction.amount)
               );
               // subtract from current account
               this.accountService.updateAccountBalance(
-                transactionParam.account.accountId,
+                newTransaction.account.accountId,
                 budgetId,
-                -Math.abs(transactionParam.amount)
+                -Math.abs(newTransaction.amount)
               );
             } else {
               // add the amount to the previous account
               this.accountService.updateAccountBalance(
-                transactionOld.account.accountId,
+                currentTransaction.account.accountId,
                 budgetId,
-                -Math.abs(transactionOld.amount)
+                -Math.abs(currentTransaction.amount)
               );
               // subtract from current account
               this.accountService.updateAccountBalance(
-                transactionParam.account.accountId,
+                newTransaction.account.accountId,
                 budgetId,
-                Math.abs(transactionParam.amount)
+                Math.abs(newTransaction.amount)
               );
             }
           }
 
-          dbTransaction.update(docRef, transactionParam.toObject);
+          dbTransaction.update(docRef, newTransaction.toObject);
         },
         error => {
           console.log(
             'There was an error updating the budget: ' +
               budgetId +
               ' - ' +
-              transactionParam.id +
+              newTransaction.id +
               ' - ' +
-              transactionParam.amount,
+              newTransaction.amount,
             error
           );
         }

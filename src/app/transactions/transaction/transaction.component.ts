@@ -127,6 +127,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
             const selectedCategory = this.categories.filter(category => {
               return item.categoryId === category.id;
             })[0];
+            console.log('selected category', selectedCategory, this.categories);
             const categoryGroup = new FormGroup({
               category: new FormControl(selectedCategory, Validators.required),
               in: new FormControl(+item.in),

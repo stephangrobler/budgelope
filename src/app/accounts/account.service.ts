@@ -72,6 +72,10 @@ export class AccountService {
     });
   }
 
+  changeAccount(fromAccountID: string, toAccountID: string, amount: number) {
+
+  }
+
   removeAccount(delAccount: Account) {
     const dbRef = firebase
       .database()
