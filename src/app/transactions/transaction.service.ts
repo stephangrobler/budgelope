@@ -135,11 +135,36 @@ export class TransactionService {
             }
           }
 
+          
+
+          // if the type has changed by changing the in or out values, ensure to update the budget values as well
+          if (currentTransaction.amount !== newTransaction.amount && currentTransaction.amount > 0) {            
+            this.budgetService.updateBudgetBalance(
+              budgetId,
+              newTransaction.date,
+              Math.abs(newTransaction.amount)
+            );
+            // subtract from current account
+              this.accountService.updateAccountBalance(
+                newTransaction.account.accountId,
+                budgetId,
+                Math.abs(newTransaction.amount)
+              );
+          } else if (currentTransaction.amount !== newTransaction.amount && currentTransaction.amount <= 0) {
+            // subtract from current account
+              this.accountService.updateAccountBalance(
+                newTransaction.account.accountId,
+                budgetId,
+                -Math.abs(newTransaction.amount)
+              );
+          }
+
+
           dbTransaction.update(docRef, newTransaction.toObject);
         },
         error => {
           console.log(
-            'There was an error updating the budget: ' +
+            'There was an error updating the transaction: ' +
               budgetId +
               ' - ' +
               newTransaction.id +
