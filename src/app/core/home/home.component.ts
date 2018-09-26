@@ -6,6 +6,8 @@ import { Observable, Subscription } from 'rxjs';
 import { AngularFireAuth } from 'angularfire2/auth';
 import * as moment from 'moment';
 import { ObservableMedia, MediaChange } from '@angular/flex-layout';
+import { AccountService } from '../../accounts/account.service';
+import { Account } from '../../shared/account';
 
 @Component({
   templateUrl: 'home.component.html',
@@ -24,7 +26,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private db: AngularFirestore,
     private router: Router,
     private media: ObservableMedia,
-    afAuth: AngularFireAuth
+    afAuth: AngularFireAuth,
+    private accountService: AccountService
   ) {
     this.currentMonth = moment().format('YYYYMM');
     afAuth.authState.subscribe(user => {
@@ -38,9 +41,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           .valueChanges()
           .subscribe(profile => {
             // get accounts
-            this.accounts = this.db
-              .collection<any>('budgets/' + profile.activeBudget + '/accounts')
-              .valueChanges();
+            this.accounts = this.accountService.getAccounts(profile.activeBudget);
           });
       }
     });
