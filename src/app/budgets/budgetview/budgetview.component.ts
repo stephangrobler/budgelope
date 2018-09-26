@@ -134,6 +134,8 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
 
       this.loadCategories(budgetId);
       this.activeBudget = budget;
+      this.activeBudget.id = budgetId;
+      console.log(this.activeBudget);
     });
     this.subscriptions.add(subscription);
   }
