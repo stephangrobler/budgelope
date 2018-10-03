@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import * as moment from 'moment';
 import { ObservableMedia } from '@angular/flex-layout';
+import { AccountService } from '../../accounts/account.service';
 
 @Component({ selector: 'router-outlet', template: '' })
 class RouterOutletStubComponent {}
@@ -20,7 +21,7 @@ class RouterOutletStubComponent {}
 class NavigationBarStubComponent {}
 
 describe('HomeComponent', () => {
-  let analyticsServiceStub, dbStub, routerStub, authStub, mediaStub;
+  let analyticsServiceStub, dbStub, routerStub, authStub, mediaStub, accountServiceStub;
 
   beforeEach(async(() => {
     analyticsServiceStub = jasmine.createSpyObj('AnalyticsService', ['pageView']);
@@ -35,6 +36,7 @@ describe('HomeComponent', () => {
     authStub = jasmine.createSpyObj('AngularFireAuth', ['login']);
     authStub.authState = of({ uid: '12345' });
     mediaStub = of({});
+    accountServiceStub = jasmine.createSpyObj('AccountService', ['getAccounts']);
 
     TestBed.configureTestingModule({
       declarations: [
@@ -65,6 +67,10 @@ describe('HomeComponent', () => {
         {
           provide: ObservableMedia,
           useValue: mediaStub
+        },
+        {
+          provide: AccountService,
+          useValue: accountServiceStub
         }
       ]
     }).compileComponents();
@@ -95,7 +101,7 @@ describe('HomeComponent', () => {
     const fixture = TestBed.createComponent(HomeComponent);
     fixture.detectChanges();
     const app = fixture.debugElement.componentInstance;
-    expect(dbStub.collection).toHaveBeenCalledWith('budgets/abcde/accounts');
+    expect(accountServiceStub.getAccounts).toHaveBeenCalledWith('abcde');
   }));
 
 
