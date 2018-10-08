@@ -127,7 +127,6 @@ export class TransactionComponent implements OnInit, OnDestroy {
             const selectedCategory = this.categories.filter(category => {
               return item.categoryId === category.id;
             })[0];
-            console.log('selected category', selectedCategory, this.categories);
             const categoryGroup = new FormGroup({
               category: new FormControl(selectedCategory, Validators.required),
               in: new FormControl(+item.in),
@@ -186,7 +185,6 @@ export class TransactionComponent implements OnInit, OnDestroy {
   }
 
   saveTransaction() {
-    console.log(this.transactionId);
     if (this.transactionId != null) {
       console.log('updating ', this.transactionId);
       this.update(this.transactionForm);
@@ -291,6 +289,8 @@ export class TransactionComponent implements OnInit, OnDestroy {
         out: fromTransaction.transferAmount
       }
     ];
+    fromTransaction.payee = toAccount.name;
+    fromTransaction.categoryDisplayName = 'Transfer to ' + toAccount.name;
     fromTransaction.amount = 0 - fromTransaction.transferAmount;
     fromTransaction.out = 0 - fromTransaction.transferAmount;
 
@@ -315,6 +315,8 @@ export class TransactionComponent implements OnInit, OnDestroy {
         out: 0
       }
     ];
+    toTransaction.payee = fromAccount.name;
+    toTransaction.categoryDisplayName = 'Transfer from ' + fromAccount.name;
     toTransaction.amount = toTransaction.transferAmount;
     toTransaction.in = toTransaction.transferAmount;
 
