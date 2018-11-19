@@ -288,7 +288,10 @@ describe('TransactionsComponent', () => {
 
     comp.transfer(form);
 
-    expect(transactionServiceStub.createTransaction).toHaveBeenCalledWith(transaction, '54321');
+    expect(transactionServiceStub.createTransaction).toHaveBeenCalledWith(
+      jasmine.objectContaining({ categoryDisplayName: 'Transfer to Test Account 2' }),
+      '54321'
+    );
   });
 
   it('should call the transfer function with a to Transaction of values', () => {
@@ -322,7 +325,10 @@ describe('TransactionsComponent', () => {
 
     comp.transfer(form);
 
-    expect(transactionServiceStub.createTransaction).toHaveBeenCalledWith(transaction, '54321');
+    expect(transactionServiceStub.createTransaction).toHaveBeenCalledWith(
+      jasmine.objectContaining({ categoryDisplayName: 'Transfer from acc1Name' }),
+      '54321'
+    );
   });
 
   it('should update the categories and call update 3 times', () => {
