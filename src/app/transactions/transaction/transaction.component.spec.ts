@@ -16,8 +16,8 @@ import { TransactionService } from './../transaction.service';
 import { BudgetService } from '../../budgets/budget.service';
 import { UserService } from '../../shared/user.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AngularFirestore } from 'angularfire2/firestore';
-import { AngularFireAuth } from 'angularfire2/auth';
+import { AngularFirestore } from '@angular/fire/firestore';
+import { AngularFireAuth } from '@angular/fire/auth';
 import { Observable, of } from 'rxjs';
 import {
   ReactiveFormsModule,

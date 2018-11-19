@@ -1,7 +1,7 @@
 import { TestBed, async } from '@angular/core/testing';
 import { TransactionService } from './transaction.service';
 import { CategoryService } from '../categories/category.service';
-import { AngularFirestore } from 'angularfire2/firestore';
+import { AngularFirestore } from '@angular/fire/firestore';
 import { Account } from '../shared/account';
 import { Category } from '../shared/category';
 import { Budget } from '../shared/budget';
@@ -9,7 +9,7 @@ import { Transaction } from '../shared/transaction';
 import { Observable, of } from 'rxjs';
 import { AccountService } from '../accounts/account.service';
 import { resolve } from 'path';
-import { FirebaseApp } from 'angularfire2';
+import { FirebaseApp } from '@angular/fire';
 
 describe('Transaction Service to be thing', () => {
   let service: TransactionService;

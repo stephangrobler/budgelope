@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Category, CategoryId } from '../shared/category';
-import { AngularFirestore } from 'angularfire2/firestore';
+import { AngularFirestore } from '@angular/fire/firestore';
 import * as firebase from 'firebase';
 import * as moment from 'moment';
 
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { FirebaseApp } from 'angularfire2';
+import { FirebaseApp } from '@angular/fire';
 
 @Injectable()
 export class CategoryService {

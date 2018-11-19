@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
-import * as firebase from 'firebase';
 import * as moment from 'moment';
-import { AngularFirestore } from 'angularfire2/firestore';
-import { AngularFireAuth } from 'angularfire2/auth';
+import { AngularFirestore } from '@angular/fire/firestore';
+import { AngularFireAuth } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
 import { take, mergeMap, map, tap } from 'rxjs/operators';
 import { Budget } from '../shared/budget';
 import { CategoryService } from '../categories/category.service';
 import { AccountService } from '../accounts/account.service';
-import { FirebaseApp } from 'angularfire2';
+import { FirebaseApp } from '@angular/fire';
 
 @Injectable()
 export class BudgetService {
@@ -31,6 +30,9 @@ export class BudgetService {
           .valueChanges()
           .pipe(
             mergeMap(user => {
+              if (user.activeBudget === 'null') {
+                throw new Error('Null value in active budget');
+              }
               return this.db.doc<Budget>('budgets/' + user.activeBudget).valueChanges();
             })
           );
@@ -39,21 +41,16 @@ export class BudgetService {
     return returnable;
   }
 
-  createBudget(budget: Budget) {
-    const dbRef = firebase.database().ref('budgets/' + budget.userId);
-    const newBudget = dbRef.push();
+  createBudget(budget: Budget, userId: string) {
 
-    newBudget.set({
-      name: budget.name,
-      start: budget.start,
-      active: budget.active,
-      id: newBudget.key
-    });
+    budget.balance = 0;
+    budget.userId = userId;
+    this.db.collection('budgets').add(budget);
   }
 
   /**
    * Update the balances of the budget in a db transaction
-   * 
+   *
    * @param budgetId The id of the budget to update
    * @param date The date of the transaction
    * @param amount The amount of the transaction

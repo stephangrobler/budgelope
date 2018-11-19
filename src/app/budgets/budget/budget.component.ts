@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import * as firebase from 'firebase';
 
 import { Budget } from '../../shared/budget';
 import { BudgetService } from '../budget.service';
 import { UserService } from '../../shared/user.service';
+import { AngularFireAuth } from '@angular/fire/auth';
+import { AngularFirestore } from '@angular/fire/firestore';
 
 @Component({
   selector: 'budget-form',
@@ -12,30 +13,38 @@ import { UserService } from '../../shared/user.service';
 })
 export class BudgetComponent implements OnInit {
   budgetName: string;
-  theUserId: string;
+  userId: string;
   budget: Budget;
 
   constructor(
     private router: Router,
     private budgetService: BudgetService,
-    private userService: UserService
+    private userService: UserService,
+    private auth: AngularFireAuth,
+    private db: AngularFirestore
   ) {  }
 
   ngOnInit() {
-    this.theUserId = this.userService.authUser.uid;
+    this.auth.authState.subscribe(user => {
+      if (!user) {
+        return;
+      }
+      this.userId = user.uid;
+      // get active budget TODO: move to service :P
+      const subscription = this.db
+        .doc<any>('users/' + user.uid)
+        .valueChanges()
+        .subscribe(profile => {
+          console.log('Current Active Budget: ', profile.activeBudget);
+        });
+    });
   }
 
-  saveBudget(){
-    // this.budget = new Budget(
-    //   this.budgetName,
-    //   new Date(),
-    //   false,
-    //   this.theUserId
-    // );
-    this.budgetService.createBudget(this.budget);
+  saveBudget() {
+    this.budgetService.createBudget(this.budget, this.userId);
   }
 
-  cancel(){
+  cancel() {
     this.router.navigate(['/budgets']);
   }
 }

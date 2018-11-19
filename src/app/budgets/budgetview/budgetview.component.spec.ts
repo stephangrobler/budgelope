@@ -1,7 +1,7 @@
 import { Component, Directive, NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { MatMenuModule, MatTableModule } from '@angular/material';
-import { AngularFirestore } from 'angularfire2/firestore';
-import { AngularFireAuth } from 'angularfire2/auth';
+import { AngularFirestore } from '@angular/fire/firestore';
+import { AngularFireAuth } from '@angular/fire/auth';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BudgetviewComponent } from './budgetview.component';
 import { BudgetService } from '../budget.service';

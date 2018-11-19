@@ -14,20 +14,25 @@ import { TransactionComponent } from '../transactions/transaction/transaction.co
 import { TransactionsComponent } from '../transactions/transactions.component';
 import { CategoriesComponent } from '../categories/categories.component';
 import { CategoryComponent } from '../categories/category/category.component';
+import { BudgetComponent } from '../budgets/budget/budget.component';
 
 const appRoutes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   {
-    path: 'app', component: HomeComponent, canActivate: [AuthGuardService], children: [
-      { path: "budget", component: BudgetviewComponent },
-      { path: "budget/:month", component: BudgetviewComponent },
+    path: 'app',
+    component: HomeComponent,
+    canActivate: [AuthGuardService],
+    children: [
+      { path: 'budget-create', component: BudgetComponent },
+      { path: 'budget', component: BudgetviewComponent },
+      { path: 'budget/:month', component: BudgetviewComponent },
       { path: 'transactions/:id', component: TransactionsComponent },
       { path: 'transactions', component: TransactionsComponent },
       { path: 'accounts', component: AccountListComponent },
       { path: 'account/:id', component: AccountComponent },
       { path: 'categories', component: CategoriesComponent },
-      { path: 'category/:id', component: CategoryComponent },
+      { path: 'category/:id', component: CategoryComponent }
     ]
   },
   { path: 'signup', component: SignUpComponent },
@@ -35,12 +40,7 @@ const appRoutes: Routes = [
 ];
 
 @NgModule({
-  imports: [
-    RouterModule.forRoot( appRoutes )
-  ],
-  exports: [
-    RouterModule
-  ]
+  imports: [RouterModule.forRoot(appRoutes)],
+  exports: [RouterModule]
 })
-
-export class AppRoutingModule { }
+export class AppRoutingModule {}

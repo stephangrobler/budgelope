@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { AngularFirestore } from 'angularfire2/firestore';
-import { AngularFireAuth } from 'angularfire2/auth';
+import { AngularFirestore } from '@angular/fire/firestore';
+import { AngularFireAuth } from '@angular/fire/auth';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { DragulaService } from 'ng2-dragula';
 import { Observable, of, Subscription } from 'rxjs';
@@ -123,20 +123,26 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
    * on the component
    */
   loadActiveBudget(budgetId: string): void {
-    const subscription = this.budgetService.getActiveBudget$().subscribe(budget => {
-      // set the current allocation for the selected month if there is none
-      if (!budget.allocations[this.selectedMonth]) {
-        budget.allocations[this.selectedMonth] = {
-          income: 0,
-          expense: 0
-        };
-      }
+    const subscription = this.budgetService.getActiveBudget$().subscribe(
+      budget => {
+        // set the current allocation for the selected month if there is none
+        if (!budget.allocations[this.selectedMonth]) {
+          budget.allocations[this.selectedMonth] = {
+            income: 0,
+            expense: 0
+          };
+        }
 
-      this.loadCategories(budgetId);
-      this.activeBudget = budget;
-      this.activeBudget.id = budgetId;
-      console.log(this.activeBudget);
-    });
+        this.loadCategories(budgetId);
+        this.activeBudget = budget;
+        this.activeBudget.id = budgetId;
+        console.log(this.activeBudget);
+      },
+      error => {
+        console.log('Error on getting data: ', error);
+        this.router.navigate(['app/budget-create']);
+      }
+    );
     this.subscriptions.add(subscription);
   }
 
@@ -247,17 +253,17 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     const ref = 'budgets/' + this.activeBudget.id + '/categories/' + item.id,
       budgetRef = 'budgets/' + this.activeBudget.id;
 
-    if (typeof(this.originalValue) !== 'undefined' && planned !== +this.originalValue) {
+    if (typeof this.originalValue !== 'undefined' && planned !== +this.originalValue) {
       if (isNaN(item.balance)) {
         item.balance = 0;
       }
-      item.balance = +item.balance - (+this.originalValue) + planned;
+      item.balance = +item.balance - +this.originalValue + planned;
 
       // update the budget available balance
       if (isNaN(this.activeBudget.balance)) {
         this.activeBudget.balance = 0;
       }
-      this.activeBudget.balance = +this.activeBudget.balance - planned + (+this.originalValue);
+      this.activeBudget.balance = +this.activeBudget.balance - planned + +this.originalValue;
       console.log('item', item.balance, 'budget', this.activeBudget.balance);
       if (!isNaN(item.balance) && !isNaN(this.activeBudget.balance)) {
         this.categoryService.updateCategory(this.activeBudget.id, item);

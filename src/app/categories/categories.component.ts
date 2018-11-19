@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import * as firebase from 'firebase';
 import * as moment from 'moment';
-import { AngularFireDatabase, AngularFireList } from 'angularfire2/database';
-import { AngularFirestore, AngularFirestoreCollection } from 'angularfire2/firestore';
-import { AngularFireAuth } from 'angularfire2/auth';
+import { AngularFireDatabase, AngularFireList } from '@angular/fire/database';
+import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
+import { AngularFireAuth } from '@angular/fire/auth';
 
 import { Category } from '../shared/category';
 import { CategoryService} from './category.service';
