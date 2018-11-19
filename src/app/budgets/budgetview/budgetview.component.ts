@@ -149,6 +149,8 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
    */
   loadCategories(budgetId: string): void {
     const subscription = this.categoryService.getCategories(budgetId).subscribe(list => {
+      // filter list
+      list = list.filter(category => category.type === 'expense');
       this.checkAllocations(list, this.selectedMonth);
       this.sortList = list;
     });
