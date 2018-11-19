@@ -43,7 +43,13 @@ export class AccountService {
   createAccount(budgetId: string, account: Account): Promise<any> {
     const accountStore = this.db.collection<Account>('budgets/' + budgetId + '/accounts');
     // add account then add starting account balance transaction to update the budget
-    return accountStore.add(JSON.parse(JSON.stringify(account)));
+    const accountObj = {
+      name: account.name,
+      balance: account.balance,
+      clearedBalance: account.balance
+    };
+
+    return accountStore.add(accountObj);
   }
 
   /**
