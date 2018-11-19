@@ -10,9 +10,16 @@ import { FirebaseApp } from '@angular/fire';
 
 @Injectable()
 export class AccountService {
-  constructor(private db: AngularFirestore, private fb: FirebaseApp) {}
+  constructor(
+    private db: AngularFirestore,
+    private fb: FirebaseApp
+  ) {}
 
   getAccounts(budgetId: string): Observable<Account[]> {
+    if (!budgetId) {
+      throw new Error('Budget ID must be set to retrieve accounts. BudgetID: ' + budgetId);
+    }
+
     return this.db
       .collection<Account>('budgets/' + budgetId + '/accounts')
       .snapshotChanges()
@@ -33,12 +40,10 @@ export class AccountService {
     return this.db.doc<Account>(ref).valueChanges();
   }
 
-  createAccount(budget: Budget, account: Account) {
-    const accountStore = this.db.collection<Account>('budgets/' + budget.id + '/accounts');
+  createAccount(budgetId: string, account: Account): Promise<any> {
+    const accountStore = this.db.collection<Account>('budgets/' + budgetId + '/accounts');
     // add account then add starting account balance transaction to update the budget
-    // accountStore.add(account).then(docRef => {
-    //   this.transactionService.createStartingBalance(account, budget);
-    // });
+    return accountStore.add(JSON.parse(JSON.stringify(account)));
   }
 
   /**
@@ -72,9 +77,7 @@ export class AccountService {
     });
   }
 
-  changeAccount(fromAccountID: string, toAccountID: string, amount: number) {
-
-  }
+  changeAccount(fromAccountID: string, toAccountID: string, amount: number) {}
 
   removeAccount(delAccount: Account) {
     const dbRef = firebase
