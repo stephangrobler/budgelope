@@ -45,7 +45,14 @@ export class BudgetService {
 
     budget.balance = 0;
     budget.userId = userId;
-    this.db.collection('budgets').add(budget);
+    budget.allocations = {};
+    budget.start = new Date();
+
+    this.db.collection('budgets').add(JSON.parse(JSON.stringify(budget))).then(budgetDocument => {
+      this.db.doc<any>('users/' + userId).update({activeBudget: budgetDocument.id});
+      // copy categories
+      this.categoryService.copyCategories('default', budgetDocument.id);
+    });
   }
 
   /**

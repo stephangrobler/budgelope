@@ -14,7 +14,7 @@ import { AngularFirestore } from '@angular/fire/firestore';
 export class BudgetComponent implements OnInit {
   budgetName: string;
   userId: string;
-  budget: Budget;
+  
 
   constructor(
     private router: Router,
@@ -41,7 +41,10 @@ export class BudgetComponent implements OnInit {
   }
 
   saveBudget() {
-    this.budgetService.createBudget(this.budget, this.userId);
+    const budget = new Budget();
+    budget.name = this.budgetName;
+
+    this.budgetService.createBudget(budget, this.userId);
   }
 
   cancel() {
