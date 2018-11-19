@@ -8,13 +8,12 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
 
 @Component({
-  selector: 'budget-form',
+  selector: 'app-budget-form',
   templateUrl: 'budget.component.html',
 })
 export class BudgetComponent implements OnInit {
   budgetName: string;
   userId: string;
-  
 
   constructor(
     private router: Router,

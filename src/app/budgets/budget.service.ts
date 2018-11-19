@@ -30,8 +30,8 @@ export class BudgetService {
           .valueChanges()
           .pipe(
             mergeMap(user => {
-              if (user.activeBudget === 'null') {
-                throw new Error('Null value in active budget');
+              if (user.activeBudget === '') {
+                throw new Error('There is no active budget set.');
               }
               return this.db.doc<Budget>('budgets/' + user.activeBudget).valueChanges();
             })
