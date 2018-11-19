@@ -2,13 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { AngularFirestore } from '@angular/fire/firestore';
 
-import { UserService } from '../../shared/user.service';
 import { AccountService } from '../account.service';
 import { Account } from '../../shared/account';
-import { BudgetService } from '../../budgets/budget.service';
-import { Budget } from '../../shared/budget';
 import { TransactionService } from 'app/transactions/transaction.service';
-import { AngularFireAuth } from '@angular/fire/auth';
+import { AuthService } from 'app/shared/auth.service';
 
 @Component({
   templateUrl: 'account.component.html'
@@ -26,37 +23,33 @@ export class AccountComponent implements OnInit {
 
   constructor(
     private accountService: AccountService,
-    private userService: UserService,
     private router: Router,
     private route: ActivatedRoute,
-    private budgetService: BudgetService,
     private db: AngularFirestore,
     private transactionService: TransactionService,
-    private afAuth: AngularFireAuth
+    private auth: AuthService
   ) {}
 
   ngOnInit() {
     this.route.params.forEach((params: Params) => {
       this.accountId = params['id'];
     });
-    this.afAuth.authState.subscribe(user => {
-      this.db
-        .doc<any>('users/' + user.uid)
-        .valueChanges()
-        .subscribe(profile => {
-          this.budgetId = profile.activeBudget;
+    this.db
+      .doc<any>('users/' + this.auth.currentUserId)
+      .valueChanges()
+      .subscribe(profile => {
+        this.budgetId = profile.activeBudget;
 
-          if (this.accountId !== 'add') {
-            const accRef = 'budgets/' + this.budgetId + '/accounts/' + this.accountId;
-            this.db
-              .doc<Account>(accRef)
-              .valueChanges()
-              .subscribe(account => (this.account = account));
-          } else {
-            this.account = new Account();
-          }
-        });
-    });
+        if (this.accountId !== 'add') {
+          const accRef = 'budgets/' + this.budgetId + '/accounts/' + this.accountId;
+          this.db
+            .doc<Account>(accRef)
+            .valueChanges()
+            .subscribe(account => (this.account = account));
+        } else {
+          this.account = new Account();
+        }
+      });
   }
 
   saveAccount() {
@@ -74,11 +67,7 @@ export class AccountComponent implements OnInit {
 
   createAccount() {
     this.accountService.createAccount(this.budgetId, this.account).then(docRef => {
-      this.transactionService.createStartingBalance(
-        docRef.id,
-        this.budgetId,
-        this.account.balance
-      );
+      this.transactionService.createStartingBalance(docRef.id, this.budgetId, this.account.balance);
     });
   }
 
