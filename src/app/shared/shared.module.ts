@@ -2,16 +2,33 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 
-import { MatToolbarModule, MatGridListModule, MatButtonModule, MatInputModule, MatNativeDateModule,
-  MatListModule, MatCardModule, MatIconModule, MatSidenavModule, MatTableModule, MatCheckboxModule,
-  MatRadioModule, MatDatepickerModule, MatSelectModule, MatAutocompleteModule, MatSnackBarModule, MatMenuModule, 
-  MatSlideToggleModule } from '@angular/material';
+import {
+  MatToolbarModule,
+  MatGridListModule,
+  MatButtonModule,
+  MatInputModule,
+  MatNativeDateModule,
+  MatListModule,
+  MatCardModule,
+  MatIconModule,
+  MatSidenavModule,
+  MatTableModule,
+  MatCheckboxModule,
+  MatRadioModule,
+  MatDatepickerModule,
+  MatSelectModule,
+  MatAutocompleteModule,
+  MatSnackBarModule,
+  MatMenuModule,
+  MatSlideToggleModule
+} from '@angular/material';
 
 import { FlexLayoutModule } from '@angular/flex-layout';
 
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 
+import { AuthService } from './auth.service';
 import { AuthGuardService } from './auth-guard.service';
 
 @NgModule({
@@ -61,10 +78,7 @@ import { AuthGuardService } from './auth-guard.service';
     MatSlideToggleModule,
     MatMenuModule
   ],
-  declarations: [
-  ],
-  providers: [
-    AuthGuardService
-  ]
+  declarations: [],
+  providers: [AuthGuardService, AuthService]
 })
-export class SharedModule { }
+export class SharedModule {}

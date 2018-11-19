@@ -13,6 +13,7 @@ import { Budget } from '../../shared/budget';
 import { BudgetService } from '../budget.service';
 import { UserService } from '../../shared/user.service';
 import { CategoryService } from '../../categories/category.service';
+import { AuthService } from 'app/shared/auth.service';
 
 @Component({
   selector: 'app-budgetview',
@@ -48,21 +49,17 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     private budgetService: BudgetService,
     private categoryService: CategoryService,
     private userService: UserService,
-    private auth: AngularFireAuth,
+    private auth: AuthService,
     private dragulaService: DragulaService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
 
   ngOnInit() {
-    this.auth.authState.subscribe(user => {
-      if (!user) {
-        return;
-      }
-      this.userId = user.uid;
+      this.userId = this.auth.currentUserId;
       // get active budget TODO: move to service :P
       const subscription = this.db
-        .doc<any>('users/' + user.uid)
+        .doc<any>('users/' + this.auth.currentUserId)
         .valueChanges()
         .subscribe(profile => {
           this.loadAvailableBudgets(profile);
@@ -70,7 +67,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
           console.log('Current Active Budget: ', profile.activeBudget);
         });
       this.subscriptions.add(subscription);
-    });
+
     // drag and drop bag setup
     this.dragulaService.setOptions('order-bag', {
       moves: function(el, container, handle) {

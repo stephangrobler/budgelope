@@ -3,9 +3,8 @@ import { Router } from '@angular/router';
 
 import { Budget } from '../../shared/budget';
 import { BudgetService } from '../budget.service';
-import { UserService } from '../../shared/user.service';
-import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
+import { AuthService } from 'app/shared/auth.service';
 
 @Component({
   selector: 'app-budget-form',
@@ -18,25 +17,19 @@ export class BudgetComponent implements OnInit {
   constructor(
     private router: Router,
     private budgetService: BudgetService,
-    private userService: UserService,
-    private auth: AngularFireAuth,
+    private auth: AuthService,
     private db: AngularFirestore
   ) {  }
 
   ngOnInit() {
-    this.auth.authState.subscribe(user => {
-      if (!user) {
-        return;
-      }
-      this.userId = user.uid;
+      this.userId = this.auth.currentUserId;
       // get active budget TODO: move to service :P
       const subscription = this.db
-        .doc<any>('users/' + user.uid)
+        .doc<any>('users/' + this.auth.currentUserId)
         .valueChanges()
         .subscribe(profile => {
           console.log('Current Active Budget: ', profile.activeBudget);
         });
-    });
   }
 
   saveBudget() {
