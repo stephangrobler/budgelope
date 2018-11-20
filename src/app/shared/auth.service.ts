@@ -8,7 +8,7 @@ import { AngularFirestore } from '@angular/fire/firestore';
 export class AuthService {
   authState: firebase.User = null;
 
-  constructor(private af: AngularFireAuth, private db: AngularFirestore) {
+  constructor(private af: AngularFireAuth) {
     this.af.authState.subscribe(auth => {
       this.authState = auth;
     });
