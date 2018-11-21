@@ -72,6 +72,6 @@ export class AccountComponent implements OnInit {
   }
 
   cancel() {
-    this.router.navigate(['/accounts']);
+    this.router.navigate(['/app/accounts']);
   }
 }

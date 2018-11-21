@@ -42,11 +42,12 @@ export class AccountService {
 
   createAccount(budgetId: string, account: Account): Promise<any> {
     const accountStore = this.db.collection<Account>('budgets/' + budgetId + '/accounts');
-    // add account then add starting account balance transaction to update the budget
+    // create the account with 0 balance as starting balance is created on the component where
+    // the method call is made
     const accountObj = {
       name: account.name,
-      balance: account.balance,
-      clearedBalance: account.balance
+      balance: 0,
+      clearedBalance: 0
     };
 
     return accountStore.add(accountObj);
@@ -66,7 +67,9 @@ export class AccountService {
     this.fb.firestore().runTransaction(transaction => {
       return transaction.get(docRef).then(
         account => {
-          const newBalance = account.data().balance + amount;
+          console.log(account.data().balance, typeof account.data().balance);
+          console.log(amount, typeof amount);
+          const newBalance = Number(account.data().balance) + Number(amount);
           transaction.update(docRef, { balance: newBalance });
         },
         error => {
