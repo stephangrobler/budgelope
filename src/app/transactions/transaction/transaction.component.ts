@@ -69,10 +69,12 @@ export class TransactionComponent implements OnInit, OnDestroy {
         .subscribe(accounts => (this.accounts = accounts));
 
       const categorySubscription = this.categoryService
-        .getCategories(profile.activeBudget)
+        .getCategories(profile.activeBudget, 'sortingOrder')
         .pipe(take(1))
         .subscribe(categories => {
-          this.categories = categories;
+          this.categories = categories.filter(category => {
+            return ((category.parentId || category.parent) !== '') && category.type !== 'system'
+          });
           this.route.paramMap.subscribe(params => {
             if (!params.get('id')) {
               return;
