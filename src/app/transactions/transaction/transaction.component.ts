@@ -350,7 +350,11 @@ export class TransactionComponent implements OnInit, OnDestroy {
     }
 
     this.transactionService.createTransaction(transaction, this.activeBudget.id).then(response => {
+      const date = transaction.date;
+
       this.transactionForm.reset();
+      // set the date again and last used account
+      this.transactionForm.get('date').setValue(date);
       this.openSnackBar('Created transaction successfully');
     });
   }
