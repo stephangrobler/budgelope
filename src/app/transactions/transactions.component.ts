@@ -66,7 +66,6 @@ export class TransactionsComponent implements OnInit {
   }
 
   onZeroStartingBalanceClick() {
-    console.log(this.accountId, this.budgetId, 0);
     this.transService.createStartingBalance(this.accountId, this.budgetId, 0);
   }
 
@@ -81,7 +80,6 @@ export class TransactionsComponent implements OnInit {
 
   selectedRow(row) {
     this.selectedTransaction = row;
-    console.log(row);
     this.router.navigate(['/app/transactions', row.id]);
   }
 }
@@ -103,7 +101,6 @@ export class TransactionDataSource extends DataSource<any> {
   }
 
   loadTransactions(accountId: string, showCleared: boolean) {
-    console.log('account', accountId, 'cleared', showCleared);
     this.transService.getTransactions(this.budgetId, accountId, showCleared)
       .subscribe(transactions => this.transactionsSubject.next(transactions));
   }

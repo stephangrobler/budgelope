@@ -162,7 +162,6 @@ export class TransactionComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
-    console.log(this.transactionForm);
   }
 
   onAddCategory() {
@@ -298,7 +297,6 @@ export class TransactionComponent implements OnInit, OnDestroy {
     fromTransaction.amount = 0 - fromTransaction.transferAmount;
     fromTransaction.out = 0 - fromTransaction.transferAmount;
 
-    // console.log('from', fromTransaction);
     this.transactionService.createTransaction(fromTransaction, this.activeBudget.id);
 
     // switch accounts to let the correct things get updated
@@ -324,7 +322,6 @@ export class TransactionComponent implements OnInit, OnDestroy {
     toTransaction.amount = toTransaction.transferAmount;
     toTransaction.in = toTransaction.transferAmount;
 
-    // console.log('to', toTransaction);
     this.transactionService.createTransaction(toTransaction, this.activeBudget.id);
   }
 

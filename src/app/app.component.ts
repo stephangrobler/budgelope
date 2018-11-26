@@ -14,7 +14,6 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.userService.verifyUser();
-    console.log('running app');
 
   //   let messaging = firebase.messaging();
   //   messaging.requestPermission()

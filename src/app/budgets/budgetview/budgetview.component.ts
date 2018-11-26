@@ -64,7 +64,6 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
         .subscribe(profile => {
           this.loadAvailableBudgets(profile);
           this.loadActiveBudget(profile.activeBudget);
-          console.log('Current Active Budget: ', profile.activeBudget);
         });
       this.subscriptions.add(subscription);
 
@@ -133,10 +132,8 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
         this.loadCategories(budgetId);
         this.activeBudget = budget;
         this.activeBudget.id = budgetId;
-        console.log(this.activeBudget);
       },
       error => {
-        console.log('Error on getting data: ', error);
         this.router.navigate(['app/budget-create']);
       }
     );
@@ -157,12 +154,10 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
           calculatedBudgetAvailable -= category.allocations[this.selectedMonth].planned;
         }
       })
-      console.log('calculated budget available:', calculatedBudgetAvailable);
       // filter list
       list = list.filter(category => category.type === 'expense');
       this.checkAllocations(list, this.selectedMonth);
       this.sortList = list;
-
     });
     this.subscriptions.add(subscription);
   }
@@ -210,7 +205,6 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
       if (category.sortingOrder !== newOrder) {
         category.sortingOrder = newOrder;
         this.db.doc(ref + category.id).update(category);
-        console.log('updating: ', category.name);
       }
     }, this);
   }
@@ -254,7 +248,6 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
 
   focus(item) {
     this.originalValue = item.allocations[this.selectedMonth].planned;
-    console.log('original value', this.originalValue);
   }
 
   blur(item) {
@@ -274,7 +267,6 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
         this.activeBudget.balance = 0;
       }
       this.activeBudget.balance = +this.activeBudget.balance - planned + +this.originalValue;
-      console.log('item', item.balance, 'budget', this.activeBudget.balance);
       if (!isNaN(item.balance) && !isNaN(this.activeBudget.balance)) {
         this.categoryService.updateCategory(this.activeBudget.id, item);
         this.db.doc(budgetRef).update(this.activeBudget);

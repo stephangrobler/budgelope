@@ -28,7 +28,6 @@ export class BudgetComponent implements OnInit {
         .doc<any>('users/' + this.auth.currentUserId)
         .valueChanges()
         .subscribe(profile => {
-          console.log('Current Active Budget: ', profile.activeBudget);
         });
   }
 
