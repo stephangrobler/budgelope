@@ -149,10 +149,20 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
    */
   loadCategories(budgetId: string): void {
     const subscription = this.categoryService.getCategories(budgetId).subscribe(list => {
+      let calculatedBudgetAvailable = 0;
+      list.forEach(category => {
+        if ( category.type === 'income' ) {
+          calculatedBudgetAvailable += category.allocations[this.selectedMonth].actual;
+        } else if (category.type === 'expense') {
+          calculatedBudgetAvailable -= category.allocations[this.selectedMonth].planned;
+        }
+      })
+      console.log('calculated budget available:', calculatedBudgetAvailable);
       // filter list
       list = list.filter(category => category.type === 'expense');
       this.checkAllocations(list, this.selectedMonth);
       this.sortList = list;
+
     });
     this.subscriptions.add(subscription);
   }
@@ -252,11 +262,12 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     const ref = 'budgets/' + this.activeBudget.id + '/categories/' + item.id,
       budgetRef = 'budgets/' + this.activeBudget.id;
 
+
     if (typeof this.originalValue !== 'undefined' && planned !== +this.originalValue) {
       if (isNaN(item.balance)) {
         item.balance = 0;
       }
-      item.balance = +item.balance - +this.originalValue + planned;
+      item.balance = item.balance - +this.originalValue + planned;
 
       // update the budget available balance
       if (isNaN(this.activeBudget.balance)) {

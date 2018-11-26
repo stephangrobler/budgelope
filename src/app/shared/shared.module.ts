@@ -20,7 +20,8 @@ import {
   MatAutocompleteModule,
   MatSnackBarModule,
   MatMenuModule,
-  MatSlideToggleModule
+  MatSlideToggleModule,
+  MatProgressSpinnerModule
 } from '@angular/material';
 
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -55,6 +56,7 @@ import { AuthGuardService } from './auth-guard.service';
     MatAutocompleteModule,
     MatSnackBarModule,
     MatMenuModule,
+    MatProgressSpinnerModule,
     AppRoutingModule
   ],
   exports: [
@@ -76,7 +78,8 @@ import { AuthGuardService } from './auth-guard.service';
     MatInputModule,
     MatSidenavModule,
     MatSlideToggleModule,
-    MatMenuModule
+    MatMenuModule,
+    MatProgressSpinnerModule
   ],
   declarations: [],
   providers: [AuthGuardService, AuthService]

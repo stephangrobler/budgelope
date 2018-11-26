@@ -36,6 +36,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
   item: AngularFirestoreDocument<any>;
   accounts: Account[];
   categories: CategoryId[];
+  systemCategories: CategoryId[];
   selectedAccount: Account;
   transferBox = false;
 
@@ -72,6 +73,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
         .getCategories(profile.activeBudget, 'sortingOrder')
         .pipe(take(1))
         .subscribe(categories => {
+          this.systemCategories = categories.filter(category => category.type === 'system');
           this.categories = categories.filter(category => {
             return ((category.parentId || category.parent) !== '') && category.type !== 'system'
           });
@@ -273,8 +275,8 @@ export class TransactionComponent implements OnInit, OnDestroy {
     const fromAccount = form.get('account').value;
     const toAccount = form.get('transferAccount').value;
 
-    const toCategory = this.categories.find(cat => cat.name === 'Transfer In');
-    const fromCategory = this.categories.find(cat => cat.name === 'Transfer Out');
+    const toCategory = this.systemCategories.find(cat => cat.name === 'Transfer In');
+    const fromCategory = this.systemCategories.find(cat => cat.name === 'Transfer Out');
 
     // first the from account transaction
     fromTransaction.account = {

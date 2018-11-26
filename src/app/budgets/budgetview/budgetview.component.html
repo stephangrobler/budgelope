@@ -47,8 +47,21 @@
 
   <!-- header -->
   <br>
-  <mat-card class="budget-view">
+  <mat-card *ngIf="!sortList">
     <mat-card-content>
+      <mat-progress-spinner
+        class="example-margin"
+        diameter="30"
+        [color]="accent"
+        [mode]="'indeterminate'"
+        >
+      </mat-progress-spinner>
+    </mat-card-content>
+  </mat-card>
+  <mat-card class="budget-view"  *ngIf="sortList">
+    <mat-card-content>
+      
+
       <a mat-fab [routerLink]="['/app/category/add']">
         <mat-icon>add</mat-icon>
       </a>
@@ -64,7 +77,7 @@
                 </div>
                 <div class="planned-input text-right" fxFlex="15" fxHide.xs>
                   <mat-form-field *ngIf="item.allocations && item.parent != ''" fxFlex="100">
-                    <input matInput type="text" name="planned" class="text-right" [(ngModel)]="item.allocations[selectedMonth].planned" (blur)="blur(item)"
+                    <input matInput type="number" name="planned" class="text-right" [(ngModel)]="item.allocations[selectedMonth].planned" (blur)="blur(item)"
                       (focus)="focus(item)" tabindex="">
 
                   </mat-form-field>
