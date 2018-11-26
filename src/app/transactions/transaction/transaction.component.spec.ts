@@ -243,7 +243,7 @@ describe('TransactionsComponent', () => {
 
   it('should call the transfer function', () => {
     categoryServiceStub.getCategories.and.returnValue(
-      of([{ id: 'cat1', name: 'Transfer In' }, { id: 'cat2', name: 'Transfer Out' }])
+      of([{ id: 'cat1', name: 'Transfer In', type: 'system' }, { id: 'cat2', name: 'Transfer Out', type: 'system' }])
     );
 
     const fixture = TestBed.createComponent(TransactionComponent);
@@ -262,7 +262,7 @@ describe('TransactionsComponent', () => {
 
   it('should call the transfer function with a from Transaction of values', () => {
     categoryServiceStub.getCategories.and.returnValue(
-      of([{ id: 'cat1', name: 'Transfer In' }, { id: 'cat2', name: 'Transfer Out' }])
+      of([{ id: 'cat1', name: 'Transfer In', type: 'system' }, { id: 'cat2', name: 'Transfer Out', type: 'system' }])
     );
 
     const fixture = TestBed.createComponent(TransactionComponent);
@@ -296,7 +296,7 @@ describe('TransactionsComponent', () => {
 
   it('should call the transfer function with a to Transaction of values', () => {
     categoryServiceStub.getCategories.and.returnValue(
-      of([{ id: 'cat1', name: 'Transfer In' }, { id: 'cat2', name: 'Transfer Out' }])
+      of([{ id: 'cat1', name: 'Transfer In', type: 'system' }, { id: 'cat2', name: 'Transfer Out', type: 'system' }])
     );
 
     const fixture = TestBed.createComponent(TransactionComponent);
