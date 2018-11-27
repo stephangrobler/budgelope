@@ -189,6 +189,10 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     this.budgetService.freshStart(this.activeBudget.id, this.userId);
   }
 
+  onNewBudget() {
+    this.router.navigate(['/app/budget-create']);
+  }
+
   updateCategoryOrder(categories: Category[], budgetId: string): void {
     const ref = 'budgets/' + budgetId + '/categories/';
     categories.forEach(function(category, index) {

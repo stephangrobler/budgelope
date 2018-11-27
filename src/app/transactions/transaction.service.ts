@@ -239,7 +239,6 @@ export class TransactionService {
 
     return new Promise((resolve, reject) => {
       const transactionObj = JSON.parse(JSON.stringify(transaction));
-      console.log('Transaction', transactionObj);
       items.add(transactionObj).then(
         response => {
           // after successfull response, we update the account budgets (could go to cloud functions)

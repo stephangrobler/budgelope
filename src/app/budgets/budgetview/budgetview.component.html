@@ -26,6 +26,9 @@
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="onNewBudget()">
+            <span>New Budget</span>
+          </button>
           <button mat-menu-item *ngFor="let budget of budgetList; index as i" (click)="onBudgetActivate(budget.id)">
             <span>{{budget.name}}</span>
           </button>
