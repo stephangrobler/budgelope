@@ -146,14 +146,6 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
    */
   loadCategories(budgetId: string): void {
     const subscription = this.categoryService.getCategories(budgetId).subscribe(list => {
-      let calculatedBudgetAvailable = 0;
-      list.forEach(category => {
-        if ( category.type === 'income' ) {
-          calculatedBudgetAvailable += category.allocations[this.selectedMonth].actual;
-        } else if (category.type === 'expense') {
-          calculatedBudgetAvailable -= category.allocations[this.selectedMonth].planned;
-        }
-      })
       // filter list
       list = list.filter(category => category.type === 'expense');
       this.checkAllocations(list, this.selectedMonth);

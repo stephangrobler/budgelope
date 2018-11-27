@@ -158,8 +158,8 @@ export class TransactionService {
               -Math.abs(newTransaction.amount)
             );
           }
-
-          dbTransaction.update(docRef, newTransaction.toObject);
+          const newTransObj = JSON.parse(JSON.stringify(newTransaction));
+          dbTransaction.update(docRef, newTransObj);
         },
         error => {
           console.log(
@@ -238,7 +238,9 @@ export class TransactionService {
       shortDate = moment(transaction.date).format('YYYYMM');
 
     return new Promise((resolve, reject) => {
-      items.add(transaction.toObject).then(
+      const transactionObj = JSON.parse(JSON.stringify(transaction));
+      console.log('Transaction', transactionObj);
+      items.add(transactionObj).then(
         response => {
           // after successfull response, we update the account budgets (could go to cloud functions)
           this.accountService.updateAccountBalance(

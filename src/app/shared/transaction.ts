@@ -74,26 +74,26 @@ export class Transaction {
     }
   }
 
-  get toObject(): any {
-    return {
-      categories: this.categories,
-      categoryDisplayName: this.categoryDisplayName,
-      account: this.account,
-      accountDisplayName: this.accountDisplayName,
-      transferAccount: this.transferAccount,
-      transferAccountDisplayName: this.transferAccountDisplayName,
-      transferAmount: this.transferAmount,
-      payeeId: this.payeeId,
-      payee: this.payee,
-      amount: this.amount,
-      in: this.in,
-      out: this.out,
-      date: this.date,
-      type: this.type, // income or expense
-      cleared: this.cleared,
-      transfer: this.transfer
-    };
-  }
+  // get toObject(): any {
+  //   return {
+  //     categories: this.categories,
+  //     categoryDisplayName: this.categoryDisplayName,
+  //     account: this.account,
+  //     accountDisplayName: this.accountDisplayName,
+  //     transferAccount: this.transferAccount,
+  //     transferAccountDisplayName: this.transferAccountDisplayName,
+  //     transferAmount: this.transferAmount,
+  //     payeeId: this.payeeId,
+  //     payee: this.payee,
+  //     amount: this.amount,
+  //     in: this.in,
+  //     out: this.out,
+  //     date: this.date,
+  //     type: this.type, // income or expense
+  //     cleared: this.cleared,
+  //     transfer: this.transfer
+  //   };
+  // }
 }
 
 export enum TransactionTypes {
