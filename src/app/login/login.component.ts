@@ -2,10 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { AngularFireAuth } from '@angular/fire/auth';
-import * as firebase from 'firebase/app';
+import { auth } from 'firebase/app';
 import { UserService } from '../shared/user.service';
 import { BudgetService } from '../budgets/budget.service';
-import { MatGridListModule, MatButtonModule } from '@angular/material';
 
 @Component({
   templateUrl: 'login.component.html'
@@ -41,7 +40,7 @@ export class LoginComponent implements OnInit {
   }
 
   googleLogin() {
-    this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(user => {
+    this.afAuth.auth.signInWithPopup(new auth.GoogleAuthProvider()).then(user => {
       this.userSVC.getProfile$();
       // check if the user has a profile
       this.router.navigate(['/app/budget']);

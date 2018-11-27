@@ -3,11 +3,8 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { Observable, forkJoin, of } from 'rxjs';
 import { map, catchError, take } from 'rxjs/operators';
 import * as moment from 'moment';
-import * as firebase from 'firebase';
 
 import { Transaction, TransactionTypes } from '../shared/transaction';
-import { Account } from '../shared/account';
-import { Budget } from '../shared/budget';
 import { CategoryService } from '../categories/category.service';
 import { AccountService } from '../accounts/account.service';
 import { BudgetService } from '../budgets/budget.service';
@@ -95,7 +92,6 @@ export class TransactionService {
 
   updateTransaction(budgetId: string, newTransaction: Transaction) {
     const docRef = this.db.doc('budgets/' + budgetId + '/transactions/' + newTransaction.id).ref;
-    console.log(newTransaction);
     this.fb.firestore().runTransaction(dbTransaction => {
       return dbTransaction.get(docRef).then(
         readTransaction => {

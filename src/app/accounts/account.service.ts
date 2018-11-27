@@ -1,11 +1,8 @@
 import { Injectable } from '@angular/core';
-import * as firebase from 'firebase';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Account } from '../shared/account';
-import { Budget } from '../shared/budget';
-import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/firestore';
-import { TransactionService } from '../transactions/transaction.service';
+import { AngularFirestore } from '@angular/fire/firestore';
 import { FirebaseApp } from '@angular/fire';
 
 @Injectable()
@@ -84,15 +81,6 @@ export class AccountService {
   }
 
   changeAccount(fromAccountID: string, toAccountID: string, amount: number) {}
-
-  removeAccount(delAccount: Account) {
-    const dbRef = firebase
-      .database()
-      .ref('accounts')
-      .child(delAccount.id)
-      .remove();
-    alert('account deleted');
-  }
 
   /** Copy accounts from a budget to another specified budget
    */

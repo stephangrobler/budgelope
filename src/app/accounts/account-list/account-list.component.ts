@@ -53,7 +53,7 @@ export class AccountListComponent implements OnInit {
   deleteAccount(single: Account){
     let verify = confirm(`Are you sure you want to delete this account?`);
     if (true == verify){
-      this.accountService.removeAccount(single);
+      // this.accountService.removeAccount(single);
     } else {
       alert(`Nothing deleted!`);
     }

@@ -1,10 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Category, CategoryId } from '../shared/category';
 import { AngularFirestore } from '@angular/fire/firestore';
-import * as firebase from 'firebase';
-import * as moment from 'moment';
-
-import { Observable, of } from 'rxjs';
+import { Observable} from 'rxjs';
 import { map } from 'rxjs/operators';
 import { FirebaseApp } from '@angular/fire';
 
@@ -29,58 +26,7 @@ export class CategoryService {
 
   getCategory(categoryId: string, budgetId: string) {
     const ref = 'budgets/' + budgetId + '/categories/' + categoryId;
-    console.log(ref);
     return this.db.doc<Category>(ref).valueChanges();
-  }
-
-  createCategory(budgetId: string, category: Category) {
-    const dbRef = this.db.collection('categories/' + budgetId);
-    const newCat = dbRef.add(category);
-    const categoryId = 'newCat.key';
-    // create a allocation
-    // current allocation
-    const currentDate = new Date();
-    const month = moment().format('YYYYMM');
-    const nextMonth = moment()
-      .add(1, 'months')
-      .format('YYYYMM');
-    const catData = category;
-    const allocData = {
-      actual: 0,
-      balance: 0,
-      planned: 0,
-      previousBalance: 0,
-      name: catData.name,
-      parent: catData.parent,
-      sortingOrder: catData.sortingOrder,
-      type: catData.type
-    };
-    const currentAllocationMonthRef = '/allocations/' + budgetId + '/' + month;
-    const nextAllocationMonthRef = '/allocations/' + budgetId + '/' + nextMonth;
-    return Promise.all([
-      firebase
-        .database()
-        .ref(currentAllocationMonthRef)
-        .child(categoryId)
-        .set(allocData),
-      firebase
-        .database()
-        .ref(nextAllocationMonthRef)
-        .child(categoryId)
-        .set(allocData),
-      firebase
-        .database()
-        .ref('/categoryAllocations/' + budgetId + '/' + categoryId)
-        .child(month)
-        .set(true),
-      firebase
-        .database()
-        .ref('/categoryAllocations/' + budgetId + '/' + categoryId)
-        .child(nextMonth)
-        .set(true)
-    ]).then(() => {
-      console.log('Created ' + catData.name + ' successfully!');
-    });
   }
 
   updateCategoryBudget(

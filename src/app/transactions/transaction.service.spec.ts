@@ -128,7 +128,6 @@ describe('Transaction Service to be thing', () => {
       },
       error => {
         expect(error).toBe('Error thrown');
-        console.log('ERROR:', error);
         done();
       }
     );
@@ -169,7 +168,6 @@ describe('Transaction Service to be thing', () => {
       },
       error => {
         expect(error).toBe('Error thrown');
-        console.log('ERROR:', error);
         done();
       }
     );

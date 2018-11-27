@@ -1,28 +1,23 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { environment } from '../../environments/environment';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import * as firebase from 'firebase/app';
 
-import { Account } from '../shared/account';
 import { Profile } from '../shared/profile';
 import { BudgetService } from '../budgets/budget.service';
 import { CategoryService } from '../categories/category.service';
 
 @Injectable()
 export class UserService implements CanActivate {
-  authenticated: boolean = false;
-  authUser: firebase.User;
+  authenticated = false;
   profile$: Observable<Profile>;
 
   constructor(
     private router: Router,
     private afAuth: AngularFireAuth,
     private db: AngularFirestore,
-    private categoryService: CategoryService,
     private budgetService: BudgetService
   ) {
     // firebase.initializeApp(environment.firebase);
@@ -31,7 +26,7 @@ export class UserService implements CanActivate {
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    let url: string = state.url;
+    const url: string = state.url;
     return this.verifyLogin(url);
   }
 
@@ -48,7 +43,6 @@ export class UserService implements CanActivate {
     this.afAuth.auth
       .createUserWithEmailAndPassword(email, password)
       .then(user => {
-        console.log(user);
         this.setupProfile(user);
       })
       .catch(function(error) {
