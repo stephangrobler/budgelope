@@ -60,11 +60,11 @@
             </div>
           </div>
         </mat-card-content>
-        <mat-checkbox name="cleared" [labelPosition]="end" formControlName="cleared">
+        <mat-checkbox name="cleared" formControlName="cleared">
           Cleared
         </mat-checkbox>
         &nbsp;
-        <mat-checkbox name="transfer" [labelPosition]="end" formControlName="transfer" (change)="onToggleTransfer()" >
+        <mat-checkbox name="transfer" formControlName="transfer" (change)="onToggleTransfer()" >
           Transfer
         </mat-checkbox>
         <mat-card-actions>

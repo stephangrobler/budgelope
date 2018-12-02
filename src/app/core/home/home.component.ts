@@ -20,6 +20,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   sideNavState: any = {};
   watcher: Subscription;
   activeMediaQuery = '';
+  theUser = true;
 
   constructor(
     private _analytics: AnalyticsService,

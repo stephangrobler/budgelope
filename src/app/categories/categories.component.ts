@@ -4,6 +4,8 @@ import { Component, OnInit } from '@angular/core';
   templateUrl: 'categories.component.html'
 })
 export class CategoriesComponent implements OnInit {
+  categories: any;
+
   constructor() {}
 
   ngOnInit() {}

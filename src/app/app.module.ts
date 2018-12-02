@@ -19,6 +19,7 @@ import { SharedModule } from './shared/shared.module';
 import { BudgetsModule } from './budgets/budgets.module';
 import { TransactionModule } from './transactions/transactions.module';
 import { CoreModule } from './core/core.module';
+import { ServiceWorkerModule } from '@angular/service-worker';
 
 @NgModule({
   declarations: [
@@ -42,7 +43,8 @@ import { CoreModule } from './core/core.module';
     SharedModule,
     BudgetsModule,
     TransactionModule,
-    CoreModule
+    CoreModule,
+    ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production })
   ],
   providers: [
   ],

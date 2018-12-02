@@ -27,7 +27,7 @@ export class LoginComponent implements OnInit {
     }
   }
 
-  login(loginEmail: string, loginPassword: string) {
+  onLogin(loginEmail: string, loginPassword: string) {
     const router = this.router;
     this.userSVC
       .login(this.email, this.password1)
