@@ -9,16 +9,15 @@
           *ngFor="let account of accounts | async"
           routerLinkActive="active">
           <h4 matLine>{{account.name}}</h4>
-          <div class="small" matLine [ngClass]="{'primary-text': account.balance >= 0, 'secondary-text': account.balance < 0}">{{account.balance | currency: 'ZAR' : 'symbol-narrow'}}</div>
+          <div class="small" matLine [ngClass]="{'primary-text': account.balance >= 0, 'secondary-text': account.balance < 0}">
+            {{account.balance | currency: 'ZAR' : 'symbol-narrow'}}
+          </div>
         </a>
       </mat-nav-list>
 
       <a mat-list-item [routerLink]="['/app/transactions']">Transactions</a>
     </mat-nav-list>
-    <div *ngIf="theUser">
-      <a mat-button [routerLink]="['/app/budgetview']">Budgets</a>
-      <a mat-button [routerLink]="['/app/transactions']">Transactions</a>
-    </div>
+
   </mat-sidenav>
   <mat-sidenav-content>
     <button mat-button color="primary" (click)="sidenav.toggle()" *ngIf="sideNavState.mode === 'over'">

@@ -56,6 +56,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.initForm();
 
+
     const profileSubscription = this.userService.getProfile$().subscribe(profile => {
       const budgetSubscription = this.budgetService.getActiveBudget$().subscribe(budget => {
         this.activeBudget = budget;
@@ -125,19 +126,24 @@ export class TransactionComponent implements OnInit, OnDestroy {
         this.transactionForm.get('account').setValue(selectedAccount);
         this.transactionForm.get('date').setValue(transaction.date);
         this.transactionForm.get('payee').setValue(transaction.payee);
-
         if (transaction.categories) {
-          transaction.categories.forEach(item => {
-            const selectedCategory = this.categories.filter(category => {
-              return item.categoryId === category.id;
-            })[0];
-            const categoryGroup = new FormGroup({
-              category: new FormControl(selectedCategory, Validators.required),
-              in: new FormControl(+item.in),
-              out: new FormControl(+item.out)
-            });
-            (<FormArray>this.transactionForm.get('categories')).push(categoryGroup);
-          });
+
+          for (const key in transaction.categories) {
+            if (transaction.categories.hasOwnProperty(key)) {
+              const item = transaction.categories[key];
+
+              const selectedCategory = this.categories.filter(category => {
+                return key === category.id;
+              })[0];
+
+              const categoryGroup = new FormGroup({
+                category: new FormControl(selectedCategory, Validators.required),
+                in: new FormControl(+item.in),
+                out: new FormControl(+item.out)
+              });
+              (<FormArray>this.transactionForm.get('categories')).push(categoryGroup);
+            }
+          };
         }
       });
     this.subscriptions.add(subscription);
@@ -150,11 +156,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
     // };
     transaction.id = this.transactionId;
     transaction.accountDisplayName = transaction['accountName'];
-    if (transaction.categories.length > 1) {
-      transaction.categoryDisplayName = 'Split (' + transaction.categories.length + ')';
-    } else {
-      transaction.categoryDisplayName = transaction.categories[0].categoryName;
-    }
+
     if (typeof transaction.date === 'object') {
       transaction.date = transaction['date'].toDate();
     }
@@ -284,14 +286,11 @@ export class TransactionComponent implements OnInit, OnDestroy {
     };
     fromTransaction.accountDisplayName = fromTransaction.account.accountName;
 
-    fromTransaction.categories = [
-      {
-        categoryId: fromCategory.id,
+    fromTransaction.categories[fromCategory.id] = {
         categoryName: fromCategory.name,
         in: 0,
         out: fromTransaction.transferAmount
-      }
-    ];
+      };
     fromTransaction.payee = toAccount.name;
     fromTransaction.categoryDisplayName = 'Transfer to ' + toAccount.name;
     fromTransaction.amount = 0 - fromTransaction.transferAmount;
@@ -309,14 +308,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
       accountName: fromAccount.name
     };
     toTransaction.accountDisplayName = toTransaction.account.accountName;
-    toTransaction.categories = [
-      {
-        categoryId: toCategory.id,
-        categoryName: toCategory.name,
-        in: toTransaction.transferAmount,
-        out: 0
-      }
-    ];
+    toTransaction.categories = {};
     toTransaction.payee = fromAccount.name;
     toTransaction.categoryDisplayName = 'Transfer from ' + fromAccount.name;
     toTransaction.amount = toTransaction.transferAmount;

@@ -1,4 +1,9 @@
-export class Category {
+
+export interface Category {
+  name: string;
+}
+
+export class Category implements Category {
   $key?: string;
   id?: string;
   name: string;

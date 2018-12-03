@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AngularFireDatabase, AngularFireList } from '@angular/fire/database';
 import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { MatTableDataSource } from '@angular/material';
@@ -9,7 +8,6 @@ import { Transaction } from '../shared/transaction';
 import { TransactionService } from './transaction.service';
 import { BudgetService } from '../budgets/budget.service';
 import { UserService } from '../shared/user.service';
-import { TransactionComponent } from './transaction/transaction.component';
 import { BehaviorSubject } from 'rxjs';
 
 @Component({
@@ -51,6 +49,7 @@ export class TransactionsComponent implements OnInit {
         this.userId = user.uid;
         this.budgetId = profileRead.activeBudget;
         this.accountId = null;
+        this.transService.transactionsByCategory(this.budgetId);
         this.dataSource = new TransactionDataSource(this.transService, profileRead.activeBudget);
         this.route.paramMap.subscribe(params => {
           if (params.get('accountId')) {
@@ -71,6 +70,10 @@ export class TransactionsComponent implements OnInit {
 
   onFilterClearedToggle() {
     this.dataSource.loadTransactions(this.accountId, this.showCleared);
+  }
+
+  onFixTransactions() {
+    this.transService.transformCategoriesToMap(this.budgetId);
   }
 
   toggleCleared(transaction: Transaction) {

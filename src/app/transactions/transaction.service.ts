@@ -10,6 +10,8 @@ import { AccountService } from '../accounts/account.service';
 import { BudgetService } from '../budgets/budget.service';
 import { FirebaseApp } from '@angular/fire';
 
+
+
 @Injectable()
 export class TransactionService {
   transactions: Transaction[];
@@ -20,7 +22,9 @@ export class TransactionService {
     private categoryService: CategoryService,
     private accountService: AccountService,
     private budgetService: BudgetService
-  ) {}
+  ) {
+
+  }
 
   /**
    * Get all transactions with the id of the transactions
@@ -66,17 +70,84 @@ export class TransactionService {
           if (data['accountName']) {
             data.accountDisplayName = data['accountName'];
           }
-          if (data.categories && data.categories.length > 1) {
-            data.categoryDisplayName = 'Split (' + data.categories.length + ')';
-          } else if (data.categories && data.categories.length === 1) {
-            data.categoryDisplayName = data.categories[0].categoryName;
-          }
 
           data.id = id;
           return { id, ...data };
         })
       )
     );
+  }
+
+
+  transactionsByCategory(budgetId: string): void {
+    const transRef = 'budgets/' + budgetId + '/transactions';
+    this.db
+      // .collection<any>(transRef, ref => ref.where('categories.7LMKnFJv5Jdf6NEzAuL2', '>', ''))
+      .collection<any>(transRef)
+      .snapshotChanges()
+      .pipe(
+        map(actions =>
+          actions.map(a => {
+            const data = a.payload.doc.data() as any;
+            const id = a.payload.doc.id;
+            console.log('Reading...', a.payload.doc.id, a.payload.doc.data());
+            if (a.payload.doc.get('id') === null) {
+              data.id = id;
+            }
+            return { id, ...data };
+          })
+        ),
+        take(1)
+      )
+      .subscribe(transactions => {
+        console.log(JSON.stringify(transactions));
+      });
+  }
+
+  transformCategoriesToMap(budgetId: string): void {
+    const transRef = 'budgets/' + budgetId + '/transactions';
+    this.db
+      .collection<any>(transRef)
+      .snapshotChanges()
+      .pipe(
+        map(actions =>
+          actions.map(a => {
+            const data = a.payload.doc.data() as any;
+            const id = a.payload.doc.id;
+            console.log('Reading...', a.payload.doc.id, a.payload.doc.data());
+            if (a.payload.doc.get('id') === null) {
+              data.id = id;
+            }
+            return { id, ...data };
+          })
+        ),
+        take(1)
+      )
+      .subscribe(transactions => {
+        console.log(transactions);
+        transactions.forEach(transaction => {
+          const ref = '/budgets/' + budgetId + '/transactions/' + transaction.id;
+          const categoryMap = {};
+          const categories: any[] = transaction.categories;
+
+          if (typeof categories.length !== 'undefined') {
+            categories.forEach(cat => {
+              categoryMap[cat.categoryId] = {
+                categoryName: cat.categoryName,
+                in: cat.in,
+                out: cat.out
+              };
+            });
+            console.log('fixing...', transaction.id);
+            transaction.categories = categoryMap;
+          }
+          console.log(ref, transaction);
+          this.db
+            .doc(ref)
+            .update(transaction)
+            .then(data => console.log('SAVED:', data));
+        });
+      });
   }
 
   getTransaction(budgetId: string, transactionId: string): Observable<Transaction> {
@@ -185,13 +256,14 @@ export class TransactionService {
 
     request.subscribe(([category, account]) => {
       const transaction = new Transaction();
-      transaction.categories = [];
-      transaction.categories.push({
-        categoryId: 'STARTING_BALANCE',
-        categoryName: 'Starting balance',
-        in: 0,
-        out: 0
-      });
+
+      transaction.categories = {
+        STARTING_BALANCE: {
+          categoryName: 'Starting balance',
+          in: 0,
+          out: 0
+        }
+      };
       transaction.account = {
         accountId: accountId,
         accountName: account.name
@@ -213,11 +285,15 @@ export class TransactionService {
 
   calculateAmount(transaction: Transaction): number {
     let amount = 0;
-    transaction.categories.forEach(category => {
-      const amountIn = +category.in,
-        amountOut = +category.out;
-      amount = amount + amountIn - amountOut;
-    });
+
+    for (const key in transaction.categories) {
+      if (transaction.categories.hasOwnProperty(key)) {
+        const category = transaction.categories[key];
+        const amountIn = +category.in,
+          amountOut = +category.out;
+        amount = amount + amountIn - amountOut;
+      }
+    }
 
     return amount;
   }
@@ -249,15 +325,19 @@ export class TransactionService {
           );
 
           // after successfull response, we update the category budgets (could go to cloud functions)
-          transaction.categories.forEach(category => {
-            this.categoryService.updateCategoryBudget(
-              budgetId,
-              category.categoryId,
-              shortDate,
-              category.in,
-              category.out
-            );
-          });
+          for (const key in transaction.categories) {
+            if (transaction.categories.hasOwnProperty(key)) {
+              const category = transaction.categories[key];
+              this.categoryService.updateCategoryBudget(
+                budgetId,
+                key,
+                shortDate,
+                category.in,
+                category.out
+              );
+            }
+          }
+
           if (!transaction.transfer) {
             // after successfull response, we update the budget budgets (could go to cloud functions)
             this.budgetService.updateBudgetBalance(budgetId, transaction.date, transaction.amount);

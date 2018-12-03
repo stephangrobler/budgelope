@@ -1,9 +1,25 @@
 import { Category } from './category';
 import { Account } from './account';
 
-export class Transaction {
+export interface ITransaction {
+  categories: {
+    [s: string]: {
+      categoryName: string;
+      in: number;
+      out: number;
+    };
+  };
+}
+
+export class Transaction implements ITransaction {
   id?: string;
-  categories: { categoryId: string; categoryName: string; in: number; out: number }[]; // object with category id for keys
+  categories: {
+    [s: string]: {
+      categoryName: string;
+      in: number;
+      out: number;
+    };
+  }; // object with category id for keys
   categoryDisplayName: string;
   account: { accountId: string; accountName: string };
   accountDisplayName: string;
@@ -39,21 +55,20 @@ export class Transaction {
 
       if (transactionData.categories && transactionData.categories.length > 0) {
         const newCategories: {
-          categoryId: string;
-          categoryName: string;
-          in: number;
-          out: number;
-        }[] = [];
+          [s: string]: {
+            categoryName: string;
+            in: number;
+            out: number;
+          };
+        } = {};
         transactionData.categories.forEach(item => {
           // it should have an id specified for later use
           if (item.category && item.category.id) {
-            const newCategory = {
-              categoryId: item.category.id,
+            newCategories[item.category.id] = {
               categoryName: item.category.name,
               in: item.in,
               out: item.out
             };
-            newCategories.push(newCategory);
           }
         });
         this.categories = newCategories;
