@@ -280,9 +280,7 @@ describe('TransactionsComponent', () => {
       accountName: 'acc1Name'
     };
     transaction.accountDisplayName = transaction.account.accountName;
-    transaction.categories = [
-      { categoryId: 'cat2', categoryName: 'Transfer Out', in: 0, out: 500 }
-    ];
+    transaction.categories['cat2'] = { categoryName: 'Transfer Out', in: 0, out: 500 };
     transaction.amount = -500;
     transaction.out = -500;
 
@@ -318,7 +316,7 @@ describe('TransactionsComponent', () => {
       accountName: 'acc1Name'
     };
     transaction.accountDisplayName = transaction.account.accountName;
-    transaction.categories = [{ categoryId: 'cat1', categoryName: 'Transfer In', in: 500, out: 0 }];
+    transaction.categories['cat1'] = {categoryName: 'Transfer In', in: 500, out: 0 };
 
     transaction.amount = 500;
     transaction.in = 500;

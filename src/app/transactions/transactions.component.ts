@@ -49,9 +49,9 @@ export class TransactionsComponent implements OnInit {
         this.userId = user.uid;
         this.budgetId = profileRead.activeBudget;
         this.accountId = null;
-        this.transService.transactionsByCategory(this.budgetId);
         this.dataSource = new TransactionDataSource(this.transService, profileRead.activeBudget);
         this.route.paramMap.subscribe(params => {
+          console.log(params);
           if (params.get('accountId')) {
             this.accountId = params.get('accountId');
           }

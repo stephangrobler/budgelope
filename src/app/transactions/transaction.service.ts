@@ -90,7 +90,6 @@ export class TransactionService {
           actions.map(a => {
             const data = a.payload.doc.data() as any;
             const id = a.payload.doc.id;
-            console.log('Reading...', a.payload.doc.id, a.payload.doc.data());
             if (a.payload.doc.get('id') === null) {
               data.id = id;
             }
@@ -100,7 +99,8 @@ export class TransactionService {
         take(1)
       )
       .subscribe(transactions => {
-        console.log(JSON.stringify(transactions));
+        transactions = transactions.filter(transaction => transaction.categories['7LMKnFJv5Jdf6NEzAuL2'] !== undefined);
+        console.log((transactions));
       });
   }
 
