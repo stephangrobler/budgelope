@@ -25,6 +25,7 @@ export class TransactionsComponent implements OnInit {
   dataSource: TransactionDataSource;
   newTransaction: Transaction;
   showCleared = false;
+  showTransaction = false;
 
   selectedTransaction: Transaction;
 
