@@ -20,6 +20,7 @@ export class TransactionsComponent implements OnInit {
   userId: string;
   budgetId: string;
   accountId: string;
+  categoryId: string;
   displayedColumns = ['date', 'account', 'payee', 'category', 'out', 'in', 'cleared'];
   dataSource: TransactionDataSource;
   newTransaction: Transaction;
@@ -55,7 +56,10 @@ export class TransactionsComponent implements OnInit {
           if (params.get('accountId')) {
             this.accountId = params.get('accountId');
           }
-          this.dataSource.loadTransactions(this.accountId, this.showCleared);
+          if (params.get('categoryId')) {
+            this.categoryId = params.get('categoryId');
+          }
+          this.dataSource.loadTransactions(this.accountId, this.showCleared, this.categoryId);
         });
       });
     });
@@ -103,9 +107,17 @@ export class TransactionDataSource extends DataSource<any> {
     this.transactionsSubject.complete();
   }
 
-  loadTransactions(accountId: string, showCleared: boolean) {
+  loadTransactions(accountId: string, showCleared: boolean, categoryId?: string) {
+    if (categoryId) {
+      showCleared = true;
+    }
     this.transService.getTransactions(this.budgetId, accountId, showCleared)
-      .subscribe(transactions => this.transactionsSubject.next(transactions));
+      .subscribe(transactions => {
+        if (categoryId) {
+          transactions = transactions.filter(transaction => transaction.categories[categoryId] !== undefined);
+        }
+        this.transactionsSubject.next(transactions)
+      });
   }
 
 }
