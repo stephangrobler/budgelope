@@ -4,7 +4,7 @@ import { Observable, forkJoin, of } from 'rxjs';
 import { map, catchError, take } from 'rxjs/operators';
 import * as moment from 'moment';
 
-import { Transaction, TransactionTypes } from '../shared/transaction';
+import { ITransaction, Transaction, TransactionTypes } from '../shared/transaction';
 import { CategoryService } from '../categories/category.service';
 import { AccountService } from '../accounts/account.service';
 import { BudgetService } from '../budgets/budget.service';
@@ -35,7 +35,7 @@ export class TransactionService {
     budgetId: string,
     accountId?: string,
     cleared?: boolean
-  ): Observable<Transaction[]> {
+  ): Observable<ITransaction[]> {
     const transRef = '/budgets/' + budgetId + '/transactions';
     // should not display cleared transactions by default
     const collection = this.db.collection<Transaction>(transRef, ref => {

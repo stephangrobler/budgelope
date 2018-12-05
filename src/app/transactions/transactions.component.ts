@@ -38,10 +38,12 @@ export class TransactionsComponent implements OnInit {
     private db: AngularFirestore,
     private af: AngularFireAuth
   ) {
-
   }
 
   ngOnInit() {
+    // const ref = this.afs.collection('/budgets/LFfPXVPxxmL6Tthl4bcA/transactions').where('categories.7LMKnFJv5Jdf6NEzAuL2', '>', '');
+    // ref.get().then(transactions => console.log(transactions)).catch(reason => console.log('error', reason));
+
     this.af.authState.subscribe((user) => {
       if (!user) {
         return;

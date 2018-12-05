@@ -18,7 +18,7 @@
       
       </mat-card-content>
     </mat-card>
-    <mat-card>
+    <mat-card class="transaction-table">
       <mat-card-content>
         <mat-table #table [dataSource]="dataSource">
           <ng-container matColumnDef="date">
@@ -27,7 +27,7 @@
           </ng-container>
           <ng-container matColumnDef="payee">
             <mat-header-cell *matHeaderCellDef>Payee</mat-header-cell>
-            <mat-cell *matCellDef="let transaction">{{transaction.payee}}</mat-cell>
+            <mat-cell *matCellDef="let transaction" class="payee">{{transaction.payee}}</mat-cell>
           </ng-container>
           <ng-container matColumnDef="account">
             <mat-header-cell *matHeaderCellDef>Account</mat-header-cell>
