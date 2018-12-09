@@ -39,6 +39,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
   systemCategories: CategoryId[];
   selectedAccount: Account;
   transferBox = false;
+  savingInProgress = false;
 
   constructor(
     private userService: UserService,
@@ -190,6 +191,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
   }
 
   saveTransaction() {
+    this.savingInProgress = true;
     if (this.transactionId != null) {
       console.log('updating ', this.transactionId);
       this.update(this.transactionForm);
@@ -342,10 +344,11 @@ export class TransactionComponent implements OnInit, OnDestroy {
 
     this.transactionService.createTransaction(transaction, this.activeBudget.id).then(response => {
       const date = transaction.date;
-
+      
       this.transactionForm.reset();
       // set the date again and last used account
       this.transactionForm.get('date').setValue(date);
+      this.savingInProgress = false;
       this.openSnackBar('Created transaction successfully');
     });
   }
