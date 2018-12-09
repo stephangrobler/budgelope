@@ -190,6 +190,15 @@ export class TransactionComponent implements OnInit, OnDestroy {
     return (<FormArray>this.transactionForm.get('categories')).controls;
   }
 
+  onDelete() {
+    if (!this.transactionId) {
+      console.log('No id set for transaction');
+    }
+    this.transactionService.removeTransaction(this.activeBudget.id, this.transactionId).then(() => {
+      this.router.navigate(['app/transactions']);
+    });
+  }
+
   saveTransaction() {
     this.savingInProgress = true;
     if (this.transactionId != null) {
@@ -344,7 +353,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
 
     this.transactionService.createTransaction(transaction, this.activeBudget.id).then(response => {
       const date = transaction.date;
-      
+
       this.transactionForm.reset();
       // set the date again and last used account
       this.transactionForm.get('date').setValue(date);

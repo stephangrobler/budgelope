@@ -10,8 +10,6 @@ import { AccountService } from '../accounts/account.service';
 import { BudgetService } from '../budgets/budget.service';
 import { FirebaseApp } from '@angular/fire';
 
-
-
 @Injectable()
 export class TransactionService {
   transactions: Transaction[];
@@ -22,9 +20,7 @@ export class TransactionService {
     private categoryService: CategoryService,
     private accountService: AccountService,
     private budgetService: BudgetService
-  ) {
-
-  }
+  ) {}
 
   /**
    * Get all transactions with the id of the transactions
@@ -78,7 +74,6 @@ export class TransactionService {
     );
   }
 
-
   transactionsByCategory(budgetId: string): void {
     const transRef = 'budgets/' + budgetId + '/transactions';
     this.db
@@ -99,8 +94,10 @@ export class TransactionService {
         take(1)
       )
       .subscribe(transactions => {
-        transactions = transactions.filter(transaction => transaction.categories['7LMKnFJv5Jdf6NEzAuL2'] !== undefined);
-        console.log((transactions));
+        transactions = transactions.filter(
+          transaction => transaction.categories['7LMKnFJv5Jdf6NEzAuL2'] !== undefined
+        );
+        console.log(transactions);
       });
   }
 
@@ -153,6 +150,52 @@ export class TransactionService {
   getTransaction(budgetId: string, transactionId: string): Observable<Transaction> {
     const transRef = 'budgets/' + budgetId + '/transactions/' + transactionId;
     return this.db.doc<Transaction>(transRef).valueChanges();
+  }
+
+  removeTransaction(budgetId: string, transactionId: string) {
+    const docRef = 'budgets/' + budgetId + '/transactions/' + transactionId;
+    return new Promise((resolve, reject) => {
+      this.db
+      .doc<ITransaction>(docRef)
+      .valueChanges().pipe(take(1))
+      .subscribe(transaction => {
+        console.log(transaction);
+        // get the opposite amount value
+        const inverseAmount =
+          transaction.amount > 0 ? -Math.abs(transaction.amount) : Math.abs(transaction.amount);
+        const shortDate = moment(transaction.date).format('YYYYMM');
+        console.log('Inverse balance:', inverseAmount, transaction.amount);
+        // update account balance with the returned amount
+        this.accountService.updateAccountBalance(
+          transaction.account.accountId,
+          budgetId,
+          inverseAmount
+        );
+
+        // update the categories with the return values
+        for (const key in transaction.categories) {
+          if (transaction.categories.hasOwnProperty(key)) {
+            const category = transaction.categories[key];
+            this.categoryService.updateCategoryBudget(
+              budgetId,
+              key,
+              shortDate,
+              category.out,
+              category.in
+            );
+          }
+        }
+
+        // update the budget of the return values
+        this.budgetService.updateBudgetBalance(budgetId, transaction.date, inverseAmount);
+
+        this.db.doc(docRef).delete().then(() => {
+          resolve();
+        }, () => {
+          reject();
+        });
+      });
+    });
   }
 
   updateClearedStatus(budgetId: string, transaction: Transaction) {

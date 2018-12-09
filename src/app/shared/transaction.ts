@@ -2,6 +2,8 @@ import { Category } from './category';
 import { Account } from './account';
 
 export interface ITransaction {
+  account: {accountId: string, accountName: string},
+  amount: number;
   categories: {
     [s: string]: {
       categoryName: string;
@@ -9,6 +11,7 @@ export interface ITransaction {
       out: number;
     };
   };
+  date: Date;
 }
 
 export class Transaction implements ITransaction {

@@ -78,6 +78,9 @@
           <button mat-raised-button fxFlex="1 1 15%" color="warn" type="button" (click)="cancel()" [disabled]="savingInProgress || transactionForm.invalid">
             Cancel
           </button>
+          <button mat-raised-button fxFlex="1 1 15%" color="warn" type="button" (click)="onDelete()" [disabled]="savingInProgress || transactionForm.invalid">
+            Delete
+          </button>
 
         </mat-card-actions>
       </mat-card>

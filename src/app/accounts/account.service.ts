@@ -60,11 +60,11 @@ export class AccountService {
     const dbRef = 'budgets/' + budgetId + '/accounts/' + accountId;
     const docRef = this.db.doc(dbRef).ref;
 
-    this.fb.firestore().runTransaction(transaction => {
-      return transaction.get(docRef).then(
+    this.fb.firestore().runTransaction(dbTransaction => {
+      return dbTransaction.get(docRef).then(
         account => {
           const newBalance = Number(account.data().balance) + Number(amount);
-          transaction.update(docRef, { balance: newBalance });
+          dbTransaction.update(docRef, { balance: newBalance });
         },
         error => {
           console.log(
