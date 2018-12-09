@@ -35,6 +35,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Category } from '../../shared/category';
 import { Budget } from '../../shared/budget';
 import { Transaction } from '../../shared/transaction';
+import { reject } from 'q';
 
 describe('TransactionsComponent', () => {
   let transactionServiceStub;
@@ -68,10 +69,16 @@ describe('TransactionsComponent', () => {
       'getTransactions',
       'getTransaction',
       'createTransaction',
+      'removeTransaction',
       'calculateAmount'
     ]);
     transactionServiceStub.getTransactions.and.returnValue(of([]));
     transactionServiceStub.createTransaction.and.returnValue({
+      then: (success, failure) => {
+        success();
+      }
+    });
+    transactionServiceStub.removeTransaction.and.returnValue({
       then: (success, failure) => {
         success();
       }
@@ -515,5 +522,26 @@ describe('TransactionsComponent', () => {
       jasmine.objectContaining({ amount: 500, in: 500 }),
       jasmine.any(String)
     );
+  });
+
+  it('should delete a transaction', () => {
+    // arrange
+    activatedRouteStub.setParamMap({});
+    transactionServiceStub.calculateAmount.and.returnValue(500);
+    const fixture = TestBed.createComponent(TransactionComponent);
+    fixture.detectChanges();
+    const comp = fixture.componentInstance;
+    const form = fixture.componentInstance.transactionForm;
+    comp.transactionId = '12345';
+    form.get('account').setValue({ id: 'acc1', name: 'acc1Name' });
+    form
+      .get('categories')
+      .setValue([{ category: { id: 'cat1', name: 'cat1Name' }, in: 0, out: 500 }]);
+
+    // action
+    comp.onDelete();
+
+    // assert
+    expect(transactionServiceStub.removeTransaction).toHaveBeenCalledWith('54321', '12345' );
   });
 });

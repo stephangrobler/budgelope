@@ -31,7 +31,8 @@ describe('Transaction Service to be thing', () => {
 
     dbMock = jasmine.createSpyObj('AngularFirestore', ['collection', 'doc']);
     dbMock.doc.and.returnValue({
-      valueChanges: () => {}
+      valueChanges: () => {},
+      delete: jasmine.createSpy('delete')
     });
     dbMock.collection.and.returnValue({
       doc: function() {
@@ -174,15 +175,58 @@ describe('Transaction Service to be thing', () => {
   });
 
   it('should call the the firestore method on the firebase service', () => {
-
     service.updateTransaction('12345', transaction);
     expect(fbMock.firestore).toHaveBeenCalled();
   });
 
   it('should call get on the transaction', () => {
-
     service.updateTransaction('12345', transaction);
     expect(fbMock.firestore).toHaveBeenCalled();
   });
 
+  it('should remove a transaction from the store', (done: DoneFn) => {
+    // arrange
+    dbMock.doc.and.returnValue({
+      valueChanges: () =>
+        of({
+          account: {
+            accountId: 'ACC_001'
+          },
+          amount: -500,
+          categories: {
+            TEST_CAT1: { in: 0, out: 500 }
+          },
+          date: '2018-12-01'
+        }),
+      delete: () => {
+        return {
+          then: success => {
+            success();
+          }
+        };
+      }
+    });
+    // action
+    service.removeTransaction('12345', 'REMOVE_ME').then(() => {
+      // assert
+      expect(budgetServiceMock.updateBudgetBalance).toHaveBeenCalledWith(
+        '12345',
+        '2018-12-01',
+        500
+      );
+      expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledWith(
+        'ACC_001',
+        '12345',
+        500
+      );
+      expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledWith(
+        '12345',
+        'TEST_CAT1',
+        '201812',
+        500,
+        0
+      );
+      done();
+    });
+  });
 });

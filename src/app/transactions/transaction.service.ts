@@ -159,12 +159,10 @@ export class TransactionService {
       .doc<ITransaction>(docRef)
       .valueChanges().pipe(take(1))
       .subscribe(transaction => {
-        console.log(transaction);
         // get the opposite amount value
         const inverseAmount =
           transaction.amount > 0 ? -Math.abs(transaction.amount) : Math.abs(transaction.amount);
         const shortDate = moment(transaction.date).format('YYYYMM');
-        console.log('Inverse balance:', inverseAmount, transaction.amount);
         // update account balance with the returned amount
         this.accountService.updateAccountBalance(
           transaction.account.accountId,
