@@ -15,6 +15,9 @@
           >
         Show Cleared
       </mat-slide-toggle>
+      <div *ngIf="account">
+        Filtered on Account: <b>{{account.name}}</b> : Cleared: <b>{{ account.clearedBalance}}</b> Uncleared: <b>{{account.clearedBalance - account.balance}} </b>= Working: <b>{{account.balance}}</b>
+      </div>
       
       </mat-card-content>
     </mat-card>

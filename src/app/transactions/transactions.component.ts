@@ -9,6 +9,7 @@ import { TransactionService } from './transaction.service';
 import { BudgetService } from '../budgets/budget.service';
 import { UserService } from '../shared/user.service';
 import { BehaviorSubject } from 'rxjs';
+import { IAccount } from 'app/shared/account';
 
 @Component({
   templateUrl: 'transactions.component.html',
@@ -20,6 +21,7 @@ export class TransactionsComponent implements OnInit {
   userId: string;
   budgetId: string;
   accountId: string;
+  account: IAccount;
   categoryId: string;
   displayedColumns = ['date', 'account', 'payee', 'category', 'out', 'in', 'cleared'];
   dataSource: TransactionDataSource;
@@ -58,6 +60,9 @@ export class TransactionsComponent implements OnInit {
           console.log(params);
           if (params.get('accountId')) {
             this.accountId = params.get('accountId');
+            this.db.doc<IAccount>('budgets/' + this.budgetId + '/accounts/' + this.accountId).valueChanges().subscribe(account => {
+              this.account = account;
+            })
           }
           if (params.get('categoryId')) {
             this.categoryId = params.get('categoryId');

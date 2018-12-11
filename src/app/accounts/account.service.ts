@@ -51,7 +51,6 @@ export class AccountService {
   }
 
   updateClearedBalance(budgetId: string, accountId: string, clearedAmount: number): void {
-    
     const dbRef = 'budgets/' + budgetId + '/accounts/' + accountId;
     const docRef = this.db.doc<IAccount>(dbRef).ref;
 

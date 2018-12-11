@@ -57,7 +57,6 @@ export class TransactionComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.initForm();
 
-
     const profileSubscription = this.userService.getProfile$().subscribe(profile => {
       const budgetSubscription = this.budgetService.getActiveBudget$().subscribe(budget => {
         this.activeBudget = budget;
@@ -77,7 +76,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
         .subscribe(categories => {
           this.systemCategories = categories.filter(category => category.type === 'system');
           this.categories = categories.filter(category => {
-            return ((category.parentId || category.parent) !== '') && category.type !== 'system'
+            return (category.parentId || category.parent) !== '' && category.type !== 'system';
           });
           this.route.paramMap.subscribe(params => {
             if (!params.get('id')) {
@@ -128,7 +127,6 @@ export class TransactionComponent implements OnInit, OnDestroy {
         this.transactionForm.get('date').setValue(transaction.date);
         this.transactionForm.get('payee').setValue(transaction.payee);
         if (transaction.categories) {
-
           for (const key in transaction.categories) {
             if (transaction.categories.hasOwnProperty(key)) {
               const item = transaction.categories[key];
@@ -144,7 +142,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
               });
               (<FormArray>this.transactionForm.get('categories')).push(categoryGroup);
             }
-          };
+          }
         }
       });
     this.subscriptions.add(subscription);
@@ -164,8 +162,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
     return transaction;
   }
 
-  onSubmit() {
-  }
+  onSubmit() {}
 
   onAddCategory() {
     const categoryGroup = new FormGroup({
@@ -191,12 +188,15 @@ export class TransactionComponent implements OnInit, OnDestroy {
   }
 
   onDelete() {
-    if (!this.transactionId) {
-      console.log('No id set for transaction');
+    // TODO: refactor this to a dialog box
+    if (confirm('Are you sure you want to delete this transaction?')) {
+      if (!this.transactionId) {
+        console.log('No id set for transaction');
+      }
+      this.transactionService.removeTransaction(this.activeBudget.id, this.transactionId).then(() => {
+        this.router.navigate(['app/transactions']);
+      });
     }
-    this.transactionService.removeTransaction(this.activeBudget.id, this.transactionId).then(() => {
-      this.router.navigate(['app/transactions']);
-    });
   }
 
   saveTransaction() {
@@ -298,10 +298,10 @@ export class TransactionComponent implements OnInit, OnDestroy {
     fromTransaction.accountDisplayName = fromTransaction.account.accountName;
 
     fromTransaction.categories[fromCategory.id] = {
-        categoryName: fromCategory.name,
-        in: 0,
-        out: fromTransaction.transferAmount
-      };
+      categoryName: fromCategory.name,
+      in: 0,
+      out: fromTransaction.transferAmount
+    };
     fromTransaction.payee = toAccount.name;
     fromTransaction.categoryDisplayName = 'Transfer to ' + toAccount.name;
     fromTransaction.amount = 0 - fromTransaction.transferAmount;
