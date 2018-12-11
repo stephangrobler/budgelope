@@ -11,7 +11,12 @@ export interface ITransaction {
       out: number;
     };
   };
+  cleared: boolean;
   date: Date;
+}
+
+export interface ITransactionID extends ITransaction {
+  id: string;
 }
 
 export class Transaction implements ITransaction {

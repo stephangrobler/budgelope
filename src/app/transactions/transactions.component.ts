@@ -4,7 +4,7 @@ import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/fire
 import { AngularFireAuth } from '@angular/fire/auth';
 import { MatTableDataSource } from '@angular/material';
 import { DataSource } from '@angular/cdk/collections';
-import { Transaction } from '../shared/transaction';
+import { Transaction, ITransactionID } from '../shared/transaction';
 import { TransactionService } from './transaction.service';
 import { BudgetService } from '../budgets/budget.service';
 import { UserService } from '../shared/user.service';
@@ -83,7 +83,7 @@ export class TransactionsComponent implements OnInit {
     this.transService.transformCategoriesToMap(this.budgetId);
   }
 
-  toggleCleared(transaction: Transaction) {
+  toggleCleared(transaction: ITransactionID) {
     transaction.cleared = !transaction.cleared;
     this.transService.updateClearedStatus(this.budgetId, transaction);
   }

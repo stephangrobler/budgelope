@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Account } from '../shared/account';
+import { Account, AccountType, IAccount } from '../shared/account';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { FirebaseApp } from '@angular/fire';
 
@@ -12,18 +12,18 @@ export class AccountService {
     private fb: FirebaseApp
   ) {}
 
-  getAccounts(budgetId: string): Observable<Account[]> {
+  getAccounts(budgetId: string): Observable<IAccount[]> {
     if (!budgetId) {
       throw new Error('Budget ID must be set to retrieve accounts. BudgetID: ' + budgetId);
     }
 
     return this.db
-      .collection<Account>('budgets/' + budgetId + '/accounts')
+      .collection<IAccount>('budgets/' + budgetId + '/accounts')
       .snapshotChanges()
       .pipe(
         map(actions =>
           actions.map(a => {
-            const data = a.payload.doc.data() as Account;
+            const data = a.payload.doc.data() as IAccount;
             const id = a.payload.doc.id;
             return { id, ...data };
           })
@@ -33,20 +33,46 @@ export class AccountService {
 
   getAccount(accountId: string, budgetId: string) {
     const ref = 'budgets/' + budgetId + '/accounts/' + accountId;
-    return this.db.doc<Account>(ref).valueChanges();
+    return this.db.doc<IAccount>(ref).valueChanges();
   }
 
-  createAccount(budgetId: string, account: Account): Promise<any> {
-    const accountStore = this.db.collection<Account>('budgets/' + budgetId + '/accounts');
+  createAccount(budgetId: string, account: IAccount): Promise<any> {
+    const accountStore = this.db.collection<IAccount>('budgets/' + budgetId + '/accounts');
     // create the account with 0 balance as starting balance is created on the component where
     // the method call is made
     const accountObj = {
       name: account.name,
       balance: 0,
-      clearedBalance: 0
+      clearedBalance: 0,
+      type: AccountType.CHEQUE
     };
 
     return accountStore.add(accountObj);
+  }
+
+  updateClearedBalance(budgetId: string, accountId: string, clearedAmount: number): void {
+    
+    const dbRef = 'budgets/' + budgetId + '/accounts/' + accountId;
+    const docRef = this.db.doc<IAccount>(dbRef).ref;
+
+    this.fb.firestore().runTransaction(dbTransaction => {
+      return dbTransaction.get(docRef).then(
+        account => {
+          const newBalance = account.data().clearedBalance + clearedAmount;
+          dbTransaction.update(docRef, { clearedBalance: newBalance });
+        },
+        error => {
+          console.log(
+            'There was an error updating the cleared balance of the account: ' +
+              accountId +
+              ' - ' +
+              budgetId +
+              ' - ',
+            error
+          );
+        }
+      );
+    });
   }
 
   /**

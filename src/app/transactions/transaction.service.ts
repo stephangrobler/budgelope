@@ -4,7 +4,7 @@ import { Observable, forkJoin, of } from 'rxjs';
 import { map, catchError, take } from 'rxjs/operators';
 import * as moment from 'moment';
 
-import { ITransaction, Transaction, TransactionTypes } from '../shared/transaction';
+import { ITransaction, Transaction, TransactionTypes, ITransactionID } from '../shared/transaction';
 import { CategoryService } from '../categories/category.service';
 import { AccountService } from '../accounts/account.service';
 import { BudgetService } from '../budgets/budget.service';
@@ -31,10 +31,10 @@ export class TransactionService {
     budgetId: string,
     accountId?: string,
     cleared?: boolean
-  ): Observable<ITransaction[]> {
+  ): Observable<ITransactionID[]> {
     const transRef = '/budgets/' + budgetId + '/transactions';
     // should not display cleared transactions by default
-    const collection = this.db.collection<Transaction>(transRef, ref => {
+    const collection = this.db.collection<ITransactionID>(transRef, ref => {
       let query: firebase.firestore.Query = ref;
       if (!cleared) {
         query = query.where('cleared', '==', false);
@@ -49,7 +49,7 @@ export class TransactionService {
     return collection.snapshotChanges().pipe(
       map(actions =>
         actions.map(a => {
-          const data = a.payload.doc.data() as Transaction;
+          const data = a.payload.doc.data() as ITransactionID;
           const id = a.payload.doc.id;
           // convert timestamp object from firebase to date object if object
           const dateObj = a.payload.doc.get('date');
@@ -57,14 +57,6 @@ export class TransactionService {
             data.date = new Date(dateObj);
           } else if (typeof dateObj === 'object') {
             data.date = dateObj.toDate();
-          }
-
-          data.account = {
-            accountId: data['accountId'],
-            accountName: data['accountName']
-          };
-          if (data['accountName']) {
-            data.accountDisplayName = data['accountName'];
           }
 
           data.id = id;
@@ -97,7 +89,6 @@ export class TransactionService {
         transactions = transactions.filter(
           transaction => transaction.categories['7LMKnFJv5Jdf6NEzAuL2'] !== undefined
         );
-        console.log(transactions);
       });
   }
 
@@ -196,10 +187,16 @@ export class TransactionService {
     });
   }
 
-  updateClearedStatus(budgetId: string, transaction: Transaction) {
+  updateClearedStatus(budgetId: string, transaction: ITransactionID) {
     this.db
       .doc('budgets/' + budgetId + '/transactions/' + transaction.id)
       .update({ cleared: transaction.cleared });
+    if (!transaction.cleared) {
+      transaction.amount = transaction.amount > 0 ? -Math.abs(transaction.amount) : Math.abs(transaction.amount);
+    }
+    this.accountService.updateClearedBalance(
+      budgetId, transaction.account.accountId, transaction.amount
+    );
   }
 
   updateTransaction(budgetId: string, newTransaction: Transaction) {
