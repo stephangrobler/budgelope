@@ -21,7 +21,7 @@
             </mat-form-field>
 
             <mat-form-field fxFlex="60" *ngIf="!transferBox" fxFlex.xs="100">
-              <input matInput placeholder="Payee" value="" type="text" name="payee" formControlName="payee" required>
+              <input matInput placeholder="Payee" value="" type="text" name="payee" formControlName="payee">
             </mat-form-field>
             <!-- transfer fields -->
             <mat-form-field fxFlex="60" *ngIf="transferBox" fxFlex.xs="100">
@@ -42,7 +42,7 @@
           <div formArrayName="categories" *ngIf="!transferBox">
             <div fxLayout="row" fxLayoutGap="10px" fxFlexFill *ngFor="let categoryControl of getControls(); let i = index" [formGroupName]="i">
               <mat-form-field fxFlex="50">
-                <mat-select placeholder="Category" required formControlName="category">
+                <mat-select placeholder="Category" formControlName="category">
                   <mat-option>--</mat-option>
                   <mat-option *ngFor="let category of categories" [value]="category">
                     {{ category.name }}
@@ -83,6 +83,7 @@
           </button>
 
         </mat-card-actions>
+        
       </mat-card>
     </form>
   </div>

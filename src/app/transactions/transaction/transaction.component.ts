@@ -103,12 +103,13 @@ export class TransactionComponent implements OnInit, OnDestroy {
       transferAccount: new FormControl(null),
       transferAmount: new FormControl(null),
       date: new FormControl(date, Validators.required),
-      payee: new FormControl(null, Validators.required),
+      payee: new FormControl(null),
       cleared: new FormControl(false),
       transfer: new FormControl(false),
       categories: new FormArray([])
     });
     this.onAddCategory();
+    console.log('transactionForm', this.transactionForm);
   }
 
   loadTransaction(transactionId: string, budgetId: string) {
@@ -166,7 +167,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
 
   onAddCategory() {
     const categoryGroup = new FormGroup({
-      category: new FormControl(null, Validators.required),
+      category: new FormControl(null),
       in: new FormControl(null),
       out: new FormControl(null)
     });
