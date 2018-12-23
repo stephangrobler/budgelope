@@ -15,8 +15,14 @@
           >
         Show Cleared
       </mat-slide-toggle>
+      <button mat-button (click)="onMatchTransactions()">
+        <mat-icon>home</mat-icon>
+      </button>
       <div *ngIf="account">
-        Filtered on Account: <b>{{account.name}}</b> : Cleared: <b>{{ account.clearedBalance}}</b> Uncleared: <b>{{account.clearedBalance - account.balance}} </b>= Working: <b>{{account.balance}}</b>
+        Filtered on Account: <b>{{account.name}}</b> : 
+        Cleared: <b>{{ account.clearedBalance | currency: 'R'}}</b> 
+        Uncleared: <b>{{account.clearedBalance - account.balance | currency: 'R'}}           
+        </b>= Working: <b>{{account.balance | currency: 'R'}}</b>
       </div>
       
       </mat-card-content>

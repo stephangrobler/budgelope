@@ -104,6 +104,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
       transferAmount: new FormControl(null),
       date: new FormControl(date, Validators.required),
       payee: new FormControl(null),
+      memo: new FormControl(null),
       cleared: new FormControl(false),
       transfer: new FormControl(false),
       categories: new FormArray([])
@@ -127,6 +128,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
         this.transactionForm.get('account').setValue(selectedAccount);
         this.transactionForm.get('date').setValue(transaction.date);
         this.transactionForm.get('payee').setValue(transaction.payee);
+        this.transactionForm.get('memo').setValue(transaction.memo);
         if (transaction.categories) {
           for (const key in transaction.categories) {
             if (transaction.categories.hasOwnProperty(key)) {

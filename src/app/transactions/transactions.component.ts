@@ -88,6 +88,10 @@ export class TransactionsComponent implements OnInit {
     this.transService.transformCategoriesToMap(this.budgetId);
   }
 
+  onMatchTransactions() {
+    this.transService.matchTransactions(this.budgetId);
+  }
+
   toggleCleared(transaction: ITransactionID) {
     transaction.cleared = !transaction.cleared;
     this.transService.updateClearedStatus(this.budgetId, transaction);

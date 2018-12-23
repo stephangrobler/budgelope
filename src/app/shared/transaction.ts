@@ -13,10 +13,16 @@ export interface ITransaction {
   };
   cleared: boolean;
   date: Date;
+  memo: string;
+  type: string;
 }
 
 export interface ITransactionID extends ITransaction {
   id: string;
+  accountDisplayName: string;
+  categoryDisplayName: string;
+  in: number;
+  out: number;
 }
 
 export class Transaction implements ITransaction {
@@ -29,7 +35,7 @@ export class Transaction implements ITransaction {
     };
   }; // object with category id for keys
   categoryDisplayName: string;
-  account: { accountId: string; accountName: string };
+  account: { accountId: string; accountName: string } = {accountId: '', accountName: ''};
   accountDisplayName: string;
   transferAccount: { accountId: string; accountName: string } = null;
   transferAccountDisplayName: string = null;
@@ -40,6 +46,7 @@ export class Transaction implements ITransaction {
   in: number;
   out: number;
   date: Date;
+  memo = '';
   type: string; // income or expense
   cleared: boolean;
   transfer = false;
@@ -84,6 +91,7 @@ export class Transaction implements ITransaction {
       if (transactionData.transferAccount) {
         this.transferAccount = transactionData.transferAccount;
       }
+
       this.transferAmount = transactionData.transferAmount ? transactionData.transferAmount : 0;
       this.transfer = transactionData.transfer ? transactionData.transfer : false;
       this.payeeId = transactionData.payeeId ? transactionData.payeeId : null;

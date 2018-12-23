@@ -3,6 +3,18 @@
 .header {
   background: mat-color($candy-app-accent);
   color: mat-contrast($candy-app-accent, 500) !important;
+  a {
+    color: mat-contrast($candy-app-primary, 500) !important;
+    text-decoration: none;
+  }
+}
+
+.category {
+  border-bottom: 1px solid mat-color($candy-app-accent);
+  a {
+    color: mat-contrast($candy-app-accent, 500) !important;
+    text-decoration: none;
+  }
 }
 
 .handle {

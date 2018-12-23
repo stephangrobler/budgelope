@@ -58,6 +58,18 @@ export class TransactionService {
           } else if (typeof dateObj === 'object') {
             data.date = dateObj.toDate();
           }
+          data.accountDisplayName = data.account.accountName;
+          
+          for (const prop in data.categories) {
+            if (data.categories.hasOwnProperty(prop)) {
+              data.categoryDisplayName = data.categories[prop].categoryName;
+            }
+          }
+          if (data.type === TransactionTypes.INCOME) {
+            data.in = data.amount;
+          } else {
+            data.out = data.amount;
+          }
 
           data.id = id;
           return { id, ...data };
@@ -90,6 +102,91 @@ export class TransactionService {
           transaction => transaction.categories['7LMKnFJv5Jdf6NEzAuL2'] !== undefined
         );
       });
+  }
+
+  matchTransactions(budgetId: string) {
+    const transRef = 'budgets/' + budgetId + '/transactions';
+    const importedTransRef = 'budgets/' + budgetId + '/imported_transactions';
+
+    const tSnapshots = this.db.collection(
+      transRef ).snapshotChanges().pipe(
+      map(actions =>
+          actions.map(a => {
+            const data = a.payload.doc.data() as any;
+            const id = a.payload.doc.id;
+            if (a.payload.doc.get('id') === null) {
+              data.id = id;
+            }
+            return { id, ...data };
+          })
+      ),
+      take(1),
+    );
+    const itSnapshots = this.db.collection(importedTransRef).snapshotChanges().pipe(
+      map(actions =>
+          actions.map(a => {
+            const data = a.payload.doc.data() as any;
+            const id = a.payload.doc.id;
+            if (a.payload.doc.get('id') === null) {
+              data.id = id;
+            }
+            return { id, ...data };
+          })
+      ),
+      take(1)
+    );
+
+    forkJoin(
+      tSnapshots, itSnapshots
+    )
+    .subscribe((val) => {
+      const transactions = val[0];
+      const imported = val[1];
+      console.log('Transactions', val[0]);
+      for (let i = 0; i < transactions.length; i++) {
+        const curTrans = transactions[i];
+        for (let j = 0; j < imported.length; j++) {
+          const importedTrans = imported[j];
+          if (curTrans.amount === importedTrans.trnamt) {
+            console.log('Matched: ', curTrans, importedTrans);
+            imported.splice(j, 1);
+            j--;
+            break;
+          }
+        }
+      }
+      // add all transactions not matched
+      if (imported.length > 0) {
+
+        imported.forEach((transVal) => {
+          const transaction = new Transaction();
+          transaction.account.accountId = 'p91amjTtkhXg7xzEnyqa';
+          transaction.account.accountName = 'Stephan Checking';
+
+          transaction.amount = transVal.trnamt;
+          transaction.date = moment(transVal.dtposted).toDate();
+          transaction.memo = transVal.memo;
+          transaction.type = transVal.trntype === 'DEBIT' ? TransactionTypes.EXPENSE : TransactionTypes.INCOME;
+          transaction.cleared = true;
+
+          let inAmount = 0, outAmount = 0;
+          if (transaction.type === TransactionTypes.INCOME) {
+            inAmount = transaction.amount;
+          } else {
+            outAmount = transaction.amount;
+          }
+          transaction.categories = {
+            'UNCATEGORIZED': {
+              categoryName: 'Uncategorized',
+              in: inAmount,
+              out: outAmount
+            }
+          }
+          // this.createTransaction(transaction, budgetId);
+        });
+      }
+      console.log('After matching: ', imported);
+    });
   }
 
   transformCategoriesToMap(budgetId: string): void {
@@ -361,7 +458,7 @@ export class TransactionService {
             budgetId,
             transaction.amount
           );
-
+          console.log('account update sent');
           // after successfull response, we update the category budgets (could go to cloud functions)
           for (const key in transaction.categories) {
             if (transaction.categories.hasOwnProperty(key)) {
@@ -375,8 +472,10 @@ export class TransactionService {
               );
             }
           }
+          console.log('categories update sent');
 
           if (!transaction.transfer) {
+            console.log(budgetId, transaction.date, transaction.amount);
             // after successfull response, we update the budget budgets (could go to cloud functions)
             this.budgetService.updateBudgetBalance(budgetId, transaction.date, transaction.amount);
           }

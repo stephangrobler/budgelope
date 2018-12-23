@@ -72,7 +72,7 @@
       <mat-list>
         <div [dragula]='"order-bag"' [dragulaModel]='sortList'>
           <div *ngFor="let item of sortList; trackBy: trackCategory">
-            <mat-list-item *ngIf="item.type != 'income'" [ngClass]="{'header': checkIsHeader(item)}">
+            <mat-list-item *ngIf="item.type != 'income'" [ngClass]=" checkIsHeader(item) ? 'header': 'category'">
               <div fxLayout="row" fxLayoutGap="10px" fxFlexFill fxLayoutAlign="center center">
                 <div fxFlex="55" fxFlex.xs="70" fxFlexAlign="center">
                   <mat-icon color="primary" class="handle" fxHide.xs>drag_indicator</mat-icon>
