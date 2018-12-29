@@ -59,7 +59,6 @@ export class TransactionService {
             data.date = dateObj.toDate();
           }
           data.accountDisplayName = data.account.accountName;
-          
           for (const prop in data.categories) {
             if (data.categories.hasOwnProperty(prop)) {
               data.categoryDisplayName = data.categories[prop].categoryName;
@@ -68,7 +67,8 @@ export class TransactionService {
           if (data.type === TransactionTypes.INCOME) {
             data.in = data.amount;
           } else {
-            data.out = data.amount;
+            // display here needs to be a positive number
+            data.out = Math.abs(data.amount);
           }
 
           data.id = id;
@@ -108,8 +108,7 @@ export class TransactionService {
     const transRef = 'budgets/' + budgetId + '/transactions';
     const importedTransRef = 'budgets/' + budgetId + '/imported_transactions';
 
-    const tSnapshots = this.db.collection(
-      transRef ).snapshotChanges().pipe(
+    const tSnapshots = this.db.collection( transRef ).snapshotChanges().pipe(
       map(actions =>
           actions.map(a => {
             const data = a.payload.doc.data() as any;
@@ -235,9 +234,24 @@ export class TransactionService {
       });
   }
 
-  getTransaction(budgetId: string, transactionId: string): Observable<Transaction> {
+  getTransaction(budgetId: string, transactionId: string): Observable<ITransaction> {
     const transRef = 'budgets/' + budgetId + '/transactions/' + transactionId;
-    return this.db.doc<Transaction>(transRef).valueChanges();
+    return this.db.doc<ITransaction>(transRef).valueChanges().pipe(
+      map((transaction: ITransactionID) => {
+          if (typeof transaction.date === 'string') {
+            transaction.date = new Date(transaction.date);
+          } else if (typeof transaction.date === 'object') {
+            // transaction.date = transaction.date.toDate();
+          }
+          transaction.accountDisplayName = transaction.account.accountName;
+          for (const prop in transaction.categories) {
+            if (transaction.categories.hasOwnProperty(prop)) {
+              transaction.categoryDisplayName = transaction.categories[prop].categoryName;
+            }
+          }
+        return transaction;
+      })
+    );
   }
 
   removeTransaction(budgetId: string, transactionId: string) {
@@ -298,7 +312,7 @@ export class TransactionService {
 
   updateTransaction(budgetId: string, newTransaction: Transaction) {
     const docRef = this.db.doc('budgets/' + budgetId + '/transactions/' + newTransaction.id).ref;
-    this.fb.firestore().runTransaction(dbTransaction => {
+    return this.fb.firestore().runTransaction(dbTransaction => {
       return dbTransaction.get(docRef).then(
         readTransaction => {
           const currentTransaction = readTransaction.data();

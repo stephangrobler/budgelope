@@ -67,6 +67,9 @@ export class TransactionsComponent implements OnInit {
           if (params.get('categoryId')) {
             this.categoryId = params.get('categoryId');
           }
+          if (params.get('id')) {
+            this.showTransaction = true;
+          }
           this.dataSource.loadTransactions(this.accountId, this.showCleared, this.categoryId);
         });
       });

@@ -14,6 +14,7 @@ export interface ITransaction {
   cleared: boolean;
   date: Date;
   memo: string;
+  payee: string;
   type: string;
 }
 
@@ -50,10 +51,12 @@ export class Transaction implements ITransaction {
   type: string; // income or expense
   cleared: boolean;
   transfer = false;
+  matched = false;
+
 
   constructor(transactionData?: any) {
     if (transactionData) {
-      this.id = transactionData.id ? transactionData.id : null;
+
       if (transactionData.account) {
         this.account = {
           accountId: transactionData.account.id,
@@ -91,7 +94,7 @@ export class Transaction implements ITransaction {
       if (transactionData.transferAccount) {
         this.transferAccount = transactionData.transferAccount;
       }
-
+      this.memo = transactionData.memo ? transactionData.memo : '';
       this.transferAmount = transactionData.transferAmount ? transactionData.transferAmount : 0;
       this.transfer = transactionData.transfer ? transactionData.transfer : false;
       this.payeeId = transactionData.payeeId ? transactionData.payeeId : null;
