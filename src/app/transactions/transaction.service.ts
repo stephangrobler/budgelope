@@ -108,8 +108,11 @@ export class TransactionService {
     const transRef = 'budgets/' + budgetId + '/transactions';
     const importedTransRef = 'budgets/' + budgetId + '/imported_transactions';
 
-    const tSnapshots = this.db.collection( transRef ).snapshotChanges().pipe(
-      map(actions =>
+    const tSnapshots = this.db
+      .collection(transRef)
+      .snapshotChanges()
+      .pipe(
+        map(actions =>
           actions.map(a => {
             const data = a.payload.doc.data() as any;
             const id = a.payload.doc.id;
@@ -118,11 +121,14 @@ export class TransactionService {
             }
             return { id, ...data };
           })
-      ),
-      take(1),
-    );
-    const itSnapshots = this.db.collection(importedTransRef).snapshotChanges().pipe(
-      map(actions =>
+        ),
+        take(1)
+      );
+    const itSnapshots = this.db
+      .collection(importedTransRef)
+      .snapshotChanges()
+      .pipe(
+        map(actions =>
           actions.map(a => {
             const data = a.payload.doc.data() as any;
             const id = a.payload.doc.id;
@@ -131,14 +137,11 @@ export class TransactionService {
             }
             return { id, ...data };
           })
-      ),
-      take(1)
-    );
+        ),
+        take(1)
+      );
 
-    forkJoin(
-      tSnapshots, itSnapshots
-    )
-    .subscribe((val) => {
+    forkJoin(tSnapshots, itSnapshots).subscribe(val => {
       const transactions = val[0];
       const imported = val[1];
       console.log('Transactions', val[0]);
@@ -156,8 +159,7 @@ export class TransactionService {
       }
       // add all transactions not matched
       if (imported.length > 0) {
-
-        imported.forEach((transVal) => {
+        imported.forEach(transVal => {
           const transaction = new Transaction();
           transaction.account.accountId = 'p91amjTtkhXg7xzEnyqa';
           transaction.account.accountName = 'Stephan Checking';
@@ -165,22 +167,24 @@ export class TransactionService {
           transaction.amount = transVal.trnamt;
           transaction.date = moment(transVal.dtposted).toDate();
           transaction.memo = transVal.memo;
-          transaction.type = transVal.trntype === 'DEBIT' ? TransactionTypes.EXPENSE : TransactionTypes.INCOME;
+          transaction.type =
+            transVal.trntype === 'DEBIT' ? TransactionTypes.EXPENSE : TransactionTypes.INCOME;
           transaction.cleared = true;
 
-          let inAmount = 0, outAmount = 0;
+          let inAmount = 0,
+            outAmount = 0;
           if (transaction.type === TransactionTypes.INCOME) {
             inAmount = transaction.amount;
           } else {
             outAmount = transaction.amount;
           }
           transaction.categories = {
-            'UNCATEGORIZED': {
+            UNCATEGORIZED: {
               categoryName: 'Uncategorized',
               in: inAmount,
               out: outAmount
             }
-          }
+          };
           // this.createTransaction(transaction, budgetId);
         });
       }
@@ -236,8 +240,11 @@ export class TransactionService {
 
   getTransaction(budgetId: string, transactionId: string): Observable<ITransaction> {
     const transRef = 'budgets/' + budgetId + '/transactions/' + transactionId;
-    return this.db.doc<ITransaction>(transRef).valueChanges().pipe(
-      map((transaction: ITransactionID) => {
+    return this.db
+      .doc<ITransaction>(transRef)
+      .valueChanges()
+      .pipe(
+        map((transaction: ITransactionID) => {
           if (typeof transaction.date === 'string') {
             transaction.date = new Date(transaction.date);
           } else if (typeof transaction.date === 'object') {
@@ -249,52 +256,59 @@ export class TransactionService {
               transaction.categoryDisplayName = transaction.categories[prop].categoryName;
             }
           }
-        return transaction;
-      })
-    );
+          return transaction;
+        })
+      );
   }
 
   removeTransaction(budgetId: string, transactionId: string) {
     const docRef = 'budgets/' + budgetId + '/transactions/' + transactionId;
     return new Promise((resolve, reject) => {
       this.db
-      .doc<ITransaction>(docRef)
-      .valueChanges().pipe(take(1))
-      .subscribe(transaction => {
-        // get the opposite amount value
-        const inverseAmount =
-          transaction.amount > 0 ? -Math.abs(transaction.amount) : Math.abs(transaction.amount);
-        const shortDate = moment(transaction.date).format('YYYYMM');
-        // update account balance with the returned amount
-        this.accountService.updateAccountBalance(
-          transaction.account.accountId,
-          budgetId,
-          inverseAmount
-        );
+        .doc<ITransaction>(docRef)
+        .valueChanges()
+        .pipe(take(1))
+        .subscribe(transaction => {
+          // get the opposite amount value
+          const inverseAmount =
+            transaction.amount > 0 ? -Math.abs(transaction.amount) : Math.abs(transaction.amount);
+          const shortDate = moment(transaction.date).format('YYYYMM');
+          // update account balance with the returned amount
+          this.accountService.updateAccountBalance(
+            transaction.account.accountId,
+            budgetId,
+            inverseAmount
+          );
 
-        // update the categories with the return values
-        for (const key in transaction.categories) {
-          if (transaction.categories.hasOwnProperty(key)) {
-            const category = transaction.categories[key];
-            this.categoryService.updateCategoryBudget(
-              budgetId,
-              key,
-              shortDate,
-              category.out,
-              category.in
-            );
+          // update the categories with the return values
+          for (const key in transaction.categories) {
+            if (transaction.categories.hasOwnProperty(key)) {
+              const category = transaction.categories[key];
+              this.categoryService.updateCategoryBudget(
+                budgetId,
+                key,
+                shortDate,
+                category.out,
+                category.in
+              );
+            }
           }
-        }
 
-        // update the budget of the return values
-        this.budgetService.updateBudgetBalance(budgetId, transaction.date, inverseAmount);
+          // update the budget of the return values
+          this.budgetService.updateBudgetBalance(budgetId, transaction.date, inverseAmount);
 
-        this.db.doc(docRef).delete().then(() => {
-          resolve();
-        }, () => {
-          reject();
+          this.db
+            .doc(docRef)
+            .delete()
+            .then(
+              () => {
+                resolve();
+              },
+              () => {
+                reject();
+              }
+            );
         });
-      });
     });
   }
 
@@ -303,10 +317,13 @@ export class TransactionService {
       .doc('budgets/' + budgetId + '/transactions/' + transaction.id)
       .update({ cleared: transaction.cleared });
     if (!transaction.cleared) {
-      transaction.amount = transaction.amount > 0 ? -Math.abs(transaction.amount) : Math.abs(transaction.amount);
+      transaction.amount =
+        transaction.amount > 0 ? -Math.abs(transaction.amount) : Math.abs(transaction.amount);
     }
     this.accountService.updateClearedBalance(
-      budgetId, transaction.account.accountId, transaction.amount
+      budgetId,
+      transaction.account.accountId,
+      transaction.amount
     );
   }
 
@@ -316,6 +333,11 @@ export class TransactionService {
       return dbTransaction.get(docRef).then(
         readTransaction => {
           const currentTransaction = readTransaction.data();
+
+          const amountDiffers = currentTransaction.amount !== newTransaction.amount;
+          console.log('Current', currentTransaction);
+          console.log('New', newTransaction);
+
           // check if the account has changed
           if (
             currentTransaction.account &&
@@ -351,11 +373,48 @@ export class TransactionService {
             }
           }
 
-          // if the type has changed by changing the in or out values, ensure to update the budget values as well
-          if (
-            currentTransaction.amount !== newTransaction.amount &&
-            currentTransaction.amount > 0
-          ) {
+          // check if the categories have changed and update where necessary
+          const currentCategories = Object.keys(currentTransaction.categories);
+          const newCategories = Object.keys(newTransaction.categories);
+          const diffA = currentCategories.filter(t => newCategories.indexOf(t) === -1);
+          const diffB = newCategories.filter(t => currentCategories.indexOf(t) === -1);
+
+          const shortDate = moment(newTransaction.date).format('YYYYMM');
+
+          // there is a difference, we revert all previous categories and apply the
+          // new ones
+          if (diffA.length > 0 || diffB.length > 0 || amountDiffers) {
+            // reverse previous categories
+            for (const key in currentTransaction.categories) {
+              if (currentTransaction.categories.hasOwnProperty(key)) {
+                const category = currentTransaction.categories[key];
+                this.categoryService.updateCategoryBudget(
+                  budgetId,
+                  key,
+                  shortDate,
+                  category.out,
+                  category.in
+                );
+              }
+            }
+
+            for (const key in newTransaction.categories) {
+              if (newTransaction.categories.hasOwnProperty(key)) {
+                const category = newTransaction.categories[key];
+                this.categoryService.updateCategoryBudget(
+                  budgetId,
+                  key,
+                  shortDate,
+                  category.in,
+                  category.out
+                );
+              }
+            }
+          }
+
+          // if the type has changed by changing the in or out values,
+          // ensure to update the budget values as well
+          if (amountDiffers && currentTransaction.amount > 0) {
             this.budgetService.updateBudgetBalance(
               budgetId,
               newTransaction.date,
@@ -367,10 +426,7 @@ export class TransactionService {
               budgetId,
               Math.abs(newTransaction.amount)
             );
-          } else if (
-            currentTransaction.amount !== newTransaction.amount &&
-            currentTransaction.amount <= 0
-          ) {
+          } else if (amountDiffers && currentTransaction.amount <= 0) {
             // subtract from current account
             this.accountService.updateAccountBalance(
               newTransaction.account.accountId,

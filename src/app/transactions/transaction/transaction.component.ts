@@ -240,7 +240,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
 
     // id is needed to update correctly
     transaction.id = this.transactionId;
-    
+
     // calculate the amount and set the in or out values
     transaction.amount = this.transactionService.calculateAmount(transaction);
 

@@ -11,7 +11,7 @@ import { AccountService } from '../accounts/account.service';
 import { resolve } from 'path';
 import { FirebaseApp } from '@angular/fire';
 
-describe('Transaction Service to be thing', () => {
+describe('Transaction Service', () => {
   let service: TransactionService;
   let dbMock,
     fbMock,
@@ -31,7 +31,7 @@ describe('Transaction Service to be thing', () => {
 
     dbMock = jasmine.createSpyObj('AngularFirestore', ['collection', 'doc']);
     dbMock.doc.and.returnValue({
-      valueChanges: () => {},
+      valueChanges: () => of({}),
       delete: jasmine.createSpy('delete')
     });
     dbMock.collection.and.returnValue({
@@ -58,7 +58,18 @@ describe('Transaction Service to be thing', () => {
 
     fbMock = jasmine.createSpyObj('FirebaseApp', ['firestore']);
     fbMock.firestore.and.returnValue({
-      runTransaction: () => {}
+      runTransaction: callback => {
+        callback({
+          get: () => {
+            return Promise.resolve({
+              data: () => {
+                return { test: 'test' };
+              }
+            });
+          }
+        });
+        return Promise.resolve({});
+      }
     });
     categoryServiceMock = jasmine.createSpyObj('CategoryService', [
       'updateCategoryBudget',
@@ -214,11 +225,7 @@ describe('Transaction Service to be thing', () => {
         '2018-12-01',
         500
       );
-      expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledWith(
-        'ACC_001',
-        '12345',
-        500
-      );
+      expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledWith('ACC_001', '12345', 500);
       expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledWith(
         '12345',
         'TEST_CAT1',
@@ -227,6 +234,204 @@ describe('Transaction Service to be thing', () => {
         0
       );
       done();
+    });
+  });
+
+  describe('Update transactions', () => {
+    let newTransaction, currentTransaction;
+    beforeEach(() => {
+      newTransaction = new Transaction({
+        id: 'TESTTRANSACTION',
+        account: {
+          id: 'ACC001',
+          name: 'TestAccount'
+        },
+        amount: -500,
+        categories: [{ in: 0, out: 500, category: { id: 'TEST001', name: 'TEST001' } }],
+        date: '2018-01-01'
+      });
+      currentTransaction = new Transaction({
+        id: 'TESTTRANSACTION',
+        account: {
+          id: 'ACC001',
+          name: 'TestAccount'
+        },
+        amount: -500,
+        categories: [{ in: 0, out: 500, category: { id: 'TEST001', name: 'TEST001' } }],
+        date: '2018-01-01'
+      });
+      fbMock.firestore.and.returnValue({
+        runTransaction: callback => {
+          callback({
+            get: () => {
+              return Promise.resolve({
+                data: () => {
+                  return currentTransaction;
+                }
+              });
+            },
+            update: () => {
+              return Promise.resolve({});
+            }
+          });
+          return Promise.resolve({});
+        }
+      });
+      dbMock.doc.and.returnValue({
+        valueChanges: () =>
+          of({
+            account: {
+              accountId: 'ACC_001'
+            },
+            amount: -500,
+            categories: {
+              TEST_CAT1: { in: 0, out: 500 }
+            },
+            date: '2018-12-01'
+          }),
+        update: () => {},
+        delete: () => {
+          return {
+            then: success => {
+              success();
+            }
+          };
+        }
+      });
+    });
+    
+    it('should update the account balance if account changed and is income type', (done: DoneFn) => {
+      // arrange
+      currentTransaction = new Transaction({
+        id: 'TESTTRANSACTION',
+        account: {
+          id: 'ACC001',
+          name: 'TestAccount'
+        },
+        amount: 500,
+        categories: [{ in: 500, out: 0, category: { id: 'TEST001', name: 'TEST001' } }],
+        date: '2018-01-01'
+      });
+      fbMock.firestore.and.returnValue({
+        runTransaction: callback => {
+          callback({
+            get: () => {
+              return Promise.resolve({
+                data: () => {
+                  return currentTransaction;
+                }
+              });
+            },
+            update: () => {
+              return Promise.resolve({});
+            }
+          });
+          return Promise.resolve({});
+        }
+      });
+
+      newTransaction.account = {
+        accountId: 'ACC002',
+        accountName: 'TestAccount002'
+      }
+      newTransaction.amount = 500;
+
+      // action
+      service.updateTransaction('BUDGETSTRING', newTransaction).then(() => {
+        expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledTimes(2);
+        // assert
+        done();
+      });
+    });
+
+    it('should update the account balance if account changed and is expense type', (done: DoneFn) => {
+      // arrange
+      newTransaction.account = {
+        accountId: 'ACC002',
+        accountName: 'TestAccount002'
+      }
+      newTransaction.amount = -500;
+
+      // action
+      service.updateTransaction('BUDGETSTRING', newTransaction).then(() => {
+        expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledTimes(2);
+        // assert
+        done();
+      });
+    });
+
+    it('should update the account balance if amount changed', (done: DoneFn) => {
+      // arrange
+      newTransaction.account = {
+        accountId: 'ACC001',
+        accountName: 'TestAccount'
+      }
+      newTransaction.amount = 500;
+
+      // action
+      service.updateTransaction('BUDGETSTRING', newTransaction).then(() => {
+        expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledTimes(1);
+        // assert
+        done();
+      });
+    });
+
+    it('should update the categories if the amount has changed', (done: DoneFn) => {
+      // arrange
+      newTransaction.categories = {
+        TEST001: { categoryName: 'TestCat', in: 0, out: 400 }
+      };
+      newTransaction.amount = 400;
+
+      // action
+      service.updateTransaction('BUDGETSTRING', newTransaction).then(() => {
+        expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledTimes(2);
+        // assert
+        done();
+      });
+
+    });
+
+    it('should update a transaction if category changed', (done: DoneFn) => {
+      // arrange
+      newTransaction.categories = {
+        TEST: { categoryName: 'TestCat', in: 0, out: 500 }
+      };
+
+      // action
+      service.updateTransaction('BUDGETSTRING', newTransaction).then(() => {
+        expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledTimes(2);
+        // reverse check
+        expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledWith(
+          'BUDGETSTRING',
+          'TEST001',
+          '201801',
+          500,
+          0
+        );
+        // new check
+        expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledWith(
+          'BUDGETSTRING',
+          'TEST',
+          '201801',
+          0,
+          500
+        );
+        done();
+      });
+    });
+
+    it('should not update categories if category ids have not changed', (done: DoneFn) => {
+      // arrange
+      newTransaction.categories = {
+        TEST001: { categoryName: 'TEST001', in: 0, out: 500 }
+      };
+
+      // action
+      service.updateTransaction('BUDGETSTRING', newTransaction).then(() => {
+        expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledTimes(0);
+        done();
+      });
     });
   });
 });

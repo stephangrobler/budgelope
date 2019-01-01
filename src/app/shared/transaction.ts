@@ -79,6 +79,7 @@ export class Transaction implements ITransaction {
             out: number;
           };
         } = {};
+
         transactionData.categories.forEach(item => {
           // it should have an id specified for later use
           if (item.category && item.category.id) {
