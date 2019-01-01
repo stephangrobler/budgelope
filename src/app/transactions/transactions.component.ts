@@ -57,7 +57,6 @@ export class TransactionsComponent implements OnInit {
         this.accountId = null;
         this.dataSource = new TransactionDataSource(this.transService, profileRead.activeBudget);
         this.route.paramMap.subscribe(params => {
-          console.log(params);
           if (params.get('accountId')) {
             this.accountId = params.get('accountId');
             this.db.doc<IAccount>('budgets/' + this.budgetId + '/accounts/' + this.accountId).valueChanges().subscribe(account => {

@@ -212,7 +212,6 @@ export class TransactionService {
         take(1)
       )
       .subscribe(transactions => {
-        console.log(transactions);
         transactions.forEach(transaction => {
           const ref = '/budgets/' + budgetId + '/transactions/' + transaction.id;
           const categoryMap = {};
@@ -316,10 +315,12 @@ export class TransactionService {
     this.db
       .doc('budgets/' + budgetId + '/transactions/' + transaction.id)
       .update({ cleared: transaction.cleared });
+    
     if (!transaction.cleared) {
       transaction.amount =
         transaction.amount > 0 ? -Math.abs(transaction.amount) : Math.abs(transaction.amount);
     }
+    
     this.accountService.updateClearedBalance(
       budgetId,
       transaction.account.accountId,
@@ -333,10 +334,7 @@ export class TransactionService {
       return dbTransaction.get(docRef).then(
         readTransaction => {
           const currentTransaction = readTransaction.data();
-
           const amountDiffers = currentTransaction.amount !== newTransaction.amount;
-          console.log('Current', currentTransaction);
-          console.log('New', newTransaction);
 
           // check if the account has changed
           if (

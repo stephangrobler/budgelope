@@ -550,7 +550,7 @@ describe('TransactionsComponent', () => {
     form
       .get('categories')
       .setValue([{ category: { id: 'cat1', name: 'cat1Name' }, in: 0, out: 500 }]);
-
+    spyOn(window, 'confirm').and.returnValue(true);
     // action
     comp.onDelete();
 

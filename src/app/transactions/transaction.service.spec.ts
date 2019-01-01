@@ -58,18 +58,7 @@ describe('Transaction Service', () => {
 
     fbMock = jasmine.createSpyObj('FirebaseApp', ['firestore']);
     fbMock.firestore.and.returnValue({
-      runTransaction: callback => {
-        callback({
-          get: () => {
-            return Promise.resolve({
-              data: () => {
-                return { test: 'test' };
-              }
-            });
-          }
-        });
-        return Promise.resolve({});
-      }
+      runTransaction: () => {}
     });
     categoryServiceMock = jasmine.createSpyObj('CategoryService', [
       'updateCategoryBudget',
@@ -299,7 +288,7 @@ describe('Transaction Service', () => {
         }
       });
     });
-    
+
     it('should update the account balance if account changed and is income type', (done: DoneFn) => {
       // arrange
       currentTransaction = new Transaction({
