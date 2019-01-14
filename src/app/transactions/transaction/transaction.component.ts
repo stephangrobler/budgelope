@@ -71,7 +71,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
         .subscribe(accounts => (this.accounts = accounts));
 
       const categorySubscription = this.categoryService
-        .getCategories(profile.activeBudget, 'sortingOrder')
+        .getCategories(profile.activeBudget, 'name')
         .pipe(take(1))
         .subscribe(categories => {
           this.systemCategories = categories.filter(category => category.type === 'system');
@@ -107,6 +107,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
       memo: new FormControl(null),
       cleared: new FormControl(false),
       transfer: new FormControl(false),
+      type: new FormControl(false),
       categories: new FormArray([])
     });
     this.onAddCategory();
@@ -127,6 +128,8 @@ export class TransactionComponent implements OnInit, OnDestroy {
         this.transactionForm.get('date').setValue(transaction.date);
         this.transactionForm.get('payee').setValue(transaction.payee);
         this.transactionForm.get('memo').setValue(transaction.memo);
+        this.transactionForm.get('type').setValue(transaction.type);
+        this.transactionForm.get('cleared').setValue(transaction.cleared);
         if (transaction.categories) {
           for (const key in transaction.categories) {
             if (transaction.categories.hasOwnProperty(key)) {

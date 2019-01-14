@@ -18,6 +18,7 @@
       <button mat-button (click)="onMatchTransactions()">
         <mat-icon>home</mat-icon>
       </button>
+      <input type="file" name="testUpload" id="testUpload" (change)="uploadFile($event)">
       <div *ngIf="account">
         Filtered on Account: <b>{{account.name}}</b> : 
         Cleared: <b>{{ account.clearedBalance | currency: 'R'}}</b> 

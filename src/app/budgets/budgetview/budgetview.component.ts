@@ -14,6 +14,7 @@ import { BudgetService } from '../budget.service';
 import { UserService } from '../../shared/user.service';
 import { CategoryService } from '../../categories/category.service';
 import { AuthService } from 'app/shared/auth.service';
+import { TransactionTypes } from 'app/shared/transaction';
 
 @Component({
   selector: 'app-budgetview',
@@ -147,7 +148,14 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
   loadCategories(budgetId: string): void {
     const subscription = this.categoryService.getCategories(budgetId).subscribe(list => {
       // filter list
-      list = list.filter(category => category.type === 'expense');
+      list = list.filter(category => category.type === TransactionTypes.EXPENSE);
+      console.log(list.reduce((a, b) => {
+        if (b.name !== 'FNB Credit Card' && b.name !== 'Credit Card - Virgin Money') {
+          return a += b.balance;
+        } else {
+          return a;
+        }
+      }, 0));
       this.checkAllocations(list, this.selectedMonth);
       this.sortList = list;
     });

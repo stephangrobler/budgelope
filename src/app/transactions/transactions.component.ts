@@ -10,6 +10,7 @@ import { BudgetService } from '../budgets/budget.service';
 import { UserService } from '../shared/user.service';
 import { BehaviorSubject } from 'rxjs';
 import { IAccount } from 'app/shared/account';
+import { AngularFireStorage } from '@angular/fire/storage';
 
 @Component({
   templateUrl: 'transactions.component.html',
@@ -38,7 +39,8 @@ export class TransactionsComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private db: AngularFirestore,
-    private af: AngularFireAuth
+    private af: AngularFireAuth,
+    private storage: AngularFireStorage
   ) {
   }
 
@@ -78,6 +80,19 @@ export class TransactionsComponent implements OnInit {
     });
   }
 
+  uploadFile(event) {
+    if (!this.accountId) {
+      console.error('Unable to upload without an account id');
+      return;
+    }
+    const file = event.target.files[0];
+    const filepath = 'budgets/' + this.budgetId + '/uploads/' + this.accountId + '.ofx';
+    const ref = this.storage.ref(filepath);
+    const task = ref.put(file).then((snap) => {
+      console.log(snap);
+    });
+  }
+
   onZeroStartingBalanceClick() {
     this.transService.createStartingBalance(this.accountId, this.budgetId, 0);
   }
@@ -91,7 +106,7 @@ export class TransactionsComponent implements OnInit {
   }
 
   onMatchTransactions() {
-    this.transService.matchTransactions(this.budgetId);
+    this.transService.matchTransactions(this.budgetId, this.accountId, this.account.name);
   }
 
   toggleCleared(transaction: ITransactionID) {

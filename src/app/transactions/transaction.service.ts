@@ -104,12 +104,12 @@ export class TransactionService {
       });
   }
 
-  matchTransactions(budgetId: string) {
+  matchTransactions(budgetId: string, accountId: string, accountName: string) {
     const transRef = 'budgets/' + budgetId + '/transactions';
-    const importedTransRef = 'budgets/' + budgetId + '/imported_transactions';
+    const importedTransRef = 'budgets/' + budgetId + '/imported/' + accountId + '/transactions';
 
     const tSnapshots = this.db
-      .collection(transRef)
+      .collection(transRef, ref => ref.orderBy('date', 'desc'))
       .snapshotChanges()
       .pipe(
         map(actions =>
@@ -119,13 +119,16 @@ export class TransactionService {
             if (a.payload.doc.get('id') === null) {
               data.id = id;
             }
+            if (typeof data.date === 'object') {
+              data.date = data.date.toDate();
+            }
             return { id, ...data };
           })
         ),
         take(1)
       );
     const itSnapshots = this.db
-      .collection(importedTransRef)
+      .collection(importedTransRef, ref => ref.orderBy('dtposted', 'desc'))
       .snapshotChanges()
       .pipe(
         map(actions =>
@@ -149,8 +152,8 @@ export class TransactionService {
         const curTrans = transactions[i];
         for (let j = 0; j < imported.length; j++) {
           const importedTrans = imported[j];
-          if (curTrans.amount === importedTrans.trnamt) {
-            console.log('Matched: ', curTrans, importedTrans);
+          const dateDiff = moment(curTrans.date).diff(moment(importedTrans.dtposted), 'days');
+          if (curTrans.amount === importedTrans.trnamt && dateDiff > -6) {
             imported.splice(j, 1);
             j--;
             break;
@@ -161,8 +164,8 @@ export class TransactionService {
       if (imported.length > 0) {
         imported.forEach(transVal => {
           const transaction = new Transaction();
-          transaction.account.accountId = 'p91amjTtkhXg7xzEnyqa';
-          transaction.account.accountName = 'Stephan Checking';
+          transaction.account.accountId = accountId;
+          transaction.account.accountName = accountName;
 
           transaction.amount = transVal.trnamt;
           transaction.date = moment(transVal.dtposted).toDate();
@@ -174,9 +177,9 @@ export class TransactionService {
           let inAmount = 0,
             outAmount = 0;
           if (transaction.type === TransactionTypes.INCOME) {
-            inAmount = transaction.amount;
+            inAmount = Math.abs(transaction.amount);
           } else {
-            outAmount = transaction.amount;
+            outAmount = Math.abs(transaction.amount);
           }
           transaction.categories = {
             UNCATEGORIZED: {
@@ -185,7 +188,7 @@ export class TransactionService {
               out: outAmount
             }
           };
-          // this.createTransaction(transaction, budgetId);
+          this.createTransaction(transaction, budgetId);
         });
       }
       console.log('After matching: ', imported);
@@ -315,12 +318,12 @@ export class TransactionService {
     this.db
       .doc('budgets/' + budgetId + '/transactions/' + transaction.id)
       .update({ cleared: transaction.cleared });
-    
+
     if (!transaction.cleared) {
       transaction.amount =
         transaction.amount > 0 ? -Math.abs(transaction.amount) : Math.abs(transaction.amount);
     }
-    
+
     this.accountService.updateClearedBalance(
       budgetId,
       transaction.account.accountId,
