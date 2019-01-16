@@ -15,10 +15,10 @@
           >
         Show Cleared
       </mat-slide-toggle>
-      <button mat-button (click)="onMatchTransactions()">
-        <mat-icon>home</mat-icon>
+      <button *ngIf="account" mat-button (click)="onMatchTransactions()">
+        <mat-icon>compare_arrows</mat-icon>
       </button>
-      <input type="file" name="testUpload" id="testUpload" (change)="uploadFile($event)">
+      <input *ngIf="account" type="file" name="testUpload" id="testUpload" (change)="uploadFile($event)">
       <div *ngIf="account">
         Filtered on Account: <b>{{account.name}}</b> : 
         Cleared: <b>{{ account.clearedBalance | currency: 'R'}}</b> 
@@ -63,6 +63,10 @@
                     [checked]="transaction.cleared">
               </mat-checkbox>
             </mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="matched">
+            <mat-header-cell *matHeaderCellDef>Matched</mat-header-cell>
+            <mat-cell *matCellDef="let transaction" style="text-align: right">{{transaction.matched | date}}</mat-cell>
           </ng-container>
           <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
           <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectedRow(row)"></mat-row>

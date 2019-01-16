@@ -2,7 +2,7 @@ import { Category } from './category';
 import { Account } from './account';
 
 export interface ITransaction {
-  account: {accountId: string, accountName: string},
+  account: { accountId: string; accountName: string };
   amount: number;
   categories: {
     [s: string]: {
@@ -36,7 +36,7 @@ export class Transaction implements ITransaction {
     };
   }; // object with category id for keys
   categoryDisplayName: string;
-  account: { accountId: string; accountName: string } = {accountId: '', accountName: ''};
+  account: { accountId: string; accountName: string } = { accountId: '', accountName: '' };
   accountDisplayName: string;
   transferAccount: { accountId: string; accountName: string } = null;
   transferAccountDisplayName: string = null;
@@ -51,12 +51,10 @@ export class Transaction implements ITransaction {
   type: string; // income or expense
   cleared: boolean;
   transfer = false;
-  matched = false;
-
+  matched: number;
 
   constructor(transactionData?: any) {
     if (transactionData) {
-
       if (transactionData.account) {
         this.account = {
           accountId: transactionData.account.id,

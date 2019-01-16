@@ -10,6 +10,12 @@ import { AccountService } from '../accounts/account.service';
 import { BudgetService } from '../budgets/budget.service';
 import { FirebaseApp } from '@angular/fire';
 
+export interface IFilter {
+  accountId: string;
+  cleared: boolean;
+  categoryId: string;
+}
+
 @Injectable()
 export class TransactionService {
   transactions: Transaction[];
@@ -29,20 +35,23 @@ export class TransactionService {
    */
   getTransactions(
     budgetId: string,
-    accountId?: string,
-    cleared?: boolean
+    filter: IFilter
   ): Observable<ITransactionID[]> {
     const transRef = '/budgets/' + budgetId + '/transactions';
     // should not display cleared transactions by default
     const collection = this.db.collection<ITransactionID>(transRef, ref => {
       let query: firebase.firestore.Query = ref;
-      if (!cleared) {
+      if (!filter.cleared) {
         query = query.where('cleared', '==', false);
       }
-      if (accountId) {
-        query = query.where('account.accountId', '==', accountId);
+      if (filter.accountId) {
+        query = query.where('account.accountId', '==', filter.accountId);
       }
-      query = query.orderBy('date', 'desc');
+      if (filter.categoryId) {
+        query = query.where('categories.' + filter.categoryId + '.categoryName', '>=', '')
+      } else {
+        query = query.orderBy('date', 'desc');
+      }
       return query;
     });
 
@@ -147,19 +156,26 @@ export class TransactionService {
     forkJoin(tSnapshots, itSnapshots).subscribe(val => {
       const transactions = val[0];
       const imported = val[1];
-      console.log('Transactions', val[0]);
+      const batch = this.db.firestore.batch();
+
       for (let i = 0; i < transactions.length; i++) {
         const curTrans = transactions[i];
         for (let j = 0; j < imported.length; j++) {
           const importedTrans = imported[j];
           const dateDiff = moment(curTrans.date).diff(moment(importedTrans.dtposted), 'days');
           if (curTrans.amount === importedTrans.trnamt && dateDiff > -6) {
+            // flag current transactions as matched
+            const ref = this.db.doc('/budgets/' + budgetId + '/transactions/' + curTrans.id).ref;
+            batch.update(ref, {matched: moment(curTrans.date).valueOf()});
             imported.splice(j, 1);
             j--;
             break;
           }
         }
       }
+      // commit batch
+      batch.commit().then(response => console.log('Batch Committed:', response));
+
       // add all transactions not matched
       if (imported.length > 0) {
         imported.forEach(transVal => {

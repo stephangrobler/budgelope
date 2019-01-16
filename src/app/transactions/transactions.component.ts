@@ -5,7 +5,7 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { MatTableDataSource } from '@angular/material';
 import { DataSource } from '@angular/cdk/collections';
 import { Transaction, ITransactionID } from '../shared/transaction';
-import { TransactionService } from './transaction.service';
+import { TransactionService, IFilter } from './transaction.service';
 import { BudgetService } from '../budgets/budget.service';
 import { UserService } from '../shared/user.service';
 import { BehaviorSubject } from 'rxjs';
@@ -24,7 +24,7 @@ export class TransactionsComponent implements OnInit {
   accountId: string;
   account: IAccount;
   categoryId: string;
-  displayedColumns = ['date', 'account', 'payee', 'category', 'out', 'in', 'cleared'];
+  displayedColumns = ['date', 'account', 'payee', 'category', 'out', 'in', 'cleared', 'matched'];
   dataSource: TransactionDataSource;
   newTransaction: Transaction;
   showCleared = false;
@@ -137,14 +137,17 @@ export class TransactionDataSource extends DataSource<any> {
   }
 
   loadTransactions(accountId: string, showCleared: boolean, categoryId?: string) {
-    if (categoryId) {
-      showCleared = true;
+    const filter: IFilter = {
+      accountId: accountId,
+      categoryId: categoryId,
+      cleared: showCleared
     }
-    this.transService.getTransactions(this.budgetId, accountId, showCleared)
+    if (categoryId) {
+      filter.cleared = true;
+    }
+    this.transService.getTransactions(this.budgetId, filter)
       .subscribe(transactions => {
-        if (categoryId) {
-          transactions = transactions.filter(transaction => transaction.categories[categoryId] !== undefined);
-        }
+        console.log(transactions);
         this.transactionsSubject.next(transactions)
       });
   }
