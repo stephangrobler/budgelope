@@ -1,0 +1,16 @@
+<h1 mat-dialog-title>Importing into account: {{ data.accountName }}</h1>
+<div mat-dialog-content>
+  <button mat-button (click)="onMatchTransactions()">
+    <mat-icon>compare_arrows</mat-icon>
+  </button>
+  <input    
+    type="file"
+    name="testUpload"
+    id="testUpload"
+    (change)="uploadFile($event)"
+  />
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">No Thanks</button>
+  <button mat-button [mat-dialog-close]="data.animal" cdkFocusInitial>Ok</button>
+</div>

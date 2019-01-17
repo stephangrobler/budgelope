@@ -15,10 +15,10 @@
           >
         Show Cleared
       </mat-slide-toggle>
-      <button *ngIf="account" mat-button (click)="onMatchTransactions()">
-        <mat-icon>compare_arrows</mat-icon>
+      <button *ngIf="account" mat-raised-button color="accent" (click)="openDialog()">
+        <mat-icon>import_export</mat-icon>
       </button>
-      <input *ngIf="account" type="file" name="testUpload" id="testUpload" (change)="uploadFile($event)">
+      
       <div *ngIf="account">
         Filtered on Account: <b>{{account.name}}</b> : 
         Cleared: <b>{{ account.clearedBalance | currency: 'R'}}</b> 

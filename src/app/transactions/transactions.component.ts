@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { MatTableDataSource } from '@angular/material';
+import { MatTableDataSource, MatDialog } from '@angular/material';
 import { DataSource } from '@angular/cdk/collections';
 import { Transaction, ITransactionID } from '../shared/transaction';
 import { TransactionService, IFilter } from './transaction.service';
@@ -10,7 +10,7 @@ import { BudgetService } from '../budgets/budget.service';
 import { UserService } from '../shared/user.service';
 import { BehaviorSubject } from 'rxjs';
 import { IAccount } from 'app/shared/account';
-import { AngularFireStorage } from '@angular/fire/storage';
+import { ImportComponent } from './import/import.component';
 
 @Component({
   templateUrl: 'transactions.component.html',
@@ -40,7 +40,7 @@ export class TransactionsComponent implements OnInit {
     private route: ActivatedRoute,
     private db: AngularFirestore,
     private af: AngularFireAuth,
-    private storage: AngularFireStorage
+    public dialog: MatDialog
   ) {
   }
 
@@ -80,16 +80,13 @@ export class TransactionsComponent implements OnInit {
     });
   }
 
-  uploadFile(event) {
-    if (!this.accountId) {
-      console.error('Unable to upload without an account id');
-      return;
-    }
-    const file = event.target.files[0];
-    const filepath = 'budgets/' + this.budgetId + '/uploads/' + this.accountId + '.ofx';
-    const ref = this.storage.ref(filepath);
-    const task = ref.put(file).then((snap) => {
-      console.log(snap);
+  openDialog() {
+    const dialogRef = this.dialog.open(ImportComponent, {
+      data: { accountId: this.accountId, budgetId: this.budgetId, accountName: this.account.name}
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('Dialog Result', result);
     });
   }
 
@@ -105,9 +102,7 @@ export class TransactionsComponent implements OnInit {
     this.transService.transformCategoriesToMap(this.budgetId);
   }
 
-  onMatchTransactions() {
-    this.transService.matchTransactions(this.budgetId, this.accountId, this.account.name);
-  }
+  
 
   toggleCleared(transaction: ITransactionID) {
     transaction.cleared = !transaction.cleared;
