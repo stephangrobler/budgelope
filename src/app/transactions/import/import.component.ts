@@ -34,4 +34,8 @@ export class ImportComponent implements OnInit {
   onMatchTransactions() {
     this.transService.matchTransactions(this.data.budgetId, this.data.accountId, this.data.accountName);
   }
+
+  onCancel() {
+    this.dialogRef.close('Pizza!');
+  }
 }
