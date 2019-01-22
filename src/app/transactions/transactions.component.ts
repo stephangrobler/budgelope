@@ -13,6 +13,7 @@ import { IAccount } from 'app/shared/account';
 import { ImportComponent } from './import/import.component';
 import { AuthService } from 'app/shared/auth.service';
 import { takeUntil, take } from 'rxjs/operators';
+import { AccountComponent } from 'app/accounts/account/account.component';
 
 @Component({
   templateUrl: 'transactions.component.html',
@@ -88,6 +89,17 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe(result => {
       console.log('Dialog Result', result);
     });
+  }
+
+  openAccountDialog() {
+    const dialogRef = this.dialog.open(AccountComponent, {
+      data: { accountId: this.accountId, budgetId: this.budgetId, accountName: this.account.name }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('Account Dialog Result', result);
+    });
+
   }
 
   onZeroStartingBalanceClick() {

@@ -15,10 +15,14 @@
           >
         Show Cleared
       </mat-slide-toggle>
-      <button *ngIf="account" mat-raised-button color="accent" (click)="openDialog()">
+      <button *ngIf="account" mat-icon-button color="accent" (click)="openDialog()">
         <mat-icon>import_export</mat-icon>
       </button>
       
+      <button *ngIf="account" mat-icon-button color="accent" (click)="openAccountDialog()">
+        <mat-icon>settings</mat-icon>
+      </button>
+
       <div *ngIf="account">
         Filtered on Account: <b>{{account.name}}</b> : 
         Cleared: <b>{{ account.clearedBalance | currency: 'R'}}</b> 

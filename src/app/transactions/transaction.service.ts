@@ -33,10 +33,7 @@ export class TransactionService {
    * @param  budgetId Current active budget for the user id
    * @return          the observable for the transactions.
    */
-  getTransactions(
-    budgetId: string,
-    filter: IFilter
-  ): Observable<ITransactionID[]> {
+  getTransactions(budgetId: string, filter: IFilter): Observable<ITransactionID[]> {
     const transRef = '/budgets/' + budgetId + '/transactions';
     // should not display cleared transactions by default
     const collection = this.db.collection<ITransactionID>(transRef, ref => {
@@ -48,7 +45,7 @@ export class TransactionService {
         query = query.where('account.accountId', '==', filter.accountId);
       }
       if (filter.categoryId) {
-        query = query.where('categories.' + filter.categoryId + '.categoryName', '>=', '')
+        query = query.where('categories.' + filter.categoryId + '.categoryName', '>=', '');
       } else {
         query = query.orderBy('date', 'desc');
       }
@@ -140,7 +137,7 @@ export class TransactionService {
           if (curTrans.amount === importedTrans.trnamt && dateDiff > -6) {
             // flag current transactions as matched
             const ref = this.db.doc('/budgets/' + budgetId + '/transactions/' + curTrans.id).ref;
-            batch.update(ref, {matched: moment(curTrans.date).valueOf()});
+            batch.update(ref, { matched: moment(curTrans.date).valueOf() });
             imported.splice(j, 1);
             j--;
             break;
@@ -445,38 +442,42 @@ export class TransactionService {
 
   createStartingBalance(accountId: string, budgetId: string, amount: number) {
     // load the account
-    const request = forkJoin(
-      this.categoryService.getCategory('STARTING_BALANCE', budgetId).pipe(take(1)),
-      this.accountService.getAccount(accountId, budgetId).pipe(take(1))
-    );
+    this.accountService
+      .getAccount(accountId, budgetId)
+      .pipe(take(1))
+      .subscribe(account => {
+        const transaction = new Transaction();
+        let inAmount, outAmount, type: string;
 
-    request.subscribe(([category, account]) => {
-      const transaction = new Transaction();
-
-      transaction.categories = {
-        STARTING_BALANCE: {
-          categoryName: 'Starting balance',
-          in: 0,
-          out: 0
+        if (amount > 0) {
+          inAmount = Math.abs(amount);
+          type = TransactionTypes.INCOME;
+        } else {
+          outAmount = Math.abs(amount);
+          type = TransactionTypes.EXPENSE;
         }
-      };
-      transaction.account = {
-        accountId: accountId,
-        accountName: account.name
-      };
-      transaction.accountDisplayName = account.name;
-      transaction.date = new Date();
-      transaction.in = 0;
-      transaction.out = 0;
-      transaction.amount = amount;
-      transaction.payee = 'Starting Balance';
-      transaction.cleared = false;
-      transaction.categoryDisplayName = 'Starting Balance';
-      transaction.transfer = false;
-      transaction.type = TransactionTypes.EXPENSE;
+        transaction.categories = {
+          STARTING_BALANCE: {
+            categoryName: 'Starting balance',
+            in: inAmount,
+            out: outAmount
+          }
+        };
+        transaction.account = {
+          accountId: accountId,
+          accountName: account.name
+        };
+        transaction.accountDisplayName = account.name;
+        transaction.date = new Date();
+        transaction.amount = amount;
+        transaction.payee = 'Starting Balance';
+        transaction.cleared = false;
+        transaction.categoryDisplayName = 'Starting Balance';
+        transaction.transfer = false;
+        transaction.type = type;
 
-      return this.createTransaction(transaction, budgetId);
-    });
+        return this.createTransaction(transaction, budgetId);
+      });
   }
 
   calculateAmount(transaction: Transaction): number {

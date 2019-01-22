@@ -1,11 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute, Params } from '@angular/router';
+import { Component, OnInit, Inject } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 
 import { AccountService } from '../account.service';
 import { Account } from '../../shared/account';
 import { TransactionService } from 'app/transactions/transaction.service';
 import { AuthService } from 'app/shared/auth.service';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 
 @Component({
   templateUrl: 'account.component.html'
@@ -23,36 +23,36 @@ export class AccountComponent implements OnInit {
 
   constructor(
     private accountService: AccountService,
-    private router: Router,
-    private route: ActivatedRoute,
+    public dialogRef: MatDialogRef<AccountComponent>,
     private db: AngularFirestore,
     private transactionService: TransactionService,
-    private auth: AuthService
+    private auth: AuthService,
+    @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
 
   ngOnInit() {
-    this.route.params.forEach((params: Params) => {
-      this.accountId = params['id'];
-    });
     this.db
       .doc<any>('users/' + this.auth.currentUserId)
       .valueChanges()
       .subscribe(profile => {
         this.budgetId = profile.activeBudget;
 
-        if (this.accountId !== 'add') {
-          const accRef = 'budgets/' + this.budgetId + '/accounts/' + this.accountId;
+        if (this.data.accountId !== 'add') {
+          const accRef = 'budgets/' + this.data.budgetId + '/accounts/' + this.data.accountId;
           this.db
             .doc<Account>(accRef)
             .valueChanges()
-            .subscribe(account => (this.account = account));
+            .subscribe(account => {
+              this.account = account;
+              this.accStartingBalance = account.balance;
+            });
         } else {
           this.account = new Account();
         }
       });
   }
 
-  saveAccount() {
+  onSaveAccount() {
     if (this.accountId !== 'add') {
       this.editAccount();
     } else {
@@ -61,8 +61,15 @@ export class AccountComponent implements OnInit {
   }
 
   editAccount() {
-    const accountRef = 'budgets/' + this.budgetId + '/accounts/' + this.accountId;
-    this.db.doc<Account>(accountRef).update(this.account);
+    const accountRef = 'budgets/' + this.budgetId + '/accounts/' + this.data.accountId;
+
+    // starting balance was changed create a starting balance
+    if (this.account.balance !== this.accStartingBalance) {
+      console.log(this.account, this.accStartingBalance);
+      this.transactionService.createStartingBalance(this.data.accountId, this.budgetId, this.account.balance);
+    } else {
+      this.db.doc<Account>(accountRef).update(this.account);
+    }
   }
 
   createAccount() {
@@ -71,7 +78,7 @@ export class AccountComponent implements OnInit {
     });
   }
 
-  cancel() {
-    this.router.navigate(['/app/accounts']);
+  onCancel() {
+    this.dialogRef.close('Pizza!');
   }
 }
