@@ -87,32 +87,6 @@ export class TransactionService {
     );
   }
 
-  transactionsByCategory(budgetId: string): void {
-    const transRef = 'budgets/' + budgetId + '/transactions';
-    this.db
-      // .collection<any>(transRef, ref => ref.where('categories.7LMKnFJv5Jdf6NEzAuL2', '>', ''))
-      .collection<any>(transRef)
-      .snapshotChanges()
-      .pipe(
-        map(actions =>
-          actions.map(a => {
-            const data = a.payload.doc.data() as any;
-            const id = a.payload.doc.id;
-            if (a.payload.doc.get('id') === null) {
-              data.id = id;
-            }
-            return { id, ...data };
-          })
-        ),
-        take(1)
-      )
-      .subscribe(transactions => {
-        transactions = transactions.filter(
-          transaction => transaction.categories['7LMKnFJv5Jdf6NEzAuL2'] !== undefined
-        );
-      });
-  }
-
   matchTransactions(budgetId: string, accountId: string, accountName: string) {
     const transRef = 'budgets/' + budgetId + '/transactions';
     const importedTransRef = 'budgets/' + budgetId + '/imported/' + accountId + '/transactions';
