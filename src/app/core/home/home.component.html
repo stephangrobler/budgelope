@@ -1,26 +1,50 @@
 <navi-bar></navi-bar>
 <mat-sidenav-container>
-  <mat-sidenav class="side-nav" #sidenav [mode]="sideNavState.mode" [(opened)]="sideNavState.opened" >
+  <mat-sidenav
+    class="side-nav"
+    #sidenav
+    [mode]="sideNavState.mode"
+    [(opened)]="sideNavState.opened"
+  >
     <mat-nav-list>
-      <a mat-list-item [routerLink]="['/app/budget', currentMonth]" routerLinkActive="active"> Budget </a>
-      <a mat-list-item routerLink="/app/accounts" routerLinkActive="active"> Accounts </a>
-      <mat-nav-list>
-        <a mat-list-item (click)='navigateTo(account.id)'
-          *ngFor="let account of accounts | async"
-          routerLinkActive="active">
-          <h4 matLine>{{account.name}}</h4>
-          <div class="small" matLine [ngClass]="{'primary-text': account.balance >= 0, 'secondary-text': account.balance < 0}">
-            {{account.balance | currency: 'ZAR' : 'symbol-narrow'}}
+      <a mat-list-item [routerLink]="['/app/budget', currentMonth]" routerLinkActive="active">
+        Budget
+      </a>
+      <mat-list-item disableRipple="true"> Accounts </mat-list-item>
+      <mat-nav-list dense>
+        <a
+          mat-list-item
+          (click)="navigateTo(account.id)"
+          *ngFor="let account of (accounts | async)"
+          routerLinkActive="active"
+        >
+          <h4 matLine>{{ account.name }}</h4>
+          <div
+            class="small"
+            matLine
+            [ngClass]="{
+              'primary-text': account.balance >= 0,
+              'secondary-text': account.balance < 0
+            }"
+          >
+            {{ account.balance | currency: 'ZAR':'symbol-narrow' }}
           </div>
         </a>
       </mat-nav-list>
+      <mat-list-item *ngIf="(accounts | async)?.length == 0">
+        It seems you dont have any accounts, create one now!
+      </mat-list-item>
 
       <a mat-list-item [routerLink]="['/app/transactions']">Transactions</a>
     </mat-nav-list>
-
   </mat-sidenav>
   <mat-sidenav-content>
-    <button mat-button color="primary" (click)="sidenav.toggle()" *ngIf="sideNavState.mode === 'over'">
+    <button
+      mat-button
+      color="primary"
+      (click)="sidenav.toggle()"
+      *ngIf="sideNavState.mode === 'over'"
+    >
       Show Sidebar
     </button>
     <router-outlet></router-outlet>

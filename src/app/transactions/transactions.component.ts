@@ -110,10 +110,6 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     this.dataSource.loadTransactions(this.accountId, this.showCleared);
   }
 
-  onFixTransactions() {
-    this.transService.transformCategoriesToMap(this.budgetId);
-  }
-
   toggleCleared(transaction: ITransactionID) {
     transaction.cleared = !transaction.cleared;
     this.transService.updateClearedStatus(this.budgetId, transaction);

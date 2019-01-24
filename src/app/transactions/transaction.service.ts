@@ -182,51 +182,6 @@ export class TransactionService {
     });
   }
 
-  transformCategoriesToMap(budgetId: string): void {
-    const transRef = 'budgets/' + budgetId + '/transactions';
-    this.db
-      .collection<any>(transRef)
-      .snapshotChanges()
-      .pipe(
-        map(actions =>
-          actions.map(a => {
-            const data = a.payload.doc.data() as any;
-            const id = a.payload.doc.id;
-            console.log('Reading...', a.payload.doc.id, a.payload.doc.data());
-            if (a.payload.doc.get('id') === null) {
-              data.id = id;
-            }
-            return { id, ...data };
-          })
-        ),
-        take(1)
-      )
-      .subscribe(transactions => {
-        transactions.forEach(transaction => {
-          const ref = '/budgets/' + budgetId + '/transactions/' + transaction.id;
-          const categoryMap = {};
-          const categories: any[] = transaction.categories;
-
-          if (typeof categories.length !== 'undefined') {
-            categories.forEach(cat => {
-              categoryMap[cat.categoryId] = {
-                categoryName: cat.categoryName,
-                in: cat.in,
-                out: cat.out
-              };
-            });
-            console.log('fixing...', transaction.id);
-            transaction.categories = categoryMap;
-          }
-          console.log(ref, transaction);
-          this.db
-            .doc(ref)
-            .update(transaction)
-            .then(data => console.log('SAVED:', data));
-        });
-      });
-  }
-
   getTransaction(budgetId: string, transactionId: string): Observable<ITransaction> {
     const transRef = 'budgets/' + budgetId + '/transactions/' + transactionId;
     return this.db
