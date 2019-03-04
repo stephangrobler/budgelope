@@ -6,6 +6,7 @@ import { AngularFireModule } from '@angular/fire';
 import { AngularFireStorageModule } from '@angular/fire/storage';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AngularFireDatabaseModule } from '@angular/fire/database';
+import { AngularFireFunctionsModule, FunctionsRegionToken } from '@angular/fire/functions';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { environment } from '../environments/environment';
 
@@ -21,6 +22,8 @@ import { BudgetsModule } from './budgets/budgets.module';
 import { TransactionModule } from './transactions/transactions.module';
 import { CoreModule } from './core/core.module';
 import { ServiceWorkerModule } from '@angular/service-worker';
+import { LayoutModule } from '@angular/cdk/layout';
+import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule } from '@angular/material';
 
 @NgModule({
   declarations: [
@@ -39,6 +42,7 @@ import { ServiceWorkerModule } from '@angular/service-worker';
     AngularFirestoreModule,
     AngularFireAuthModule,
     AngularFireStorageModule,
+    AngularFireFunctionsModule,
     AppRoutingModule,
     AccountsModule,
     CategoriesModule,
@@ -46,9 +50,16 @@ import { ServiceWorkerModule } from '@angular/service-worker';
     BudgetsModule,
     TransactionModule,
     CoreModule,
-    ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production })
+    ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production }),
+    LayoutModule,
+    MatToolbarModule,
+    MatButtonModule,
+    MatSidenavModule,
+    MatIconModule,
+    MatListModule
   ],
   providers: [
+    { provide: FunctionsRegionToken, useValue: 'us-central1' }
   ],
   bootstrap: [AppComponent]
 })

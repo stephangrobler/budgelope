@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { Observable, forkJoin, of } from 'rxjs';
-import { map, catchError, take } from 'rxjs/operators';
+import { map, catchError, take, last } from 'rxjs/operators';
 import * as moment from 'moment';
 
 import { ITransaction, Transaction, TransactionTypes, ITransactionID } from '../shared/transaction';
@@ -84,16 +84,23 @@ export class TransactionService {
     );
   }
 
-  matchTransactions(budgetId: string, accountId: string, accountName: string) {
+  matchTransactions(
+    budgetId: string,
+    accountId: string,
+    accountName: string,
+    importedTransactions
+  ) {
     const transRef = 'budgets/' + budgetId + '/transactions';
-    const importedTransRef = 'budgets/' + budgetId + '/imported/' + accountId + '/transactions';
-
-    const tSnapshots = this.db
-      .collection(transRef, ref => ref.orderBy('date', 'desc'))
+    this.db
+      .collection(transRef)
       .snapshotChanges()
       .pipe(
-        map(actions =>
-          actions.map(a => {
+        map(actions => {
+          return actions.map(a => {
+             // a.payload.doc.metadata.fromCache
+             if (a.payload.doc.metadata.fromCache) {
+               return false;
+             }
             const data = a.payload.doc.data() as any;
             const id = a.payload.doc.id;
             if (a.payload.doc.get('id') === null) {
@@ -103,83 +110,71 @@ export class TransactionService {
               data.date = data.date.toDate();
             }
             return { id, ...data };
-          })
-        ),
-        take(1)
-      );
-    const itSnapshots = this.db
-      .collection(importedTransRef, ref => ref.orderBy('dtposted', 'desc'))
-      .snapshotChanges()
-      .pipe(
-        map(actions =>
-          actions.map(a => {
-            const data = a.payload.doc.data() as any;
-            const id = a.payload.doc.id;
-            if (a.payload.doc.get('id') === null) {
-              data.id = id;
+          });
+        })
+      )
+      .subscribe(val => {
+        const transactions = val;
+				console.log('TCL: TransactionService -> transactions', transactions);
+        if (val.length > 0 && val[0] === false) {
+
+          return;
+        }
+        console.log('only if objects');
+        const batch = this.db.firestore.batch();
+        for (let i = 0; i < transactions.length; i++) {
+          const curTrans = transactions[i];
+          if (!curTrans) {
+            continue;
+          } else {
+          for (let j = 0; j < importedTransactions.length; j++) {
+            const importedTrans = importedTransactions[j];
+            const dateDiff = moment(curTrans.date).diff(moment(importedTrans.dtposted), 'days');
+            if (curTrans.amount === +importedTrans.trnamt && dateDiff > -6) {
+              // flag current transactions as matched
+              const ref = this.db.doc('/budgets/' + budgetId + '/transactions/' + curTrans.id).ref;
+              batch.update(ref, { matched: moment(curTrans.date).valueOf() });
+              importedTransactions.splice(j, 1);
+              j--;
+              break;
             }
-            return { id, ...data };
-          })
-        ),
-        take(1)
-      );
-
-    forkJoin(tSnapshots, itSnapshots).subscribe(val => {
-      const transactions = val[0];
-      const imported = val[1];
-      const batch = this.db.firestore.batch();
-
-      for (let i = 0; i < transactions.length; i++) {
-        const curTrans = transactions[i];
-        for (let j = 0; j < imported.length; j++) {
-          const importedTrans = imported[j];
-          const dateDiff = moment(curTrans.date).diff(moment(importedTrans.dtposted), 'days');
-          if (curTrans.amount === importedTrans.trnamt && dateDiff > -6) {
-            // flag current transactions as matched
-            const ref = this.db.doc('/budgets/' + budgetId + '/transactions/' + curTrans.id).ref;
-            batch.update(ref, { matched: moment(curTrans.date).valueOf() });
-            imported.splice(j, 1);
-            j--;
-            break;
+          }
           }
         }
-      }
-      // commit batch
-      batch.commit().then(response => console.log('Batch Committed:', response));
+        // commit batch
+        batch.commit().then(response => console.log('Batch Committed:', response));
 
-      // add all transactions not matched
-      if (imported.length > 0) {
-        imported.forEach(transVal => {
-          const transaction = new Transaction();
-          transaction.account.accountId = accountId;
-          transaction.account.accountName = accountName;
-
-          transaction.amount = transVal.trnamt;
-          transaction.date = moment(transVal.dtposted).toDate();
-          transaction.memo = transVal.memo;
-          transaction.type =
-            transVal.trntype === 'DEBIT' ? TransactionTypes.EXPENSE : TransactionTypes.INCOME;
-          transaction.cleared = true;
-
-          let inAmount = 0,
-            outAmount = 0;
-          if (transaction.type === TransactionTypes.INCOME) {
-            inAmount = Math.abs(transaction.amount);
-          } else {
-            outAmount = Math.abs(transaction.amount);
-          }
-          transaction.categories = {
-            UNCATEGORIZED: {
-              categoryName: 'Uncategorized',
-              in: inAmount,
-              out: outAmount
-            }
-          };
-          this.createTransaction(transaction, budgetId);
-        });
-      }
-      console.log('After matching: ', imported);
-    });
+        // add all transactions not matched
+        if (importedTransactions.length > 0) {
+          // importedTransactions.forEach(transVal => {
+          //   const transaction = new Transaction();
+          //   transaction.account.accountId = accountId;
+          //   transaction.account.accountName = accountName;
+          //   transaction.amount = transVal.trnamt;
+          //   transaction.date = moment(transVal.dtposted).toDate();
+          //   transaction.memo = transVal.memo;
+          //   transaction.type =
+          //     transVal.trntype === 'DEBIT' ? TransactionTypes.EXPENSE : TransactionTypes.INCOME;
+          //   transaction.cleared = true;
+          //   let inAmount = 0,
+          //     outAmount = 0;
+          //   if (transaction.type === TransactionTypes.INCOME) {
+          //     inAmount = Math.abs(transaction.amount);
+          //   } else {
+          //     outAmount = Math.abs(transaction.amount);
+          //   }
+          //   transaction.categories = {
+          //     UNCATEGORIZED: {
+          //       categoryName: 'Uncategorized',
+          //       in: inAmount,
+          //       out: outAmount
+          //     }
+          //   };
+          //   this.createTransaction(transaction, budgetId);
+          // });
+        }
+        console.log('After matching: ', importedTransactions);
+      });
   }
 
   getTransaction(budgetId: string, transactionId: string): Observable<ITransaction> {

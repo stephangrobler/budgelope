@@ -3,12 +3,25 @@
   <button mat-button (click)="onMatchTransactions()">
     <mat-icon>compare_arrows</mat-icon>
   </button>
+  <button mat-button (click)="onTestAddMessage()">
+    <mat-icon>add</mat-icon>
+  </button>
+
   <input    
     type="file"
     name="testUpload"
     id="testUpload"
     (change)="uploadFile($event)"
   />
+  <ul>
+    <li *ngFor="let transaction of dataResponse">
+      {{transaction.dtposted}} -- 
+      {{transaction.fitid}} -- 
+      {{transaction.trnamt}} -- 
+      {{transaction.memo}} -- 
+      {{transaction.trntype}} -- 
+    </li>
+  </ul>
 </div>
 <div mat-dialog-actions>
   <button mat-button (click)="onCancel()">No Thanks</button>

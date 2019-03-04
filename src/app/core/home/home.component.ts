@@ -1,15 +1,14 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AnalyticsService } from '../analytics.service';
-import { AngularFirestore } from '@angular/fire/firestore';
 import { Observable, Subscription, of, Subject } from 'rxjs';
 import * as moment from 'moment';
-import { ObservableMedia, MediaChange } from '@angular/flex-layout';
+// import { ObservableMedia, MediaChange } from '@angular/flex-layout';
 import { AccountService } from '../../accounts/account.service';
 import { Account } from '../../shared/account';
-import { AuthService } from 'app/shared/auth.service';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, map } from 'rxjs/operators';
 import { UserService } from 'app/shared/user.service';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   templateUrl: 'home.component.html',
@@ -23,15 +22,16 @@ export class HomeComponent implements OnInit, OnDestroy {
   watcher: Subscription;
   activeMediaQuery = '';
   theUser = true;
+  isHandset$ = this.breakpointObserver.observe(Breakpoints.Handset).pipe(
+    map(results => { console.log(results.matches); return results.matches; })
+  );
 
   unsubscribe = new Subject<any>();
 
   constructor(
     private _analytics: AnalyticsService,
-    private db: AngularFirestore,
     private router: Router,
-    private media: ObservableMedia,
-    private authService: AuthService,
+    private breakpointObserver: BreakpointObserver,
     private accountService: AccountService,
     private userService: UserService
   ) {}
@@ -46,19 +46,6 @@ export class HomeComponent implements OnInit, OnDestroy {
           this.accounts = this.accountService.getAccounts(profile.activeBudget);
       });
 
-    this.media
-      .asObservable()
-      .pipe(takeUntil(this.unsubscribe))
-      .subscribe((change: MediaChange) => {
-        this.activeMediaQuery = change ? `'${change.mqAlias}' = (${change.mediaQuery})` : '';
-        if (change.mqAlias === 'xs') {
-          this.sideNavState.mode = 'over';
-          this.sideNavState.opened = false;
-        } else {
-          this.sideNavState.mode = 'side';
-          this.sideNavState.opened = true;
-        }
-      });
   }
 
   ngOnDestroy() {

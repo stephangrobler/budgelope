@@ -2,7 +2,12 @@ import { NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA, Component } from '@angular/co
 
 import { TestBed, async } from '@angular/core/testing';
 import { HomeComponent } from './home.component';
-import { MatSidenavModule, MatListModule } from '@angular/material';
+import {
+  MatSidenavModule,
+  MatListModule,
+  MatIconModule,
+  MatToolbarModule
+} from '@angular/material';
 import { RouterLinkDirectiveStub } from 'testing/route-link-directive-stub';
 import { AnalyticsService } from '../analytics.service';
 import { of } from 'rxjs';
@@ -11,8 +16,10 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import * as moment from 'moment';
-import { ObservableMedia } from '@angular/flex-layout';
+// import { ObservableMedia } from '@angular/flex-layout';
 import { AccountService } from '../../accounts/account.service';
+import { UserService } from 'app/shared/user.service';
+import { BreakpointObserver } from '@angular/cdk/layout';
 
 @Component({ selector: 'router-outlet', template: '' })
 class RouterOutletStubComponent {}
@@ -21,22 +28,24 @@ class RouterOutletStubComponent {}
 class NavigationBarStubComponent {}
 
 describe('HomeComponent', () => {
-  let analyticsServiceStub, dbStub, routerStub, authStub, mediaStub, accountServiceStub;
+  let analyticsServiceStub, dbStub, routerStub, authStub, breakpointObserverStub, accountServiceStub, userServiceStub;
 
   beforeEach(async(() => {
     analyticsServiceStub = jasmine.createSpyObj('AnalyticsService', ['pageView']);
     dbStub = jasmine.createSpyObj('AngularFirestore', ['doc', 'collection']);
     dbStub.doc.and.returnValue({
-        valueChanges: () => of({activeBudget: 'abcde'})
+      valueChanges: () => of({ activeBudget: 'abcde' })
     });
     dbStub.collection.and.returnValue({
-        valueChanges: () => of([])
+      valueChanges: () => of([])
     });
     routerStub = jasmine.createSpyObj('Router', ['navigate']);
     authStub = jasmine.createSpyObj('AngularFireAuth', ['login']);
     authStub.authState = of({ uid: '12345' });
-    mediaStub = of({});
+    breakpointObserverStub = { observe: () => of({})};
     accountServiceStub = jasmine.createSpyObj('AccountService', ['getAccounts']);
+    userServiceStub = jasmine.createSpyObj('UserService', ['getProfile$']);
+    userServiceStub.getProfile$.and.returnValue(of({activeBudget: 'abcde'}))
 
     TestBed.configureTestingModule({
       declarations: [
@@ -45,7 +54,13 @@ describe('HomeComponent', () => {
         NavigationBarStubComponent,
         RouterLinkDirectiveStub
       ],
-      imports: [MatSidenavModule, MatListModule, BrowserAnimationsModule],
+      imports: [
+        MatSidenavModule,
+        MatListModule,
+        MatIconModule,
+        MatToolbarModule,
+        BrowserAnimationsModule
+      ],
       schemas: [],
       providers: [
         {
@@ -65,12 +80,16 @@ describe('HomeComponent', () => {
           useValue: authStub
         },
         {
-          provide: ObservableMedia,
-          useValue: mediaStub
+          provide: BreakpointObserver,
+          useValue: breakpointObserverStub
         },
         {
           provide: AccountService,
           useValue: accountServiceStub
+        },
+        {
+          provide: UserService,
+          useValue: userServiceStub
         }
       ]
     }).compileComponents();
@@ -103,6 +122,4 @@ describe('HomeComponent', () => {
     const app = fixture.debugElement.componentInstance;
     expect(accountServiceStub.getAccounts).toHaveBeenCalledWith('abcde');
   }));
-
-
 });

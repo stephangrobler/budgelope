@@ -12,22 +12,37 @@ const settings = { timestampsInSnapshots: true };
 const db = admin.firestore();
 db.settings(settings);
 
-exports.importOFX = functions.storage.object().onFinalize(object => {
+// exports.importOFX = functions.storage.object().onFinalize(object => {
   
-  console.log(object);
-  // Exit if this is triggered on a file that is not an image.
-  if (!object.contentType.startsWith('application/')) {
-    console.log('This is not an ofx file.');
-    return null;
-  }
+//   console.log(object);
+//   // Exit if this is triggered on a file that is not an image.
+//   if (!object.contentType.startsWith('application/')) {
+//     console.log('This is not an ofx file.');
+//     return null;
+//   }
+//   return Promise.resolve();
   
+// });
+
+// create a callable test function
+exports.addMessage = functions.https.onCall((data, context) => {
+  // Message text passed from the client.
+  // const text = data.text;
+  // Authentication / user information is automatically added to the request.
+  // const uid = context.auth.uid;
+  // const name = context.auth.token.name || null;
+  // const picture = context.auth.token.picture || null;
+  // const email = context.auth.token.email || null;
+
+  console.log(data);
+
   // get the file to local instance first
-  const filePath = object.name; // File path in the bucket.
-  const fileDir = path.dirname(filePath);
-  const fileBucket = object.bucket;
-  const fileParts = filePath.split('/');
+  const filePath = data.filename; // File path in the bucket.
+  // const fileDir = path.dirname(filePath);
+  const fileBucket = data.bucket;
+  // const fileParts = filePath.split('/');
   const tempLocalFile = path.join(os.tmpdir(), filePath);
-  const tempLocalDir = path.dirname(tempLocalFile);
+  // const tempLocalDir = path.dirname(tempLocalFile);
   const storage = new Storage({
     projectId: 'yrab-6c2b5'
   });
@@ -45,10 +60,10 @@ exports.importOFX = functions.storage.object().onFinalize(object => {
   }).then(() => {
     console.log('OFX downloaded locally to', tempFilePath);
 
-    
     var parser = new xml2js.Parser({ explicitArray: false, normalizeTags: true });
     console.log(parser);
-    fs.readFile(tempFilePath, 'utf8', (err, ofxStr) => {
+    return new Promise((resolve, reject) => {
+      fs.readFile(tempFilePath, 'utf8', (err, ofxStr) => {
       if (err) console.log(err);
       console.log('Read the file succesfully.');
       var data = {
@@ -69,6 +84,7 @@ exports.importOFX = functions.storage.object().onFinalize(object => {
 
       // console.log(data.xml);
       console.log('Converted to xml.');
+      
       parser.parseString(data.xml, (err, result) => {
         if (err) console.log(err);
         console.log('Succesfully parsed the xml');
@@ -82,31 +98,33 @@ exports.importOFX = functions.storage.object().onFinalize(object => {
         
         console.log('Filter transactions:', transactionList.length);
 
-        const refString = '/budgets/' + fileParts[1] + '/imported/' + path.basename(filePath, '.ofx') + '/transactions';
-        console.log('Collection to upload to: ' + refString);
-        const ref = db.collection(refString);
-        const trPromises = [];
-        db.collection('/test').doc('test').set({name: 'test'}).then((result) => {
-          console.log(result);
-        }).catch((reason) => {
-          console.log(reason);
-        })
-        for (let i = 0; i < transactionList.length; i++) {
-          let transaction = transactionList[i];
-          transaction.trnamt = Number(transaction.trnamt);
-          transaction.acctid = accountNumber;
-          console.log(i, transaction);
-          trPromises.push(ref.doc(transaction.fitid).set(transaction));
+        // const refString = '/budgets/' + fileParts[1] + '/imported/' + path.basename(filePath, '.ofx') + '/transactions';
+        // console.log('Collection to upload to: ' + refString);
+        // const ref = db.collection(refString);
+        // const trPromises = [];
+        // db.collection('/test').doc('test').set({name: 'test'}).then((result) => {
+        //   console.log(result);
+        // }).catch((reason) => {
+        //   console.log(reason);
+        // })
+        // for (let i = 0; i < transactionList.length; i++) {
+        //   let transaction = transactionList[i];
+        //   transaction.trnamt = Number(transaction.trnamt);
+        //   transaction.acctid = accountNumber;
+        //   console.log(i, transaction);
+        //   trPromises.push(ref.doc(transaction.fitid).set(transaction));
           
-        }
-        return Promise.all(trPromises)
-          .then((results) => console.log(results))
-          .catch((reason) => console.log(reason));
+        // }
+        resolve(transactionList);
+        return transactionList;
+          // .then((results) => console.log(results))
+          // .catch((reason) => console.log(reason));
       });
-    });
+    
+      });
+    }).then(data => {return data;});
   });
 });
-
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //
