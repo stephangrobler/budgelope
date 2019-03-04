@@ -23,7 +23,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   activeMediaQuery = '';
   theUser = true;
   isHandset$ = this.breakpointObserver.observe(Breakpoints.Handset).pipe(
-    map(results => { console.log(results.matches); return results.matches; })
+    map(results => results.matches)		
   );
 
   unsubscribe = new Subject<any>();

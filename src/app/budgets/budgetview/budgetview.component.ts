@@ -149,13 +149,13 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     const subscription = this.categoryService.getCategories(budgetId).subscribe(list => {
       // filter list
       list = list.filter(category => category.type === TransactionTypes.EXPENSE);
-      console.log(list.reduce((a, b) => {
-        if (b.name !== 'FNB Credit Card' && b.name !== 'Credit Card - Virgin Money') {
-          return a += b.balance;
-        } else {
-          return a;
-        }
-      }, 0));
+      // console.log(list.reduce((a, b) => {
+      //   if (b.name !== 'FNB Credit Card' && b.name !== 'Credit Card - Virgin Money') {
+      //     return a += b.balance;
+      //   } else {
+      //     return a;
+      //   }
+      // }, 0));
       this.checkAllocations(list, this.selectedMonth);
       this.sortList = list;
     });

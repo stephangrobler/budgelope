@@ -5,11 +5,12 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { Account } from '../shared/account';
 import { Category } from '../shared/category';
 import { Budget } from '../shared/budget';
-import { Transaction } from '../shared/transaction';
+import { Transaction, ITransaction, ITransactionID, TransactionTypes } from '../shared/transaction';
 import { Observable, of } from 'rxjs';
 import { AccountService } from '../accounts/account.service';
 import { resolve } from 'path';
 import { FirebaseApp } from '@angular/fire';
+import { IImportedTransaction } from './import/importedTransaction';
 
 describe('Transaction Service', () => {
   let service: TransactionService;
@@ -322,7 +323,7 @@ describe('Transaction Service', () => {
       newTransaction.account = {
         accountId: 'ACC002',
         accountName: 'TestAccount002'
-      }
+      };
       newTransaction.amount = 500;
 
       // action
@@ -338,7 +339,7 @@ describe('Transaction Service', () => {
       newTransaction.account = {
         accountId: 'ACC002',
         accountName: 'TestAccount002'
-      }
+      };
       newTransaction.amount = -500;
 
       // action
@@ -354,7 +355,7 @@ describe('Transaction Service', () => {
       newTransaction.account = {
         accountId: 'ACC001',
         accountName: 'TestAccount'
-      }
+      };
       newTransaction.amount = 500;
 
       // action
@@ -378,7 +379,6 @@ describe('Transaction Service', () => {
         // assert
         done();
       });
-
     });
 
     it('should update a transaction if category changed', (done: DoneFn) => {
@@ -421,6 +421,71 @@ describe('Transaction Service', () => {
         expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledTimes(0);
         done();
       });
+    });
+
+    it('should return void if 1 option in array is a boolean', () => {
+      // arrange
+      const importedTransactions: IImportedTransaction[] = [
+        { dtposted: '20190304', trnamt: '-50.33', fitid: 'testid001', trntype: 'DEBIT' },
+        { dtposted: '20190304', trnamt: '-150.33', fitid: 'testid002', trntype: 'DEBIT' },
+        { dtposted: '20190305', trnamt: '-250.33', fitid: 'testid003', trntype: 'DEBIT' },
+        { dtposted: '20190305', trnamt: '-350.33', fitid: 'testid005', trntype: 'DEBIT' }
+      ];
+
+      const currentTransactions = [];
+
+      // action
+
+      // assert
+
+      service.doMatching(currentTransactions, importedTransactions);
+    });
+
+    it('should return void if 1 option in array is a boolean', () => {
+      // arrange
+      const importedTransactions: IImportedTransaction[] = [
+        { dtposted: '20190304', trnamt: '-50.33', fitid: 'testid001', trntype: 'DEBIT' },
+        { dtposted: '20190304', trnamt: '-150.33', fitid: 'testid002', trntype: 'DEBIT' },
+        { dtposted: '20190305', trnamt: '-250.33', fitid: 'testid003', trntype: 'DEBIT' },
+        { dtposted: '20190305', trnamt: '-350.33', fitid: 'testid005', trntype: 'DEBIT' }
+      ];
+
+      const day = new Date('2019-03-04');
+      
+      const currentTransactions: ITransactionID[] = [
+        {
+          id: '001',
+          date: day,
+          amount: -50.33,
+          accountDisplayName: 'Test',
+          categoryDisplayName: '',
+          in: 0,
+          out: -50.33,
+          account: {
+            accountId: 'ACC001',
+            accountName: 'TESTACCOUNT'
+          },
+          cleared: false,
+          type: TransactionTypes.EXPENSE,
+          categories: {
+            TESTID001: {
+              categoryName: 'TEST',
+              in: 0,
+              out: -50.33
+            }
+          },
+          memo: '',
+          payee: ''
+        }
+      ];
+
+      // action
+
+      // assert
+
+      const matching = service.doMatching(currentTransactions, importedTransactions);
+      expect(matching.matched.length).toBe(1);
+      expect(matching.unmatched.length).toBe(3);
     });
   });
 });

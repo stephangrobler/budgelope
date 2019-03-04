@@ -34,7 +34,6 @@ export class ImportComponent implements OnInit {
     const filepath = 'budgets/' + this.data.budgetId + '/uploads/' + this.data.accountId + '.ofx';
     const ref = this.storage.ref(filepath);
     const task = ref.put(file).then(snap => {
-      console.log(snap);
       // create data object
       const data = {
         filename: snap.metadata.fullPath,
@@ -43,7 +42,6 @@ export class ImportComponent implements OnInit {
       const callable = this.functions.httpsCallable('addMessage');
 
       callable(data).subscribe(dataResponse => {
-        console.log('data response', dataResponse);
         this.dataResponse = dataResponse;
         this.transService.matchTransactions(this.data.budgetId, this.data.accountId, this.data.accountName, dataResponse);
       });
@@ -56,7 +54,7 @@ export class ImportComponent implements OnInit {
 
   onTestAddMessage() {
     const callable = this.functions.httpsCallable('addMessage');
-    callable({ text: 'some-data' }).subscribe(data => console.log(data));
+    // callable({ text: 'some-data' }).subscribe(data => console.log(data));
   }
 
   onCancel() {

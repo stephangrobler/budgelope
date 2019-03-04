@@ -9,6 +9,7 @@ import { CategoryService } from '../categories/category.service';
 import { AccountService } from '../accounts/account.service';
 import { BudgetService } from '../budgets/budget.service';
 import { FirebaseApp } from '@angular/fire';
+import { IImportedTransaction } from './import/importedTransaction';
 
 export interface IFilter {
   accountId: string;
@@ -84,6 +85,37 @@ export class TransactionService {
     );
   }
 
+  doMatching(currentTransactions: ITransaction[], importedTransactions: IImportedTransaction[]) {
+    const matching = { matched: [], unmatched: [] };
+
+    if (currentTransactions.length > 0 && typeof currentTransactions[0] === 'boolean') {
+      return matching;
+    }
+
+    for (let i = 0; i < currentTransactions.length; i++) {
+      const curTrans = currentTransactions[i];
+      if (!curTrans) {
+        continue;
+      } else {
+        for (let j = 0; j < importedTransactions.length; j++) {
+          const importedTrans = importedTransactions[j];
+          const dateDiff = moment(curTrans.date).diff(moment(importedTrans.dtposted), 'days');
+          if (curTrans.amount === +importedTrans.trnamt && dateDiff > -6) {
+            // flag current transactions as matched
+
+            importedTransactions.splice(j, 1);
+            j--;
+            break;
+          }
+        }
+      }
+    }
+    matching.matched = currentTransactions.slice();
+    matching.unmatched = importedTransactions.slice();
+    return matching;
+    // commit batch
+  }
+
   matchTransactions(
     budgetId: string,
     accountId: string,
@@ -97,10 +129,10 @@ export class TransactionService {
       .pipe(
         map(actions => {
           return actions.map(a => {
-             // a.payload.doc.metadata.fromCache
-             if (a.payload.doc.metadata.fromCache) {
-               return false;
-             }
+            // a.payload.doc.metadata.fromCache
+            if (a.payload.doc.metadata.fromCache) {
+              return false;
+            }
             const data = a.payload.doc.data() as any;
             const id = a.payload.doc.id;
             if (a.payload.doc.get('id') === null) {
@@ -115,30 +147,28 @@ export class TransactionService {
       )
       .subscribe(val => {
         const transactions = val;
-				console.log('TCL: TransactionService -> transactions', transactions);
         if (val.length > 0 && val[0] === false) {
-
           return;
         }
-        console.log('only if objects');
         const batch = this.db.firestore.batch();
         for (let i = 0; i < transactions.length; i++) {
           const curTrans = transactions[i];
           if (!curTrans) {
             continue;
           } else {
-          for (let j = 0; j < importedTransactions.length; j++) {
-            const importedTrans = importedTransactions[j];
-            const dateDiff = moment(curTrans.date).diff(moment(importedTrans.dtposted), 'days');
-            if (curTrans.amount === +importedTrans.trnamt && dateDiff > -6) {
-              // flag current transactions as matched
-              const ref = this.db.doc('/budgets/' + budgetId + '/transactions/' + curTrans.id).ref;
-              batch.update(ref, { matched: moment(curTrans.date).valueOf() });
-              importedTransactions.splice(j, 1);
-              j--;
-              break;
+            for (let j = 0; j < importedTransactions.length; j++) {
+              const importedTrans = importedTransactions[j];
+              const dateDiff = moment(curTrans.date).diff(moment(importedTrans.dtposted), 'days');
+              if (curTrans.amount === +importedTrans.trnamt && dateDiff > -6) {
+                // flag current transactions as matched
+                const ref = this.db.doc('/budgets/' + budgetId + '/transactions/' + curTrans.id)
+                  .ref;
+                batch.update(ref, { matched: moment(curTrans.date).valueOf() });
+                importedTransactions.splice(j, 1);
+                j--;
+                break;
+              }
             }
-          }
           }
         }
         // commit batch
@@ -470,7 +500,6 @@ export class TransactionService {
             budgetId,
             transaction.amount
           );
-          console.log('account update sent');
           // after successfull response, we update the category budgets (could go to cloud functions)
           for (const key in transaction.categories) {
             if (transaction.categories.hasOwnProperty(key)) {
@@ -484,10 +513,7 @@ export class TransactionService {
               );
             }
           }
-          console.log('categories update sent');
-
           if (!transaction.transfer) {
-            console.log(budgetId, transaction.date, transaction.amount);
             // after successfull response, we update the budget budgets (could go to cloud functions)
             this.budgetService.updateBudgetBalance(budgetId, transaction.date, transaction.amount);
           }

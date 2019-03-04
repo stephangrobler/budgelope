@@ -65,7 +65,7 @@ export class AccountComponent implements OnInit {
 
     // starting balance was changed create a starting balance
     if (this.account.balance !== this.accStartingBalance) {
-      console.log(this.account, this.accStartingBalance);
+      // console.log(this.account, this.accStartingBalance);
       this.transactionService.createStartingBalance(this.data.accountId, this.budgetId, this.account.balance);
     } else {
       this.db.doc<Account>(accountRef).update(this.account);
