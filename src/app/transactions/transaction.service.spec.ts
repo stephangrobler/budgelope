@@ -30,10 +30,12 @@ describe('Transaction Service', () => {
     budget = new Budget();
     transaction = new Transaction();
 
-    dbMock = jasmine.createSpyObj('AngularFirestore', ['collection', 'doc']);
+    dbMock = jasmine.createSpyObj('AngularFirestore', ['collection', 'doc', 'createId']);
+    dbMock.createId.and.returnValue('RandomString');
     dbMock.doc.and.returnValue({
       valueChanges: () => of({}),
-      delete: jasmine.createSpy('delete')
+      delete: jasmine.createSpy('delete'),
+      ref: {'ref': 'noop'}
     });
     dbMock.collection.and.returnValue({
       doc: function() {
@@ -224,6 +226,140 @@ describe('Transaction Service', () => {
         0
       );
       done();
+    });
+  });
+
+  describe('Match transactions', () => {
+    beforeEach(() => {
+      dbMock.firestore = {
+        batch: () => {
+          return {
+            set: () => {},
+            update: () => {},
+            commit: () => Promise.resolve('Return after commit')
+          };
+        }
+      };
+    });
+
+    it('should match the stored transactions with the imported values', () => {
+      // arrange
+      const importedTransactions: IImportedTransaction[] = [
+        { dtposted: '20190304', trnamt: '-50.33', fitid: 'testid001', trntype: 'DEBIT' },
+        { dtposted: '20190304', trnamt: '-150.33', fitid: 'testid002', trntype: 'DEBIT' },
+        { dtposted: '20190305', trnamt: '-250.33', fitid: 'testid003', trntype: 'DEBIT' },
+        { dtposted: '20190305', trnamt: '-350.33', fitid: 'testid005', trntype: 'DEBIT' }
+      ];
+
+      const day = new Date('2019-03-04');
+
+      const currentTransactions: ITransactionID[] = [
+        {
+          id: '001',
+          date: day,
+          amount: -50.33,
+          accountDisplayName: 'Test',
+          categoryDisplayName: '',
+          in: 0,
+          out: -50.33,
+          account: {
+            accountId: 'ACC001',
+            accountName: 'TESTACCOUNT'
+          },
+          cleared: false,
+          type: TransactionTypes.EXPENSE,
+          categories: {
+            TESTID001: {
+              categoryName: 'TEST',
+              in: 0,
+              out: -50.33
+            }
+          },
+          memo: '',
+          payee: ''
+        }
+      ];
+
+      // action
+
+      // assert
+
+      const matching = service.doMatching(currentTransactions, importedTransactions);
+      expect(matching.matched.length).toBe(1);
+      expect(matching.unmatched.length).toBe(3);
+    });
+
+    it('should create a batched update of the matched transactions', () => {
+      // arrange
+      const transactions = [
+        <ITransactionID>{id: 'TEST001'},
+        <ITransactionID>{id: 'TEST002'},
+        <ITransactionID>{id: 'TEST003'},
+      ]
+
+      // action
+      service.batchUpdateMatched(transactions, 'TESTBUDGET');
+
+      // assert
+      
+    });
+
+    it('should create a batched transcations of unmatched transactions', async (done: DoneFn) => {
+      // arrange
+      const importedTransactions: IImportedTransaction[] = [
+        { dtposted: '20190304', trnamt: '50.33', fitid: 'testid001', trntype: 'CREDIT' },
+        { dtposted: '20190304', trnamt: '-150.33', fitid: 'testid002', trntype: 'DEBIT' },
+        { dtposted: '20190305', trnamt: '-250.33', fitid: 'testid003', trntype: 'DEBIT' },
+        { dtposted: '20190305', trnamt: '-350.33', fitid: 'testid005', trntype: 'DEBIT' }
+      ];
+      const transDate = new Date('2019-03-05');
+      // action
+      service
+        .batchCreateTransactions(importedTransactions, 'TESTBUDGET', 'ACC001', 'ACCOUNTNAME')
+        .then(() => {
+          // assert
+          expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledWith(
+            'ACC001',
+            'TESTBUDGET',
+            -700.6600000000001
+          );
+          expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledWith(
+            'TESTBUDGET',
+            'UNCATEGORIZED',
+            '201903',
+            0,
+            -700.6600000000001
+          );
+
+          expect(budgetServiceMock.updateBudgetBalance).toHaveBeenCalledWith(
+            'TESTBUDGET',
+            jasmine.anything(),
+            -700.6600000000001
+          )
+          done();
+        });
+    });
+
+    it('should update the account balance with the correct amount', async (done: DoneFn) => {
+      // arrange
+      const importedTransactions: IImportedTransaction[] = [
+        { dtposted: '20190304', trnamt: '50.33', fitid: 'testid001', trntype: 'CREDIT' },
+        { dtposted: '20190304', trnamt: '-150.33', fitid: 'testid002', trntype: 'DEBIT' },
+        { dtposted: '20190305', trnamt: '-250.33', fitid: 'testid003', trntype: 'DEBIT' },
+        { dtposted: '20190305', trnamt: '-350.33', fitid: 'testid005', trntype: 'DEBIT' }
+      ];
+      // action
+      service
+        .batchCreateTransactions(importedTransactions, 'TESTBUDGET', 'ACC001', 'ACCOUNTNAME')
+        .then(() => {
+          // assert
+          expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledWith(
+            'ACC001',
+            'TESTBUDGET',
+            -700.6600000000001
+          );
+          done();
+        });
     });
   });
 
@@ -439,53 +575,6 @@ describe('Transaction Service', () => {
       // assert
 
       service.doMatching(currentTransactions, importedTransactions);
-    });
-
-    it('should return void if 1 option in array is a boolean', () => {
-      // arrange
-      const importedTransactions: IImportedTransaction[] = [
-        { dtposted: '20190304', trnamt: '-50.33', fitid: 'testid001', trntype: 'DEBIT' },
-        { dtposted: '20190304', trnamt: '-150.33', fitid: 'testid002', trntype: 'DEBIT' },
-        { dtposted: '20190305', trnamt: '-250.33', fitid: 'testid003', trntype: 'DEBIT' },
-        { dtposted: '20190305', trnamt: '-350.33', fitid: 'testid005', trntype: 'DEBIT' }
-      ];
-
-      const day = new Date('2019-03-04');
-      
-      const currentTransactions: ITransactionID[] = [
-        {
-          id: '001',
-          date: day,
-          amount: -50.33,
-          accountDisplayName: 'Test',
-          categoryDisplayName: '',
-          in: 0,
-          out: -50.33,
-          account: {
-            accountId: 'ACC001',
-            accountName: 'TESTACCOUNT'
-          },
-          cleared: false,
-          type: TransactionTypes.EXPENSE,
-          categories: {
-            TESTID001: {
-              categoryName: 'TEST',
-              in: 0,
-              out: -50.33
-            }
-          },
-          memo: '',
-          payee: ''
-        }
-      ];
-
-      // action
-
-      // assert
-
-      const matching = service.doMatching(currentTransactions, importedTransactions);
-      expect(matching.matched.length).toBe(1);
-      expect(matching.unmatched.length).toBe(3);
     });
   });
 });

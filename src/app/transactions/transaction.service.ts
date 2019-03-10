@@ -102,7 +102,6 @@ export class TransactionService {
           const dateDiff = moment(curTrans.date).diff(moment(importedTrans.dtposted), 'days');
           if (curTrans.amount === +importedTrans.trnamt && dateDiff > -6) {
             // flag current transactions as matched
-
             importedTransactions.splice(j, 1);
             j--;
             break;
@@ -114,6 +113,81 @@ export class TransactionService {
     matching.unmatched = importedTransactions.slice();
     return matching;
     // commit batch
+  }
+
+  batchUpdateMatched(transactions: ITransactionID[], budgetId: string) {
+    const batch = this.db.firestore.batch();
+    transactions.forEach(transaction => {
+      const ref = this.db.doc('/budgets/' + budgetId + '/transactions/' + transaction.id).ref;
+      console.log(ref);
+      batch.update(ref, { matched: moment(transaction.date).valueOf() });
+    });
+
+    batch.commit().then(response => console.log('Batch Committed:', response));
+  }
+
+  batchCreateTransactions(transactions: IImportedTransaction[], budgetId: string,
+    accountId: string,
+    accountName: string) {
+    const batch = this.db.firestore.batch();
+    let accAmount = 0, budgetAmount = 0, categoryAmount = 0;
+    let shortDate = '', transDate;
+    transactions.forEach(transaction => {
+      const id = this.db.createId();
+      const ref = this.db.doc('/budgets/' + budgetId + '/testtransactions/' + id).ref;
+      // create transaction to write
+      const transRec = <ITransactionID>{account: {}};
+      transRec.account.accountId = accountId;
+      transRec.account.accountName = accountName;
+      transRec.amount = Number(transaction.trnamt);
+      transRec.date = moment(transaction.dtposted).toDate();
+      transRec.memo = transaction.memo;
+      transRec.type =
+        transaction.trntype === 'DEBIT' ? TransactionTypes.EXPENSE : TransactionTypes.INCOME;
+      transRec.cleared = true;
+      let inAmount = 0,
+        outAmount = 0;
+      if (transRec.type === TransactionTypes.INCOME) {
+        inAmount = Math.abs(transRec.amount);
+      } else {
+        outAmount = Math.abs(transRec.amount);
+      }
+      transRec.categories = {
+        UNCATEGORIZED: {
+          categoryName: 'Uncategorized',
+          in: inAmount,
+          out: outAmount
+        }
+      };
+      batch.set(ref, transRec);
+      // count amount of account
+      accAmount += transRec.amount;
+      // count category amount values
+      categoryAmount += transRec.amount;
+      // count budget amount values
+      budgetAmount += transRec.amount;
+      shortDate = moment(transaction.dtposted).format('YYYYMM');
+      transDate = moment(transaction.dtposted).toDate();
+      // update all the things
+    });
+    return batch.commit().then(response => {
+      this.accountService.updateAccountBalance(
+        accountId,
+        budgetId,
+        accAmount
+      );
+      // after successfull response, we update the category budgets (could go to cloud functions)
+      this.categoryService.updateCategoryBudget(
+        budgetId,
+        'UNCATEGORIZED',
+        shortDate,
+        0,
+        accAmount
+      );
+
+      // after successfull response, we update the budget budgets (could go to cloud functions)
+      this.budgetService.updateBudgetBalance(budgetId, transDate, accAmount);
+    });
   }
 
   matchTransactions(
@@ -145,65 +219,10 @@ export class TransactionService {
           });
         })
       )
-      .subscribe(val => {
+      .subscribe(async val => {
         const transactions = val;
-        if (val.length > 0 && val[0] === false) {
-          return;
-        }
-        const batch = this.db.firestore.batch();
-        for (let i = 0; i < transactions.length; i++) {
-          const curTrans = transactions[i];
-          if (!curTrans) {
-            continue;
-          } else {
-            for (let j = 0; j < importedTransactions.length; j++) {
-              const importedTrans = importedTransactions[j];
-              const dateDiff = moment(curTrans.date).diff(moment(importedTrans.dtposted), 'days');
-              if (curTrans.amount === +importedTrans.trnamt && dateDiff > -6) {
-                // flag current transactions as matched
-                const ref = this.db.doc('/budgets/' + budgetId + '/transactions/' + curTrans.id)
-                  .ref;
-                batch.update(ref, { matched: moment(curTrans.date).valueOf() });
-                importedTransactions.splice(j, 1);
-                j--;
-                break;
-              }
-            }
-          }
-        }
-        // commit batch
-        batch.commit().then(response => console.log('Batch Committed:', response));
-
-        // add all transactions not matched
-        if (importedTransactions.length > 0) {
-          // importedTransactions.forEach(transVal => {
-          //   const transaction = new Transaction();
-          //   transaction.account.accountId = accountId;
-          //   transaction.account.accountName = accountName;
-          //   transaction.amount = transVal.trnamt;
-          //   transaction.date = moment(transVal.dtposted).toDate();
-          //   transaction.memo = transVal.memo;
-          //   transaction.type =
-          //     transVal.trntype === 'DEBIT' ? TransactionTypes.EXPENSE : TransactionTypes.INCOME;
-          //   transaction.cleared = true;
-          //   let inAmount = 0,
-          //     outAmount = 0;
-          //   if (transaction.type === TransactionTypes.INCOME) {
-          //     inAmount = Math.abs(transaction.amount);
-          //   } else {
-          //     outAmount = Math.abs(transaction.amount);
-          //   }
-          //   transaction.categories = {
-          //     UNCATEGORIZED: {
-          //       categoryName: 'Uncategorized',
-          //       in: inAmount,
-          //       out: outAmount
-          //     }
-          //   };
-          //   this.createTransaction(transaction, budgetId);
-          // });
-        }
-        console.log('After matching: ', importedTransactions);
+        const matchObject = this.doMatching(transactions, importedTransactions);
+        // await this.batchCreateTransactions(matchObject.unmatched, budgetId, accountId, accountName);
       });
   }
 
