@@ -126,17 +126,23 @@ export class TransactionService {
     batch.commit().then(response => console.log('Batch Committed:', response));
   }
 
-  batchCreateTransactions(transactions: IImportedTransaction[], budgetId: string,
+  batchCreateTransactions(
+    transactions: IImportedTransaction[],
+    budgetId: string,
     accountId: string,
-    accountName: string) {
+    accountName: string
+  ) {
     const batch = this.db.firestore.batch();
-    let accAmount = 0, budgetAmount = 0, categoryAmount = 0;
-    let shortDate = '', transDate;
+    let accAmount = 0,
+      budgetAmount = 0,
+      categoryAmount = 0;
+    let shortDate = '',
+      transDate;
     transactions.forEach(transaction => {
       const id = this.db.createId();
-      const ref = this.db.doc('/budgets/' + budgetId + '/testtransactions/' + id).ref;
+      const ref = this.db.doc('/budgets/' + budgetId + '/transactions/' + id).ref;
       // create transaction to write
-      const transRec = <ITransactionID>{account: {}};
+      const transRec = <ITransactionID>{ account: {} };
       transRec.account.accountId = accountId;
       transRec.account.accountName = accountName;
       transRec.amount = Number(transaction.trnamt);
@@ -159,7 +165,9 @@ export class TransactionService {
           out: outAmount
         }
       };
+      
       batch.set(ref, transRec);
+			console.log('TCL: TransactionService -> transRec', transRec);
       // count amount of account
       accAmount += transRec.amount;
       // count category amount values
@@ -171,19 +179,9 @@ export class TransactionService {
       // update all the things
     });
     return batch.commit().then(response => {
-      this.accountService.updateAccountBalance(
-        accountId,
-        budgetId,
-        accAmount
-      );
+      this.accountService.updateAccountBalance(accountId, budgetId, accAmount);
       // after successfull response, we update the category budgets (could go to cloud functions)
-      this.categoryService.updateCategoryBudget(
-        budgetId,
-        'UNCATEGORIZED',
-        shortDate,
-        0,
-        accAmount
-      );
+      this.categoryService.updateCategoryBudget(budgetId, 'UNCATEGORIZED', shortDate, 0, accAmount);
 
       // after successfull response, we update the budget budgets (could go to cloud functions)
       this.budgetService.updateBudgetBalance(budgetId, transDate, accAmount);
@@ -222,7 +220,14 @@ export class TransactionService {
       .subscribe(async val => {
         const transactions = val;
         const matchObject = this.doMatching(transactions, importedTransactions);
-        // await this.batchCreateTransactions(matchObject.unmatched, budgetId, accountId, accountName);
+				console.log('TCL: TransactionService -> matchObject', matchObject);
+       
+        await this.batchCreateTransactions(
+          matchObject.unmatched,
+          budgetId,
+          accountId,
+          accountName
+        ).then(() => console.log('done?'));
       });
   }
 

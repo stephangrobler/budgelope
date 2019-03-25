@@ -22,9 +22,7 @@
 }
 
 .budget-view {
-  .mat-form-field-infix {
-    width: 80px;
-  }
+  padding: 10px;
 
   .budget-info {
     .month {
@@ -48,6 +46,15 @@
 
     .menu-button {
       text-align: right;
+    }
+  }
+
+  .planned-input {
+    input {
+      padding: 5px;
+      border: 1px solid #d3d3d3;
+      border-radius: 5px;
+      width: 100%;
     }
   }
 }

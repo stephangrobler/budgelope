@@ -1,4 +1,4 @@
-<div class="budget-view" fxLayout="column" fxLayoutGap="10px" fxLayoutAlign="center none">
+<div class="budget-view" fxLayout="column" fxLayoutAlign="center none">
 
   <mat-card *ngIf="activeBudget">
     <mat-card-title>
@@ -74,16 +74,16 @@
           <div *ngFor="let item of sortList; trackBy: trackCategory">
             <mat-list-item *ngIf="item.type != 'income'" [ngClass]=" checkIsHeader(item) ? 'header': 'category'">
               <div fxLayout="row" fxLayoutGap="10px" fxFlexFill fxLayoutAlign="center center">
-                <div fxFlex="55" fxFlex.xs="70" fxFlexAlign="center">
+                <div fxFlex="65" fxFlex.xs="70" fxLayout="row" fxFlexAlign="center">
                   <mat-icon color="primary" class="handle" fxHide.xs>drag_indicator</mat-icon>
                   <a [routerLink]="['/app/transactions', {'categoryId': item.id} ]" class="routerLink">{{item.name}}</a>
                 </div>
-                <div class="planned-input text-right" fxFlex="15" fxHide.xs>
-                  <mat-form-field *ngIf="item.allocations && item.parent != ''" fxFlex="100">
+                <div class="planned-input" fxFlex="10" fxHide.xs>
+                  <div *ngIf="item.allocations && item.parent != ''" fxFlex="100">
                     <input matInput type="number" name="planned" class="text-right" [(ngModel)]="item.allocations[selectedMonth].planned" (blur)="blur(item)"
                       (focus)="focus(item)" tabindex="">
+                  </div>
 
-                  </mat-form-field>
                 </div>
                 <div class="actual text-right" *ngIf="item.parent != ''" fxFlex="15" fxHide.xs>
                   <span *ngIf="item.allocations">
