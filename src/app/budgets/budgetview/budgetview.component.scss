@@ -22,7 +22,9 @@
 }
 
 .budget-view {
-  padding: 10px;
+  padding: 10px 10px 50px 10px;
+  position: relative;
+
 
   .budget-info {
     .month {
@@ -47,6 +49,13 @@
     .menu-button {
       text-align: right;
     }
+  }
+
+  .add-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 2;
   }
 
   .planned-input {
