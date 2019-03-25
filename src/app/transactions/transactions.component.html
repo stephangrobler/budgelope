@@ -1,10 +1,9 @@
 <div fxLayout="column" fxLayoutGap="10px" fxFlexFill style="padding: 10px">
-    <div class="page-header">
-      <h1>Transactions
-        <button mat-mini-fab color="warn" (click)="showTransaction = !showTransaction">
+<button mat-mini-fab class="add-transaction-button" color="warn" (click)="showTransaction = !showTransaction">
           <mat-icon>add</mat-icon>
         </button>
-      </h1>
+    <div class="page-header">
+      <h1>Transactions <span *ngIf="account">for {{account.name}}</span></h1>
       <app-transaction *ngIf="showTransaction"></app-transaction>
     </div>
     <mat-card>
