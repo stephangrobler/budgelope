@@ -56,4 +56,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   navigateTo(accountId) {
     this.router.navigate(['/app/transactions', { accountId: accountId }]);
   }
+  
+  gotoBudget() {
+    const shortDate = moment().format('YYYYMM');
+    this.router.navigate(['/app/budget/' + shortDate]);
+  }
 }

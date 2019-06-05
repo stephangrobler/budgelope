@@ -34,8 +34,4 @@ export class NavComponent implements OnInit {
     this.userService.logout();
   }
 
-  gotoBudget() {
-    const shortDate = moment().format('YYYYMM');
-    this.router.navigate(['/app/budget/' + shortDate]);
-  }
 }

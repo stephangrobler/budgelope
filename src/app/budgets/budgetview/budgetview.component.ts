@@ -201,6 +201,39 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     this.router.navigate(['/app/budget-create']);
   }
 
+  onRecalculate() {
+    this.db.collection('budgets/' + this.activeBudget.id + '/transactions').valueChanges()
+      .subscribe(transactions => {
+        console.log('Transactions:', transactions);
+        const NetValue = transactions.reduce((a: number, b: {amount: number}) => {
+          a += Number(b.amount);
+          return a;
+        }, 0);
+        const totalBudget = transactions.reduce((a: number, b: {amount: number}) => {
+          const amount = Number(b.amount);
+          if (amount > 0) {
+            a += amount;
+          }
+          return a;
+        }, 0);
+        console.log(totalBudget, ' -- ', NetValue);
+      });
+      this.db.collection('budgets/' + this.activeBudget.id + '/categories').valueChanges()
+        .subscribe(categories => {
+          console.log('Categories:', categories);
+          const plannedTotal: any = categories.reduce((a: number, b: {allocations: any}) => {
+            for (const key in b.allocations) {
+              if (b.allocations.hasOwnProperty(key)) {
+                const alloc = b.allocations[key];
+                a += alloc.planned;
+              }
+            }
+            return a;
+          }, 0);
+          console.log('PlannedTotal:', plannedTotal);
+        })
+  }
+
   updateCategoryOrder(categories: Category[], budgetId: string): void {
     const ref = 'budgets/' + budgetId + '/categories/';
     categories.forEach(function(category, index) {

@@ -2,6 +2,7 @@
   <mat-card *ngIf="activeBudget">
     <mat-card-title> </mat-card-title>
     <mat-card-content class="budget-info" fxLayout="row" fxLayout.xs="column">
+      {{activeBudget | json}}
       <div class="month" fxFlex="50">
         {{ this.displayMonth }}
       </div>
@@ -48,6 +49,9 @@
       </button>
       <button mat-raised-button color="basic" type="button" (click)="onNextMonth()">
         Next Month
+      </button>
+      <button mat-raised-button color="basic" type="button" (click)="onRecalculate()">
+        Re-Calculate
       </button>
     </mat-card-actions>
   </mat-card>
