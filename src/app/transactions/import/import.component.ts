@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { AngularFireStorage } from '@angular/fire/storage';
 import { TransactionService } from '../transaction.service';
 import { AngularFireFunctions } from '@angular/fire/functions';

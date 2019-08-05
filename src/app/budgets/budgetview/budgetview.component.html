@@ -76,7 +76,6 @@
   <mat-card class="budget-view" *ngIf="sortList">
     <mat-card-content>
       <mat-list>
-        <div [dragula]="'order-bag'" [dragulaModel]="sortList">
           <div *ngFor="let item of sortList; trackBy: trackCategory">
             <mat-list-item
               *ngIf="item.type != 'income'"
@@ -129,7 +128,6 @@
               </div>
             </mat-list-item>
           </div>
-        </div>
       </mat-list>
     </mat-card-content>
   </mat-card>

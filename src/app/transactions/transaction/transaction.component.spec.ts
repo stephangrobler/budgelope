@@ -1,15 +1,13 @@
 import { NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import {
-  MatTableModule,
-  MatCardModule,
-  MatDatepickerModule,
-  MatFormFieldModule,
-  MatSelectModule,
-  MatSnackBar,
-  MatNativeDateModule,
-  MatCheckboxModule,
-  MatInputModule
-} from '@angular/material';
+import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
 import { TestBed, async } from '@angular/core/testing';
 import { TransactionComponent } from './transaction.component';
 import { TransactionService } from './../transaction.service';

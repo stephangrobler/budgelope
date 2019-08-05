@@ -1,5 +1,7 @@
 import { NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { MatTableModule, MatCardModule, MatDialog } from '@angular/material';
+import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
+import { MatTableModule } from '@angular/material/table';
 import { TestBed, async } from '@angular/core/testing';
 import { TransactionsComponent } from './transactions.component';
 import { TransactionService } from './transaction.service';

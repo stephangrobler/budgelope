@@ -1,5 +1,5 @@
 .transaction-card {
-  /deep/ .mat-card-content {
+  ::ng-deep .mat-card-content {
     font-size: 16px;
 
     .mat-form-field,
