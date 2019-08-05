@@ -38,12 +38,18 @@ export class ImportComponent implements OnInit {
       const data = {
         filename: snap.metadata.fullPath,
         bucket: snap.metadata.bucket
-      }
+      };
       const callable = this.functions.httpsCallable('addMessage');
 
       callable(data).subscribe(dataResponse => {
         this.dataResponse = dataResponse;
-        this.transService.matchTransactions(this.data.budgetId, this.data.accountId, this.data.accountName, dataResponse);
+        console.log('TCL: ImportComponent -> uploadFile -> dataResponse', dataResponse);
+        this.transService.matchTransactions(
+          this.data.budgetId,
+          this.data.accountId,
+          this.data.accountName,
+          dataResponse
+        );
       });
     });
   }

@@ -14,12 +14,19 @@
     (change)="uploadFile($event)"
   />
   <ul>
-    <li *ngFor="let transaction of dataResponse">
-      {{transaction.dtposted}} -- 
-      {{transaction.fitid}} -- 
-      {{transaction.trnamt}} -- 
-      {{transaction.memo}} -- 
-      {{transaction.trntype}} -- 
+    <li *ngFor="let transaction of dataResponse" style="border-bottom: 1px solid #efefef">
+      <div style="display: inline-block; width: 20%">
+{{transaction.dtposted}}
+      </div>
+      <div style="display: inline-block; width: 20%">
+{{transaction.trnamt}}
+      </div>
+      <div style="display: inline-block; width: 40%">
+{{transaction.memo}}
+      </div>
+      <div style="display: inline-block; width: 20%">
+{{transaction.trntype}}
+      </div>
     </li>
   </ul>
 </div>

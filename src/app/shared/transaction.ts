@@ -1,5 +1,6 @@
 import { Category } from './category';
 import { Account } from './account';
+import { IImportedTransaction } from 'app/transactions/import/importedTransaction';
 
 export interface ITransaction {
   account: { accountId: string; accountName: string };
@@ -16,6 +17,7 @@ export interface ITransaction {
   memo: string;
   payee: string;
   type: string;
+  matched: IImportedTransaction
 }
 
 export interface ITransactionID extends ITransaction {
@@ -51,7 +53,7 @@ export class Transaction implements ITransaction {
   type: string; // income or expense
   cleared: boolean;
   transfer = false;
-  matched: number;
+  matched: IImportedTransaction;
 
   constructor(transactionData?: any) {
     if (transactionData) {

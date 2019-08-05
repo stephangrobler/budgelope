@@ -85,8 +85,8 @@ export class TransactionService {
     );
   }
 
-  doMatching(currentTransactions: ITransaction[], importedTransactions: IImportedTransaction[]) {
-    const matching = { matched: [], unmatched: [] };
+  doMatching(currentTransactions: ITransactionID[], importedTransactions: IImportedTransaction[]) {
+    const matching = { matched: [], unmatched: [], updated: [] };
 
     if (currentTransactions.length > 0 && typeof currentTransactions[0] === 'boolean') {
       return matching;
@@ -101,7 +101,12 @@ export class TransactionService {
           const importedTrans = importedTransactions[j];
           const dateDiff = moment(curTrans.date).diff(moment(importedTrans.dtposted), 'days');
           if (curTrans.amount === +importedTrans.trnamt && dateDiff > -6) {
+            if (curTrans.matched === null) {
             // flag current transactions as matched
+            curTrans.matched = importedTrans;
+            matching.updated.push(curTrans);
+
+            }
             importedTransactions.splice(j, 1);
             j--;
             break;
@@ -120,7 +125,7 @@ export class TransactionService {
     transactions.forEach(transaction => {
       const ref = this.db.doc('/budgets/' + budgetId + '/transactions/' + transaction.id).ref;
       console.log(ref);
-      batch.update(ref, { matched: moment(transaction.date).valueOf() });
+      batch.update(ref, { matched: transaction.matched });
     });
 
     batch.commit().then(response => console.log('Batch Committed:', response));
@@ -195,8 +200,9 @@ export class TransactionService {
     importedTransactions
   ) {
     const transRef = 'budgets/' + budgetId + '/transactions';
+    console.log('accountId: ', accountId);
     this.db
-      .collection(transRef)
+      .collection(transRef, ref => ref.where('account.accountId', '==', accountId))
       .snapshotChanges()
       .pipe(
         map(actions => {
@@ -217,17 +223,19 @@ export class TransactionService {
           });
         })
       )
-      .subscribe(async val => {
+      .subscribe(async (val: ITransactionID[]) => {
         const transactions = val;
         const matchObject = this.doMatching(transactions, importedTransactions);
-				console.log('TCL: TransactionService -> matchObject', matchObject);
-       
-        await this.batchCreateTransactions(
-          matchObject.unmatched,
-          budgetId,
-          accountId,
-          accountName
-        ).then(() => console.log('done?'));
+        console.log('TCL: TransactionService -> matchObject', matchObject);
+        if (matchObject.updated.length > 0) {
+          this.batchUpdateMatched(matchObject.updated, budgetId);
+        }
+        // await this.batchCreateTransactions(
+        //   matchObject.unmatched,
+        //   budgetId,
+        //   accountId,
+        //   accountName
+        // ).then(() => console.log('done?'));
       });
   }
 

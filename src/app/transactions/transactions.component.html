@@ -69,7 +69,7 @@
           </ng-container>
           <ng-container matColumnDef="matched">
             <mat-header-cell *matHeaderCellDef>Matched</mat-header-cell>
-            <mat-cell *matCellDef="let transaction" style="text-align: right">{{transaction.matched | date}}</mat-cell>
+            <mat-cell *matCellDef="let transaction" style="text-align: right">{{transaction.matched?.trnamt}}</mat-cell>
           </ng-container>
           <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
           <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectedRow(row)"></mat-row>
