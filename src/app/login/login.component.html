@@ -1,42 +1,79 @@
 <navi-bar></navi-bar>
-
-<div class="flex-container">
-  <div class="flex-object w33"></div>
-  <div class="flex-object w33">
-    <h1>Login</h1>
-    <div style="margin-bottom: 50px;">
-      <button mat-raised-button color="primary" (click)="googleLogin()" style="width:100%">Login with Google</button>
-    </div>
-    <hr>
-    <form class="">
-      <mat-form-field  style="width:100%">
-        <input matInput type="text" id="email" placeholder="Email Address" [(ngModel)]="email" name="email" #em="ngModel">
-      </mat-form-field>
-
-
-      <mat-form-field  style="width:100%">
-        <input matInput type="password" class="form-control" id="password" placeholder="Password" [(ngModel)]="password1" name="password1" #pwd1="ngModel">
-
-      </mat-form-field>
-      <div class="flex-container space-around">
-        <div class="flex-object w33">
-          <button type="button" mat-raised-button color="primary" (click)="onLogin(email, password1)" style="width:100%">
-            Login
+<div fxLayout="row" fxLayoutGap="10px">
+  <div fxFlex="33" fxHide.xs></div>
+  <div fxFlex="33" fxFlex.xs="100" style="padding:10px">
+    <div fxLayout="column">
+      <div fxFlex="33" fxFlex.xs="100" fxFlexOffset="10px">
+        <h1>Login</h1>
+        <div style="margin-bottom: 50px;">
+          <button mat-raised-button color="primary" (click)="googleLogin()" style="width:100%">
+            Login with Google
           </button>
         </div>
-        <div class="flex-object w33" >
-          <button type="button" mat-raised-button color="warn" (click)="signUp()" style="width:100%">
-            Sign Up
-          </button>
-        </div>
-        <div class="flex-object w33">
-          <button type="button" mat-raised-button color="basic" (click)="cancel()" style="width:100%">
-            Cancel
-          </button>
-        </div>
+        <hr />
+        <form class="">
+          <mat-form-field style="width:100%">
+            <input
+              matInput
+              type="text"
+              id="email"
+              placeholder="Email Address"
+              [(ngModel)]="email"
+              name="email"
+              #em="ngModel"
+            />
+          </mat-form-field>
+
+          <mat-form-field style="width:100%">
+            <input
+              matInput
+              type="password"
+              class="form-control"
+              id="password"
+              placeholder="Password"
+              [(ngModel)]="password1"
+              name="password1"
+              #pwd1="ngModel"
+            />
+          </mat-form-field>
+          <div fxLayout="row" fxLayout.xs="column" fxLayoutGap="10px">
+            <div fxFlex="33" fxFlex.xs="100">
+              <button
+                type="button"
+                mat-raised-button
+                color="primary"
+                (click)="onLogin(email, password1)"
+                style="width:100%"
+              >
+                Login
+              </button>
+            </div>
+            <div fxFlex="33" fxFlex.xs="100">
+              <button
+                type="button"
+                mat-raised-button
+                color="warn"
+                (click)="signUp()"
+                style="width:100%"
+              >
+                Sign Up
+              </button>
+            </div>
+            <div fxFlex="33" fxFlex.xs="100">
+              <button
+                type="button"
+                mat-raised-button
+                color="basic"
+                (click)="cancel()"
+                style="width:100%"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
-
-    </form>  </div>
-  <div class="flex-object w33"></div>
-
+    </div>
+    <div fxFlex="33" fxHide.xs></div>
+  </div>
 </div>

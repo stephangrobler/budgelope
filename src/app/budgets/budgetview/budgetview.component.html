@@ -1,23 +1,23 @@
-<div class="budget-view" fxLayout="column" fxLayoutGap="10px" fxLayoutAlign="center none">
-
+<div class="budget-view" fxLayout="column" fxLayoutAlign="center none">
   <mat-card *ngIf="activeBudget">
-    <mat-card-title>
-
-    </mat-card-title>
+    <mat-card-title> </mat-card-title>
     <mat-card-content class="budget-info" fxLayout="row" fxLayout.xs="column">
       <div class="month" fxFlex="50">
         {{ this.displayMonth }}
       </div>
       <div class="" fxFlex="40" fxFlex.xs="100">
-        <div class="balance" [ngClass]="{'positive': activeBudget.balance >= 0, 'negative': activeBudget.balance < 0}">
-          {{ activeBudget.balance | number: '1.2'}}
+        <div
+          class="balance"
+          [ngClass]="{ positive: activeBudget.balance >= 0, negative: activeBudget.balance < 0 }"
+        >
+          {{ activeBudget.balance | number: '1.2' }}
         </div>
         <div class="minor-balance" fxLayout="column">
           <div fxFlex="50">
-            Income : {{ activeBudget.allocations[selectedMonth].income | number: '1.2'}}
+            Income : {{ activeBudget.allocations[selectedMonth].income | number: '1.2' }}
           </div>
           <div fxFlex="50">
-            Expense : {{ activeBudget.allocations[selectedMonth].expense | number: '1.2'}}
+            Expense : {{ activeBudget.allocations[selectedMonth].expense | number: '1.2' }}
           </div>
         </div>
       </div>
@@ -29,8 +29,12 @@
           <button mat-menu-item (click)="onNewBudget()">
             <span>New Budget</span>
           </button>
-          <button mat-menu-item *ngFor="let budget of budgetList; index as i" (click)="onBudgetActivate(budget.id)">
-            <span>{{budget.name}}</span>
+          <button
+            mat-menu-item
+            *ngFor="let budget of budgetList; index as i"
+            (click)="onBudgetActivate(budget.id)"
+          >
+            <span>{{ budget.name }}</span>
           </button>
           <button mat-menu-item (click)="onFreshStart()">
             <span>Fresh Start</span>
@@ -45,11 +49,19 @@
       <button mat-raised-button color="basic" type="button" (click)="onNextMonth()">
         Next Month
       </button>
+      <button mat-raised-button color="basic" type="button" (click)="onRecalculate()">
+        Re-Calculate
+      </button>
     </mat-card-actions>
   </mat-card>
 
   <!-- header -->
-  <br>
+  <br />
+  <div class="add-button">
+    <a mat-fab [routerLink]="['/app/category/add']">
+      <mat-icon>add</mat-icon>
+    </a>
+  </div>
   <mat-card *ngIf="!sortList">
     <mat-card-content>
       <mat-progress-spinner
@@ -57,37 +69,45 @@
         diameter="30"
         [color]="accent"
         [mode]="'indeterminate'"
-        >
+      >
       </mat-progress-spinner>
     </mat-card-content>
   </mat-card>
-  <mat-card class="budget-view"  *ngIf="sortList">
+  <mat-card class="budget-view" *ngIf="sortList">
     <mat-card-content>
-      
-
-      <a mat-fab [routerLink]="['/app/category/add']">
-        <mat-icon>add</mat-icon>
-      </a>
-
       <mat-list>
-        <div [dragula]='"order-bag"' [dragulaModel]='sortList'>
+        <div [dragula]="'order-bag'" [dragulaModel]="sortList">
           <div *ngFor="let item of sortList; trackBy: trackCategory">
-            <mat-list-item *ngIf="item.type != 'income'" [ngClass]="{'header': checkIsHeader(item)}">
+            <mat-list-item
+              *ngIf="item.type != 'income'"
+              [ngClass]="checkIsHeader(item) ? 'header' : 'category'"
+            >
               <div fxLayout="row" fxLayoutGap="10px" fxFlexFill fxLayoutAlign="center center">
-                <div fxFlex="55" fxFlex.xs="70" fxFlexAlign="center">
+                <div fxFlex="65" fxFlex.xs="70" fxLayout="row" fxFlexAlign="center">
                   <mat-icon color="primary" class="handle" fxHide.xs>drag_indicator</mat-icon>
-                  <a [routerLink]="['/app/transactions', {'categoryId': item.id} ]" class="routerLink">{{item.name}}</a>
+                  <a
+                    [routerLink]="['/app/transactions', { categoryId: item.id }]"
+                    class="routerLink"
+                    >{{ item.name }}</a
+                  >
                 </div>
-                <div class="planned-input text-right" fxFlex="15" fxHide.xs>
-                  <mat-form-field *ngIf="item.allocations && item.parent != ''" fxFlex="100">
-                    <input matInput type="number" name="planned" class="text-right" [(ngModel)]="item.allocations[selectedMonth].planned" (blur)="blur(item)"
-                      (focus)="focus(item)" tabindex="">
-
-                  </mat-form-field>
+                <div class="planned-input" fxFlex="10" fxHide.xs>
+                  <div *ngIf="item.allocations && item.parent != ''" fxFlex="100">
+                    <input
+                      matInput
+                      type="number"
+                      name="planned"
+                      class="text-right"
+                      [(ngModel)]="item.allocations[selectedMonth].planned"
+                      (blur)="blur(item)"
+                      (focus)="focus(item)"
+                      tabindex=""
+                    />
+                  </div>
                 </div>
                 <div class="actual text-right" *ngIf="item.parent != ''" fxFlex="15" fxHide.xs>
                   <span *ngIf="item.allocations">
-                    {{item.allocations[selectedMonth].actual | number:'1.2'}}
+                    {{ item.allocations[selectedMonth].actual | number: '1.2' }}
                   </span>
                 </div>
                 <div class="actual text-right" *ngIf="item.parent == ''" fxFlex="15" fxHide.xs>
@@ -95,8 +115,13 @@
                     &nbsp;
                   </span>
                 </div>
-                <div class="balance text-right" *ngIf="item.parent != ''" fxFlex="15" fxFlex.xs="30">
-                  {{item.balance | number:'1.2'}}
+                <div
+                  class="balance text-right"
+                  *ngIf="item.parent != ''"
+                  fxFlex="15"
+                  fxFlex.xs="30"
+                >
+                  {{ item.balance | number: '1.2' }}
                 </div>
                 <div class="balance text-right" *ngIf="item.parent == ''" fxFlex="15">
                   &nbsp;
@@ -108,5 +133,4 @@
       </mat-list>
     </mat-card-content>
   </mat-card>
-
 </div>

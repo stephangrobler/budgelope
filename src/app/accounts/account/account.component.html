@@ -1,45 +1,32 @@
-<div fxLayout="column" fxLayoutGap="10px">
-  <div class="">
-    <div class="col-xs-12">
-      <div class="page-header">
-        <h1>Add Account <small></small></h1>
-      </div>
-      <form name="account_form" *ngIf="account">
-        <mat-card>
-          <mat-card-content>
-            <div fxLayout="column" fxLayoutGap="10px">
-              <mat-form-field fxFlex="20">
-                <input
-                  matInput
-                  type="text"
-                  placeholder="Account Name"
-                  [(ngModel)]="account.name"
-                  name="accName"
-                  #accTitle="ngModel"
-                />
-              </mat-form-field>
-              <mat-form-field fxFlex="20">
-                <input
-                  matInput
-                  type="number"
-                  placeholder="Starting Balance"
-                  [(ngModel)]="account.balance"
-                  name="accStartingBalance"
-                  #accCurrent="ngModel"
-                />
-              </mat-form-field>
-            </div>
-            <div fxLayout="row" fxLayoutGap="10px">
-              <button mat-raised-button color="primary" type="button" (click)="saveAccount()">
-                Save Account
-              </button>
-              <button mat-raised-button color="warn" type="button" (click)="cancel()">
-                Cancel
-              </button>
-            </div>
-          </mat-card-content>
-        </mat-card>
-      </form>
-    </div>
-  </div>
+<div *ngIf="!account">Loading...</div>
+<div *ngIf="account">
+<h1 mat-dialog-title>Account: {{ data.accountName }}</h1>
+<div mat-dialog-content>
+  <mat-form-field fxFlex="100">
+    <input
+      matInput
+      type="text"
+      placeholder="Account Name"
+      [(ngModel)]="account.name"
+      name="accName"
+      #accTitle="ngModel"
+    />
+  </mat-form-field>
+  <mat-form-field fxFlex="100">
+    <input
+      matInput
+      type="number"
+      placeholder="Starting Balance"
+      [(ngModel)]="account.balance"
+      name="accStartingBalance"
+      #accCurrent="ngModel"
+    />
+  </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-raised-button color="warn" (click)="onCancel()">Cancel</button>
+  <button mat-raised-button (click)="onSaveAccount()" [mat-dialog-close]="data.animal" cdkFocusInitial>
+    Ok
+  </button>
+</div>
 </div>

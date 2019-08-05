@@ -1,6 +1,6 @@
 <div>
   <div>
-    <form class="form" [formGroup]="transactionForm" (ngSubmit)="onSubmit()">
+    <form class="form" [formGroup]="transactionForm">
       <mat-card class="transaction-card">
         <mat-card-content>
           <div fxLayout="row" fxLayout.xs="column" fxLayoutGap="10px" fxFlexFill>
@@ -59,6 +59,11 @@
               </mat-form-field>
             </div>
           </div>
+          <div fxFlexFill>
+            <mat-form-field style="width: 100%">
+              <textarea matInput placeholder="Memo" formControlName="memo"></textarea>
+            </mat-form-field>
+          </div> 
         </mat-card-content>
         <mat-checkbox name="cleared" formControlName="cleared">
           Cleared
@@ -85,6 +90,7 @@
         </mat-card-actions>
         
       </mat-card>
+      <input type="hidden" name="type" formControlName="type">
     </form>
   </div>
 

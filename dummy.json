@@ -1,0 +1,83 @@
+[
+  {
+    "id": "GsiQXhJIWcybVkcahbGA",
+    "account": { "accountId": "p91amjTtkhXg7xzEnyqa", "accountName": "Stephan Checking" },
+    "accountDisplayName": "Stephan Checking",
+    "amount": 33400,
+    "categories": {
+      "uFzJbEKdXGpEOai26Utb": { "categoryName": "Salary - Britehouse", "in": 33400, "out": null }
+    },
+    "categoryDisplayName": "Salary - Britehouse",
+    "cleared": false,
+    "date": "2018-11-27T17:14:37.040Z",
+    "in": 33400,
+    "out": null,
+    "payee": "SF Grobler",
+    "payeeId": null,
+    "transfer": false,
+    "transferAccount": null,
+    "transferAccountDisplayName": null,
+    "transferAmount": 0,
+    "type": "income"
+  },
+  {
+    "id": "GsvU8GIDrnVaaz70vXKg",
+    "account": { "accountId": "m3zv9zSbrR3qyLSKFTdy", "accountName": "Riana Checking" },
+    "accountDisplayName": "Riana Checking",
+    "amount": 0,
+    "catMap": { "TestID": { "categoryName": "test", "in": 0, "out": 10 } },
+    "categories": { "STARTING_BALANCE": { "categoryName": "Starting balance", "in": 0, "out": 0 } },
+    "categoryDisplayName": "Starting Balance",
+    "cleared": false,
+    "date": "2018-11-27T18:09:37.014Z",
+    "in": 0,
+    "out": 0,
+    "payee": "Starting Balance",
+    "payeeId": null,
+    "transfer": false,
+    "transferAccount": null,
+    "transferAccountDisplayName": null,
+    "transferAmount": 0,
+    "type": "expense"
+  },
+  {
+    "id": "REbmVjA3HzPqQYxihhmp",
+    "account": { "accountId": "m3zv9zSbrR3qyLSKFTdy", "accountName": "Riana Checking" },
+    "accountDisplayName": "Riana Checking",
+    "amount": -501,
+    "categories": { "7LMKnFJv5Jdf6NEzAuL2": { "categoryName": "Groceries", "in": 0, "out": 501 } },
+    "categoryDisplayName": "Groceries",
+    "cleared": false,
+    "date": "2018-11-27T18:10:11.718Z",
+    "in": null,
+    "out": 501,
+    "payee": "Test",
+    "payeeId": null,
+    "transfer": false,
+    "transferAccount": null,
+    "transferAccountDisplayName": null,
+    "transferAmount": 0,
+    "type": null
+  },
+  {
+    "id": "vpbMnO2lZXnY1f4dYtLF",
+    "account": { "accountId": "p91amjTtkhXg7xzEnyqa", "accountName": "Stephan Checking" },
+    "accountDisplayName": "Stephan Checking",
+    "amount": -11500,
+    "categories": {
+      "YptAPT4jmtRF7eJ8Z1va": { "categoryName": "Mortgage", "in": null, "out": 11500 }
+    },
+    "categoryDisplayName": "Mortgage",
+    "cleared": false,
+    "date": "2018-12-03T19:15:00.928Z",
+    "in": null,
+    "out": 11500,
+    "payee": "Test Bulid",
+    "payeeId": null,
+    "transfer": false,
+    "transferAccount": null,
+    "transferAccountDisplayName": null,
+    "transferAmount": 0,
+    "type": null
+  }
+]

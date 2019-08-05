@@ -1,6 +1,12 @@
 .cleared-box {
     padding-left: 24px;
 }
+.add-transaction-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 2;
+}
 
 @media screen and (max-width: 599px){
     .transaction-table {
@@ -47,6 +53,9 @@
         justify-content: flex-end;
     }
     .mat-column-cleared {
+        display: none;
+    }
+    .mat-column-matched {
         display: none;
     }
 }

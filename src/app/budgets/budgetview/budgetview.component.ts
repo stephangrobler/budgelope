@@ -1,19 +1,18 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { AngularFireAuth } from '@angular/fire/auth';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { DragulaService } from 'ng2-dragula';
-import { Observable, of, Subscription } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { Subscription, forkJoin, of, combineLatest } from 'rxjs';
 import * as moment from 'moment';
 
-import { Account } from '../../shared/account';
 import { Category } from '../../shared/category';
 import { Budget } from '../../shared/budget';
 import { BudgetService } from '../budget.service';
 import { UserService } from '../../shared/user.service';
 import { CategoryService } from '../../categories/category.service';
 import { AuthService } from 'app/shared/auth.service';
+import { TransactionTypes } from 'app/shared/transaction';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-budgetview',
@@ -56,16 +55,16 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-      this.userId = this.auth.currentUserId;
-      // get active budget TODO: move to service :P
-      const subscription = this.db
-        .doc<any>('users/' + this.auth.currentUserId)
-        .valueChanges()
-        .subscribe(profile => {
-          this.loadAvailableBudgets(profile);
-          this.loadActiveBudget(profile.activeBudget);
-        });
-      this.subscriptions.add(subscription);
+    this.userId = this.auth.currentUserId;
+    // get active budget TODO: move to service :P
+    const subscription = this.db
+      .doc<any>('users/' + this.auth.currentUserId)
+      .valueChanges()
+      .subscribe(profile => {
+        this.loadAvailableBudgets(profile);
+        this.loadActiveBudget(profile.activeBudget);
+      });
+    this.subscriptions.add(subscription);
 
     // drag and drop bag setup
     this.dragulaService.setOptions('order-bag', {
@@ -147,7 +146,14 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
   loadCategories(budgetId: string): void {
     const subscription = this.categoryService.getCategories(budgetId).subscribe(list => {
       // filter list
-      list = list.filter(category => category.type === 'expense');
+      list = list.filter(category => category.type === TransactionTypes.EXPENSE);
+      // console.log(list.reduce((a, b) => {
+      //   if (b.name !== 'FNB Credit Card' && b.name !== 'Credit Card - Virgin Money') {
+      //     return a += b.balance;
+      //   } else {
+      //     return a;
+      //   }
+      // }, 0));
       this.checkAllocations(list, this.selectedMonth);
       this.sortList = list;
     });
@@ -191,6 +197,57 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
 
   onNewBudget() {
     this.router.navigate(['/app/budget-create']);
+  }
+
+  onRecalculate() {
+    console.log('recalculating...');
+
+    const data = combineLatest([
+      this.db.collection('budgets/' + this.activeBudget.id + '/transactions').valueChanges(),
+      this.db.collection('budgets/' + this.activeBudget.id + '/categories').valueChanges()
+    ]);
+
+    data.subscribe(records => {
+      console.log('Records: ', records);
+      const transactions = records[0];
+      const categories = records[1];
+
+      const NetValue = transactions.reduce((a: number, b: { amount: number }) => {
+        a += Number(b.amount);
+        return a;
+      }, 0);
+      const totalBudget = transactions.reduce(
+        (a: { inc: number; exp: number }, b: { amount: number; transfer: boolean }) => {
+          if (b.transfer) {
+            return a;
+          }
+          const amount = Number(b.amount);
+          if (amount > 0) {
+            a.inc += amount;
+          } else {
+            a.exp += amount;
+          }
+          return a;
+        },
+        { inc: 0, exp: 0 }
+      );
+      console.log('TotalBudget: ', totalBudget, ' -- ', 'Calculated Nett: ', NetValue);
+
+      const plannedTotal: any = categories.reduce((a: number, b: { allocations: any }) => {
+        for (const key in b.allocations) {
+          if (b.allocations.hasOwnProperty(key)) {
+            const alloc = b.allocations[key];
+            a += alloc.planned;
+          }
+        }
+        // GVierllH2PW82OTBhfKX
+
+        return a;
+      }, 0);
+      console.log('PlannedTotal:', plannedTotal);
+      console.log('Current: ', totalBudget.inc - totalBudget.exp);
+      console.log('Actual Available Budget: ', totalBudget.inc - plannedTotal);
+    }, err => console.log('Err:', err), () => console.log('Completed!'));
   }
 
   updateCategoryOrder(categories: Category[], budgetId: string): void {
@@ -250,7 +307,6 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     const planned: number = +item.allocations[this.selectedMonth].planned;
     const ref = 'budgets/' + this.activeBudget.id + '/categories/' + item.id,
       budgetRef = 'budgets/' + this.activeBudget.id;
-
 
     if (typeof this.originalValue !== 'undefined' && planned !== +this.originalValue) {
       if (isNaN(item.balance)) {

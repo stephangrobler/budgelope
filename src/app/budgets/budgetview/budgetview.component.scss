@@ -3,6 +3,18 @@
 .header {
   background: mat-color($candy-app-accent);
   color: mat-contrast($candy-app-accent, 500) !important;
+  a {
+    color: mat-contrast($candy-app-primary, 500) !important;
+    text-decoration: none;
+  }
+}
+
+.category {
+  border-bottom: 1px solid mat-color($candy-app-accent);
+  a {
+    color: mat-contrast($candy-app-accent, 500) !important;
+    text-decoration: none;
+  }
 }
 
 .handle {
@@ -10,9 +22,9 @@
 }
 
 .budget-view {
-  .mat-form-field-infix {
-    width: 80px;
-  }
+  padding: 10px 10px 50px 10px;
+  position: relative;
+
 
   .budget-info {
     .month {
@@ -36,6 +48,22 @@
 
     .menu-button {
       text-align: right;
+    }
+  }
+
+  .add-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 2;
+  }
+
+  .planned-input {
+    input {
+      padding: 5px;
+      border: 1px solid #d3d3d3;
+      border-radius: 5px;
+      width: 100%;
     }
   }
 }

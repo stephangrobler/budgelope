@@ -1,10 +1,9 @@
 <div fxLayout="column" fxLayoutGap="10px" fxFlexFill style="padding: 10px">
-    <div class="page-header">
-      <h1>Transactions
-        <button mat-mini-fab color="warn" (click)="showTransaction = !showTransaction">
+<button mat-mini-fab class="add-transaction-button" color="warn" (click)="showTransaction = !showTransaction">
           <mat-icon>add</mat-icon>
         </button>
-      </h1>
+    <div class="page-header">
+      <h1>Transactions <span *ngIf="account">for {{account.name}}</span></h1>
       <app-transaction *ngIf="showTransaction"></app-transaction>
     </div>
     <mat-card>
@@ -15,8 +14,19 @@
           >
         Show Cleared
       </mat-slide-toggle>
+      <button *ngIf="account" mat-icon-button color="accent" (click)="openDialog()">
+        <mat-icon>import_export</mat-icon>
+      </button>
+      
+      <button *ngIf="account" mat-icon-button color="accent" (click)="openAccountDialog()">
+        <mat-icon>settings</mat-icon>
+      </button>
+
       <div *ngIf="account">
-        Filtered on Account: <b>{{account.name}}</b> : Cleared: <b>{{ account.clearedBalance}}</b> Uncleared: <b>{{account.clearedBalance - account.balance}} </b>= Working: <b>{{account.balance}}</b>
+        Filtered on Account: <b>{{account.name}}</b> : 
+        Cleared: <b>{{ account.clearedBalance | currency: 'R'}}</b> 
+        Uncleared: <b>{{account.clearedBalance - account.balance | currency: 'R'}}           
+        </b>= Working: <b>{{account.balance | currency: 'R'}}</b>
       </div>
       
       </mat-card-content>
@@ -56,6 +66,10 @@
                     [checked]="transaction.cleared">
               </mat-checkbox>
             </mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="matched">
+            <mat-header-cell *matHeaderCellDef>Matched</mat-header-cell>
+            <mat-cell *matCellDef="let transaction" style="text-align: right">{{transaction.matched?.trnamt}}</mat-cell>
           </ng-container>
           <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
           <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectedRow(row)"></mat-row>

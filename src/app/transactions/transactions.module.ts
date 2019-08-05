@@ -7,17 +7,22 @@ import { SharedModule } from '../shared/shared.module';
 
 import { TransactionsComponent } from './transactions.component';
 import { TransactionComponent } from './transaction/transaction.component';
+import { ImportComponent } from './import/import.component';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    SharedModule,
+    SharedModule
   ],
   declarations: [
     TransactionsComponent,
     TransactionComponent,
+    ImportComponent,
+  ],
+  entryComponents: [
+    ImportComponent
   ],
   providers: []
 })

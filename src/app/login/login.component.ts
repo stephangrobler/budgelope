@@ -41,7 +41,8 @@ export class LoginComponent implements OnInit {
 
   googleLogin() {
     this.afAuth.auth.signInWithPopup(new auth.GoogleAuthProvider()).then(user => {
-      this.userSVC.getProfile$();
+      
+      this.userSVC.getProfile$().subscribe(thing => console.log(thing));
       // check if the user has a profile
       this.router.navigate(['/app/budget']);
     });

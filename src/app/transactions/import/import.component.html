@@ -1,0 +1,36 @@
+<h1 mat-dialog-title>Importing into account: {{ data.accountName }}</h1>
+<div mat-dialog-content>
+  <button mat-button (click)="onMatchTransactions()">
+    <mat-icon>compare_arrows</mat-icon>
+  </button>
+  <button mat-button (click)="onTestAddMessage()">
+    <mat-icon>add</mat-icon>
+  </button>
+
+  <input    
+    type="file"
+    name="testUpload"
+    id="testUpload"
+    (change)="uploadFile($event)"
+  />
+  <ul>
+    <li *ngFor="let transaction of dataResponse" style="border-bottom: 1px solid #efefef">
+      <div style="display: inline-block; width: 20%">
+{{transaction.dtposted}}
+      </div>
+      <div style="display: inline-block; width: 20%">
+{{transaction.trnamt}}
+      </div>
+      <div style="display: inline-block; width: 40%">
+{{transaction.memo}}
+      </div>
+      <div style="display: inline-block; width: 20%">
+{{transaction.trntype}}
+      </div>
+    </li>
+  </ul>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onCancel()">No Thanks</button>
+  <button mat-button [mat-dialog-close]="data.animal" cdkFocusInitial>Ok</button>
+</div>

@@ -71,7 +71,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
         .subscribe(accounts => (this.accounts = accounts));
 
       const categorySubscription = this.categoryService
-        .getCategories(profile.activeBudget, 'sortingOrder')
+        .getCategories(profile.activeBudget, 'name')
         .pipe(take(1))
         .subscribe(categories => {
           this.systemCategories = categories.filter(category => category.type === 'system');
@@ -104,12 +104,13 @@ export class TransactionComponent implements OnInit, OnDestroy {
       transferAmount: new FormControl(null),
       date: new FormControl(date, Validators.required),
       payee: new FormControl(null),
+      memo: new FormControl(null),
       cleared: new FormControl(false),
       transfer: new FormControl(false),
+      type: new FormControl(false),
       categories: new FormArray([])
     });
     this.onAddCategory();
-    console.log('transactionForm', this.transactionForm);
   }
 
   loadTransaction(transactionId: string, budgetId: string) {
@@ -117,7 +118,6 @@ export class TransactionComponent implements OnInit, OnDestroy {
       .getTransaction(budgetId, transactionId)
       .pipe(take(1))
       .subscribe(transaction => {
-        this.mapTransaction(transaction);
         this.clearFormCategories(<FormArray>this.transactionForm.get('categories'));
 
         const selectedAccount = this.accounts.filter(
@@ -127,6 +127,9 @@ export class TransactionComponent implements OnInit, OnDestroy {
         this.transactionForm.get('account').setValue(selectedAccount);
         this.transactionForm.get('date').setValue(transaction.date);
         this.transactionForm.get('payee').setValue(transaction.payee);
+        this.transactionForm.get('memo').setValue(transaction.memo);
+        this.transactionForm.get('type').setValue(transaction.type);
+        this.transactionForm.get('cleared').setValue(transaction.cleared);
         if (transaction.categories) {
           for (const key in transaction.categories) {
             if (transaction.categories.hasOwnProperty(key)) {
@@ -148,22 +151,6 @@ export class TransactionComponent implements OnInit, OnDestroy {
       });
     this.subscriptions.add(subscription);
   }
-
-  mapTransaction(transaction: any): Transaction {
-    // transaction.account = {
-    //   accountId: transaction['accountId'],
-    //   accountName: transaction['accountName']
-    // };
-    transaction.id = this.transactionId;
-    transaction.accountDisplayName = transaction['accountName'];
-
-    if (typeof transaction.date === 'object') {
-      transaction.date = transaction['date'].toDate();
-    }
-    return transaction;
-  }
-
-  onSubmit() {}
 
   onAddCategory() {
     const categoryGroup = new FormGroup({
@@ -253,28 +240,17 @@ export class TransactionComponent implements OnInit, OnDestroy {
    */
   update(form: FormGroup) {
     const transaction = new Transaction(form.value);
-    transaction.id = this.transactionId;
-    transaction.account = {
-      accountId: form.value.account.id,
-      accountName: form.value.account.name
-    };
-    transaction.accountDisplayName = transaction.account.accountName;
-    // transaction.calculateAmount;
 
-    if (form.value.categories.length > 1) {
-      transaction.categoryDisplayName = 'Split';
-    } else {
-      transaction.categoryDisplayName = form.value.categories[0].category.name;
-    }
+    // id is needed to update correctly
+    transaction.id = this.transactionId;
 
     // calculate the amount and set the in or out values
     transaction.amount = this.transactionService.calculateAmount(transaction);
-    if (transaction.amount > 0) {
-      transaction.in = transaction.amount;
-    } else {
-      transaction.out = Math.abs(transaction.amount);
-    }
-    this.transactionService.updateTransaction(this.activeBudget.id, transaction);
+
+    this.transactionService.updateTransaction(this.activeBudget.id, transaction).then(() => {
+      this.savingInProgress = false;
+      this.openSnackBar('Updated transaction successfully');
+    });
   }
 
   /**
@@ -351,7 +327,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
     } else {
       transaction.out = Math.abs(transaction.amount);
     }
-
+    
     this.transactionService.createTransaction(transaction, this.activeBudget.id).then(response => {
       const date = transaction.date;
 
