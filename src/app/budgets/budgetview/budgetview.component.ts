@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
-import { DragulaService } from 'ng2-dragula';
 import { Subscription, forkJoin, of, combineLatest } from 'rxjs';
 import * as moment from 'moment';
 
@@ -49,7 +48,6 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     private categoryService: CategoryService,
     private userService: UserService,
     private auth: AuthService,
-    private dragulaService: DragulaService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
@@ -65,16 +63,6 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
         this.loadActiveBudget(profile.activeBudget);
       });
     this.subscriptions.add(subscription);
-
-    // drag and drop bag setup
-    this.dragulaService.setOptions('order-bag', {
-      moves: function(el, container, handle) {
-        return handle.className.indexOf('handle') > -1;
-      }
-    });
-    this.dragulaService.dropModel.subscribe(value => {
-      this.updateCategoryOrder(this.sortList, this.activeBudget.id);
-    });
 
     // if the month is specified, use that, else use the current month
     this.route.paramMap.subscribe(params => {
@@ -94,9 +82,6 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.dragulaService.find('order-bag') !== undefined) {
-      this.dragulaService.destroy('order-bag');
-    }
     this.subscriptions.unsubscribe();
   }
 
@@ -217,7 +202,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
         return a;
       }, 0);
       const totalBudget = transactions.reduce(
-        (a: { inc: number; exp: number }, b: { amount: number; transfer: boolean }) => {
+        (a: { inc: number; exp: number }, b: { amount: number; transfer: boolean }) : { inc: number, exp: number } => {
           if (b.transfer) {
             return a;
           }
@@ -245,8 +230,8 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
         return a;
       }, 0);
       console.log('PlannedTotal:', plannedTotal);
-      console.log('Current: ', totalBudget.inc - totalBudget.exp);
-      console.log('Actual Available Budget: ', totalBudget.inc - plannedTotal);
+      console.log('Current: ', totalBudget['inc'] - totalBudget['exp']);
+      console.log('Actual Available Budget: ', totalBudget['inc'] - plannedTotal);
     }, err => console.log('Err:', err), () => console.log('Completed!'));
   }
 

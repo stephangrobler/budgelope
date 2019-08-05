@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { DragulaModule } from 'ng2-dragula';
 import { BudgetsComponent } from './budgets.component';
 import { BudgetComponent } from './budget/budget.component';
 import { BudgetListComponent } from './budgetlist/budgetlist.component';
@@ -16,7 +15,6 @@ import { AppRoutingModule } from '../shared/app-routing.module';
     CommonModule,
     SharedModule,
     FormsModule,
-    DragulaModule,
     AppRoutingModule
   ],
   declarations: [

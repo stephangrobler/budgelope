@@ -5,7 +5,7 @@ import { AccountService } from '../account.service';
 import { Account } from '../../shared/account';
 import { TransactionService } from 'app/transactions/transaction.service';
 import { AuthService } from 'app/shared/auth.service';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   templateUrl: 'account.component.html'

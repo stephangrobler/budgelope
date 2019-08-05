@@ -27,8 +27,6 @@ $custom-typography: mat-typography-config($font-family: '"Lato", sans-serif;');
 // that you are using.
 @include angular-material-theme($candy-app-theme);
 
-@import '~dragula/dist/dragula.css';
-
 body {
   font-family: 'Lato', sans-serif;
   padding: 0;

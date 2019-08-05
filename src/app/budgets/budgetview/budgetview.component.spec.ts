@@ -1,5 +1,6 @@
 import { Component, Directive, NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { MatMenuModule, MatTableModule } from '@angular/material';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTableModule } from '@angular/material/table';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';

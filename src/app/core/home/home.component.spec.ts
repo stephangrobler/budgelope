@@ -2,12 +2,10 @@ import { NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA, Component } from '@angular/co
 
 import { TestBed, async } from '@angular/core/testing';
 import { HomeComponent } from './home.component';
-import {
-  MatSidenavModule,
-  MatListModule,
-  MatIconModule,
-  MatToolbarModule
-} from '@angular/material';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterLinkDirectiveStub } from 'testing/route-link-directive-stub';
 import { AnalyticsService } from '../analytics.service';
 import { of } from 'rxjs';
