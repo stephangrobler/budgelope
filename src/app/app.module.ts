@@ -28,6 +28,11 @@ import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { HttpClientModule } from '@angular/common/http';
+import { StoreModule  } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
+import { EntityDataModule } from '@ngrx/data';
+import { entityConfig } from './shared/entity-metadata';
+import { EntityStoreModule } from './store/entity-store.module';
 
 @NgModule({
   declarations: [
@@ -60,7 +65,11 @@ import { HttpClientModule } from '@angular/common/http';
     MatButtonModule,
     MatSidenavModule,
     MatIconModule,
-    MatListModule
+    MatListModule,
+    StoreModule.forRoot({}),
+    EffectsModule.forRoot([]),
+    EntityDataModule.forRoot(entityConfig),
+    EntityStoreModule
   ],
   providers: [
     { provide: FunctionsRegionToken, useValue: 'us-central1' }

@@ -47,6 +47,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+
     this.db
       .doc<any>('users/' + this.authService.currentUserId)
       .valueChanges()
@@ -146,7 +147,7 @@ export class TransactionDataSource extends DataSource<any> {
     if (categoryId) {
       filter.cleared = true;
     }
-    this.transService.getTransactions(this.budgetId, filter).subscribe(transactions => {
+    this.transService.getWithQuery({budgetId: this.budgetId}).subscribe(transactions => {
       this.transactionsSubject.next(transactions);
     });
   }
