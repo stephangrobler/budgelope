@@ -6,6 +6,7 @@
       <h1>Transactions <span *ngIf="account">for {{account.name}}</span></h1>
       <app-transaction *ngIf="showTransaction"></app-transaction>
     </div>
+    <p *ngIf="loading$ | async">Loading...</p>
     <mat-card>
       <mat-card-content>
         <mat-slide-toggle          

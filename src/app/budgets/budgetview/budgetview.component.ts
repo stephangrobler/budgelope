@@ -129,16 +129,9 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
    * @param budgetId string
    */
   loadCategories(budgetId: string): void {
-    const subscription = this.categoryService.getCategories(budgetId).subscribe(list => {
+    const subscription = this.categoryService.getWithQuery({budgetId: budgetId, orderBy: 'sortingOrder'}).subscribe(list => {
       // filter list
       list = list.filter(category => category.type === TransactionTypes.EXPENSE);
-      // console.log(list.reduce((a, b) => {
-      //   if (b.name !== 'FNB Credit Card' && b.name !== 'Credit Card - Virgin Money') {
-      //     return a += b.balance;
-      //   } else {
-      //     return a;
-      //   }
-      // }, 0));
       this.checkAllocations(list, this.selectedMonth);
       this.sortList = list;
     });
@@ -305,7 +298,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
       }
       this.activeBudget.balance = +this.activeBudget.balance - planned + +this.originalValue;
       if (!isNaN(item.balance) && !isNaN(this.activeBudget.balance)) {
-        this.categoryService.updateCategory(this.activeBudget.id, item);
+        this.categoryService.update(item);
         this.db.doc(budgetRef).update(this.activeBudget);
       }
     }

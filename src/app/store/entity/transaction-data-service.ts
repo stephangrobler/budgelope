@@ -15,12 +15,12 @@ import { AngularFirestore } from '@angular/fire/firestore';
 
 @Injectable()
 export class TransactionDataService extends DefaultDataService<ITransactionID> {
-
   constructor(
     private db: AngularFirestore,
     http: HttpClient,
     httpUrlGenerator: HttpUrlGenerator,
-    logger: Logger) {
+    logger: Logger
+  ) {
     super('ITransaction', http, httpUrlGenerator);
     logger.log('Created custom Transaction EntityDataService');
   }

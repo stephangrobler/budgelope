@@ -72,7 +72,6 @@ export class TransactionService extends EntityCollectionServiceBase<ITransaction
     const batch = this.db.firestore.batch();
     transactions.forEach(transaction => {
       const ref = this.db.doc('/budgets/' + budgetId + '/transactions/' + transaction.id).ref;
-      console.log(ref);
       batch.update(ref, { matched: transaction.matched });
     });
 
@@ -118,9 +117,7 @@ export class TransactionService extends EntityCollectionServiceBase<ITransaction
           out: outAmount
         }
       };
-      
       batch.set(ref, transRec);
-			console.log('TCL: TransactionService -> transRec', transRec);
       // count amount of account
       accAmount += transRec.amount;
       // count category amount values
@@ -148,7 +145,6 @@ export class TransactionService extends EntityCollectionServiceBase<ITransaction
     importedTransactions
   ) {
     const transRef = 'budgets/' + budgetId + '/transactions';
-    console.log('accountId: ', accountId);
     this.db
       .collection(transRef, ref => ref.where('account.accountId', '==', accountId))
       .snapshotChanges()
@@ -174,16 +170,9 @@ export class TransactionService extends EntityCollectionServiceBase<ITransaction
       .subscribe(async (val: ITransactionID[]) => {
         const transactions = val;
         const matchObject = this.doMatching(transactions, importedTransactions);
-        console.log('TCL: TransactionService -> matchObject', matchObject);
         if (matchObject.updated.length > 0) {
           this.batchUpdateMatched(matchObject.updated, budgetId);
         }
-        // await this.batchCreateTransactions(
-        //   matchObject.unmatched,
-        //   budgetId,
-        //   accountId,
-        //   accountName
-        // ).then(() => console.log('done?'));
       });
   }
 

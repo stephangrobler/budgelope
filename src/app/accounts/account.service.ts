@@ -4,13 +4,18 @@ import { map } from 'rxjs/operators';
 import { Account, AccountType, IAccount } from '../shared/account';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { FirebaseApp } from '@angular/fire';
+import { EntityCollectionServiceBase, EntityCollectionServiceElementsFactory } from '@ngrx/data';
 
 @Injectable()
-export class AccountService {
+export class AccountService extends EntityCollectionServiceBase<IAccount> {
+
   constructor(
     private db: AngularFirestore,
-    private fb: FirebaseApp
-  ) {}
+    private fb: FirebaseApp,
+    serviceElementsFactory: EntityCollectionServiceElementsFactory
+  ) {
+    super('Account', serviceElementsFactory);
+  }
 
   getAccounts(budgetId: string): Observable<IAccount[]> {
     if (!budgetId) {

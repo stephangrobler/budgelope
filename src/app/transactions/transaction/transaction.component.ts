@@ -71,7 +71,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
         .subscribe(accounts => (this.accounts = accounts));
 
       const categorySubscription = this.categoryService
-        .getCategories(profile.activeBudget, 'name')
+        .getWithQuery({budgetId: profile.activeBudget, orderBy: 'name'})
         .pipe(take(1))
         .subscribe(categories => {
           this.systemCategories = categories.filter(category => category.type === 'system');
