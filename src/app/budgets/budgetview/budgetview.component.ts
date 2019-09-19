@@ -11,7 +11,6 @@ import { UserService } from '../../shared/user.service';
 import { CategoryService } from '../../categories/category.service';
 import { AuthService } from 'app/shared/auth.service';
 import { TransactionTypes } from 'app/shared/transaction';
-import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-budgetview',
@@ -103,7 +102,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
    * on the component
    */
   loadActiveBudget(budgetId: string): void {
-    const subscription = this.budgetService.getActiveBudget$().subscribe(
+    const subscription = this.budgetService.getByKey(budgetId).subscribe(
       budget => {
         // set the current allocation for the selected month if there is none
         if (!budget.allocations[this.selectedMonth]) {
@@ -283,8 +282,6 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
 
   blur(item) {
     const planned: number = +item.allocations[this.selectedMonth].planned;
-    const ref = 'budgets/' + this.activeBudget.id + '/categories/' + item.id,
-      budgetRef = 'budgets/' + this.activeBudget.id;
 
     if (typeof this.originalValue !== 'undefined' && planned !== +this.originalValue) {
       if (isNaN(item.balance)) {
@@ -299,7 +296,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
       this.activeBudget.balance = +this.activeBudget.balance - planned + +this.originalValue;
       if (!isNaN(item.balance) && !isNaN(this.activeBudget.balance)) {
         this.categoryService.update(item);
-        this.db.doc(budgetRef).update(this.activeBudget);
+        this.budgetService.update(this.activeBudget);
       }
     }
   }

@@ -8,9 +8,10 @@ import { Budget } from '../shared/budget';
 import { CategoryService } from '../categories/category.service';
 import { AccountService } from '../accounts/account.service';
 import { FirebaseApp } from '@angular/fire';
+import { EntityCollectionServiceBase, EntityCollectionServiceElementsFactory } from '@ngrx/data';
 
 @Injectable()
-export class BudgetService {
+export class BudgetService extends EntityCollectionServiceBase<Budget>{
   activeBudget$: Observable<Budget>;
 
   constructor(
@@ -18,8 +19,11 @@ export class BudgetService {
     private categoryService: CategoryService,
     private accountService: AccountService,
     private afAuth: AngularFireAuth,
-    private fb: FirebaseApp
-  ) {}
+    private fb: FirebaseApp,
+    serviceElementsFactory: EntityCollectionServiceElementsFactory
+  ) {
+    super('Budget', serviceElementsFactory );
+  }
 
   getActiveBudget$(): Observable<Budget> {
     const returnable = this.afAuth.authState.pipe(

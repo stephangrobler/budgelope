@@ -35,7 +35,6 @@ export class TransactionDataService extends DefaultDataService<ITransactionID> {
   }
 
   getWithQuery(params: any): Observable<ITransactionID[]> {
-    // return super.getWithQuery(params).pipe(map(transactiones => transactiones.map(transaction => this.maptransaction(transaction))));
     const transRef = '/budgets/' + params.budgetId + '/transactions';
     // should not display cleared transactions by default
     const collection = this.db.collection<ITransactionID>(transRef, ref => {

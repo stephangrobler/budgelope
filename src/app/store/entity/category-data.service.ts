@@ -3,7 +3,7 @@ import { DefaultDataService, Logger, HttpUrlGenerator } from '@ngrx/data';
 import { Category, CategoryId } from 'app/shared/category';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { UserService } from 'app/shared/user.service';
 import { Update } from '@ngrx/entity';
@@ -46,9 +46,9 @@ export class CategoryDataService extends DefaultDataService<CategoryId> {
       );
   }
 
-  update(category: any): Observable<CategoryId> {
+  update(category: Update<CategoryId>): Observable<CategoryId> {
     const docRef = 'budgets/' + this.activeBudgetID + '/categories/' + category.id;
-    this.db.doc(docRef).update(category);
-    return;
+    this.db.doc(docRef).update(category.changes);
+    return of(category.changes as CategoryId);
   }
 }
