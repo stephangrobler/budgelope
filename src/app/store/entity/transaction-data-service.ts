@@ -1,41 +1,47 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {
-  EntityCollectionDataService,
   DefaultDataService,
   HttpUrlGenerator,
-  Logger,
-  QueryParams
+  Logger
 } from '@ngrx/data';
 
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ITransaction, ITransactionID, TransactionTypes } from 'app/shared/transaction';
+import { ITransactionID, TransactionTypes } from 'app/shared/transaction';
 import { AngularFirestore } from '@angular/fire/firestore';
+import { UserService } from 'app/shared/user.service';
 
 @Injectable()
 export class TransactionDataService extends DefaultDataService<ITransactionID> {
+  activeBudgetID: string;
+
   constructor(
     private db: AngularFirestore,
     http: HttpClient,
     httpUrlGenerator: HttpUrlGenerator,
-    logger: Logger
+    logger: Logger,
+    private userService: UserService
   ) {
     super('ITransaction', http, httpUrlGenerator);
     logger.log('Created custom Transaction EntityDataService');
+    this.userService.getProfile$().subscribe(profile => {
+      this.activeBudgetID = profile.activeBudget;
+      logger.log('TransactionService -> this.activeBudgetID:', this.activeBudgetID);
+    });
   }
 
   getAll(): Observable<ITransactionID[]> {
-    // return super.getAll().pipe(map(heroes => heroes.map(hero => this.mapHero(hero))));
-    return of([] as ITransactionID[]);
+    const transRef = '/budgets/' + this.activeBudgetID + '/transactions';
+    return this.db.collection<ITransactionID>(transRef).valueChanges();
   }
 
-  getById(id: string | number): Observable<ITransactionID> {
-    return super.getById(id).pipe(map(transaction => this.maptransaction(transaction)));
+  getById(id: string): Observable<ITransactionID> {
+    return this.db.doc<ITransactionID>('budgets/' + this.activeBudgetID + '/transactions/' + id).valueChanges();
   }
 
   getWithQuery(params: any): Observable<ITransactionID[]> {
-    const transRef = '/budgets/' + params.budgetId + '/transactions';
+    const transRef = '/budgets/' + this.activeBudgetID + '/transactions';
     // should not display cleared transactions by default
     const collection = this.db.collection<ITransactionID>(transRef, ref => {
       let query: firebase.firestore.Query = ref;
@@ -83,9 +89,5 @@ export class TransactionDataService extends DefaultDataService<ITransactionID> {
         })
       )
     );
-  }
-
-  private maptransaction(transaction: ITransactionID): ITransactionID {
-    return { ...transaction };
   }
 }

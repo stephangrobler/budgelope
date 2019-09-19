@@ -22,9 +22,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   watcher: Subscription;
   activeMediaQuery = '';
   theUser = true;
-  isHandset$ = this.breakpointObserver.observe(Breakpoints.Handset).pipe(
-    map(results => results.matches)		
-  );
+  isHandset$ = this.breakpointObserver
+    .observe(Breakpoints.Handset)
+    .pipe(map(results => results.matches));
 
   unsubscribe = new Subject<any>();
 
@@ -43,9 +43,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       .getProfile$()
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(profile => {
-          this.accounts = this.accountService.getAccounts(profile.activeBudget);
+        this.accounts = this.accountService.getAll();
       });
-
   }
 
   ngOnDestroy() {
@@ -56,7 +55,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   navigateTo(accountId) {
     this.router.navigate(['/app/transactions', { accountId: accountId }]);
   }
-  
+
   gotoBudget() {
     const shortDate = moment().format('YYYYMM');
     this.router.navigate(['/app/budget/' + shortDate]);

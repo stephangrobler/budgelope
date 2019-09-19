@@ -17,30 +17,6 @@ export class AccountService extends EntityCollectionServiceBase<IAccount> {
     super('Account', serviceElementsFactory);
   }
 
-  getAccounts(budgetId: string): Observable<IAccount[]> {
-    if (!budgetId) {
-      throw new Error('Budget ID must be set to retrieve accounts. BudgetID: ' + budgetId);
-    }
-
-    return this.db
-      .collection<IAccount>('budgets/' + budgetId + '/accounts')
-      .snapshotChanges()
-      .pipe(
-        map(actions =>
-          actions.map(a => {
-            const data = a.payload.doc.data() as IAccount;
-            const id = a.payload.doc.id;
-            return { id, ...data };
-          })
-        )
-      );
-  }
-
-  getAccount(accountId: string, budgetId: string) {
-    const ref = 'budgets/' + budgetId + '/accounts/' + accountId;
-    return this.db.doc<IAccount>(ref).valueChanges();
-  }
-
   createAccount(budgetId: string, account: IAccount): Promise<any> {
     const accountStore = this.db.collection<IAccount>('budgets/' + budgetId + '/accounts');
     // create the account with 0 balance as starting balance is created on the component where

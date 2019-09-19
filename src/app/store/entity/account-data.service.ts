@@ -29,12 +29,26 @@ export class AccountDataService extends DefaultDataService<Account> {
   }
 
   getAll(): Observable<Account[]> {
-    return of([] as Account[]);
+    const accountRef = '/budgets/' + this.activeBudgetID + '/accounts';
+    return this.db
+      .collection<Account>(accountRef)
+      .snapshotChanges()
+      .pipe(
+        map(actions => {
+          return actions.map(a => {
+            const data = a.payload.doc.data() as Account;
+            const id = a.payload.doc.id;
+            return {id, ...data};
+          });
+        })
+      );
   }
 
   getWithQuery(params: any): Observable<Account[]> {
     return this.db
-      .collection<Account>('budgets/' + this.activeBudgetID + '/categories', ref => ref.orderBy(params.orderBy))
+      .collection<Account>('budgets/' + this.activeBudgetID + '/categories', ref =>
+        ref.orderBy(params.orderBy)
+      )
       .snapshotChanges()
       .pipe(
         map(actions => {
@@ -52,5 +66,4 @@ export class AccountDataService extends DefaultDataService<Account> {
     this.db.doc(docRef).update(account.changes);
     return of(account.changes as Account);
   }
-
 }
