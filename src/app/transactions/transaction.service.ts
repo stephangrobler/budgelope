@@ -392,7 +392,7 @@ export class TransactionService extends EntityCollectionServiceBase<ITransaction
   createStartingBalance(accountId: string, budgetId: string, amount: number) {
     // load the account
     this.accountService
-      .getAccount(accountId, budgetId)
+      .getByKey(accountId)
       .pipe(take(1))
       .subscribe(account => {
         const transaction = new Transaction();

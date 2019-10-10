@@ -11,6 +11,7 @@ import { AccountService } from '../accounts/account.service';
 import { resolve } from 'path';
 import { FirebaseApp } from '@angular/fire';
 import { IImportedTransaction } from './import/importedTransaction';
+import { EntityCollectionServiceElementsFactory } from '@ngrx/data';
 
 describe('Transaction Service', () => {
   let service: TransactionService;
@@ -22,7 +23,8 @@ describe('Transaction Service', () => {
     account,
     category,
     budget,
-    transaction;
+    transaction,
+    serviceElementsFactoryMock;
 
   beforeEach(() => {
     account = new Account();
@@ -72,17 +74,21 @@ describe('Transaction Service', () => {
       'getAccounts'
     ]);
     budgetServiceMock = jasmine.createSpyObj('BudgetService', ['updateBudgetBalance']);
+    serviceElementsFactoryMock = jasmine.createSpyObj('EntityCollectionServiceElementsFactory', ['create']);
+
     TestBed.configureTestingModule({
       providers: [
         TransactionService,
         { provide: CategoryService, useValue: categoryServiceMock },
         { provide: AccountService, useValue: accountServiceMock },
         { provide: AngularFirestore, useValue: dbMock },
-        { provide: FirebaseApp, useValue: fbMock }
+        { provide: FirebaseApp, useValue: fbMock },
+        EntityCollectionServiceElementsFactory
       ]
     });
 
     service = new TransactionService(
+      serviceElementsFactoryMock,
       dbMock,
       fbMock,
       categoryServiceMock,

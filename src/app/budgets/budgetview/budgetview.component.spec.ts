@@ -1,4 +1,4 @@
-import { Component, Directive, NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTableModule } from '@angular/material/table';
 import { AngularFirestore } from '@angular/fire/firestore';
@@ -7,9 +7,8 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BudgetviewComponent } from './budgetview.component';
 import { BudgetService } from '../budget.service';
 import { UserService } from '../../shared/user.service';
-import { DragulaService } from 'ng2-dragula';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 import * as moment from 'moment';
 
 import { ActivatedRouteStub } from '../../../testing/activate-route-stub';
@@ -78,10 +77,6 @@ describe('BudgetviewComponent', () => {
         {
           provide: UserService,
           useValue: userServiceStub
-        },
-        {
-          provide: DragulaService,
-          useValue: dragulaServiceStub
         },
         {
           provide: ActivatedRoute,

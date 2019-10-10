@@ -64,13 +64,13 @@ describe('TransactionsComponent', () => {
       id: '201805'
     });
     transactionServiceStub = jasmine.createSpyObj('TransactionService', [
-      'getTransactions',
-      'getTransaction',
+      'getWithQuery',
+      'getByKey',
       'createTransaction',
       'removeTransaction',
       'calculateAmount'
     ]);
-    transactionServiceStub.getTransactions.and.returnValue(of([]));
+    transactionServiceStub.getWithQuery.and.returnValue(of([]));
     transactionServiceStub.createTransaction.and.returnValue({
       then: (success, failure) => {
         success();
@@ -82,20 +82,20 @@ describe('TransactionsComponent', () => {
       }
     });
     accountServiceStub = jasmine.createSpyObj('AccountService', [
-      'getAccounts',
+      'getAll',
       'updateAccountBalance'
     ]);
-    accountServiceStub.getAccounts.and.returnValue(of([]));
+    accountServiceStub.getAll.and.returnValue(of([]));
 
     categoryServiceStub = jasmine.createSpyObj('CategoryService', [
-      'getCategories',
+      'getWithQuery',
       'updateCategory'
     ]);
-    categoryServiceStub.getCategories.and.returnValue(of([]));
+    categoryServiceStub.getWithQuery.and.returnValue(of([]));
 
     matSnackBarStub = jasmine.createSpyObj('MatSnackBar', ['open']);
 
-    transactionServiceStub.getTransaction.and.returnValue(
+    transactionServiceStub.getByKey.and.returnValue(
       of({
         date: '2018-01-01',
         payee: 'Test Payee',
@@ -247,7 +247,7 @@ describe('TransactionsComponent', () => {
   });
 
   it('should call the transfer function', () => {
-    categoryServiceStub.getCategories.and.returnValue(
+    categoryServiceStub.getWithQuery.and.returnValue(
       of([
         { id: 'cat1', name: 'Transfer In', type: 'system' },
         { id: 'cat2', name: 'Transfer Out', type: 'system' }
@@ -269,7 +269,7 @@ describe('TransactionsComponent', () => {
   });
 
   it('should call the transfer function with a from Transaction of values', () => {
-    categoryServiceStub.getCategories.and.returnValue(
+    categoryServiceStub.getWithQuery.and.returnValue(
       of([
         { id: 'cat1', name: 'Transfer In', type: 'system' },
         { id: 'cat2', name: 'Transfer Out', type: 'system' }
@@ -308,7 +308,7 @@ describe('TransactionsComponent', () => {
   });
 
   it('should call the transfer function with a to Transaction of values', () => {
-    categoryServiceStub.getCategories.and.returnValue(
+    categoryServiceStub.getWithQuery.and.returnValue(
       of([
         { id: 'cat1', name: 'Transfer In', type: 'system' },
         { id: 'cat2', name: 'Transfer Out', type: 'system' }
