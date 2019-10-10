@@ -10,6 +10,7 @@ import { AccountService } from '../accounts/account.service';
 import { BudgetService } from '../budgets/budget.service';
 import { FirebaseApp } from '@angular/fire';
 import { IImportedTransaction } from './import/importedTransaction';
+import { EntityCollectionServiceBase, EntityCollectionServiceElementsFactory } from '@ngrx/data';
 
 export interface IFilter {
   accountId: string;
@@ -17,72 +18,19 @@ export interface IFilter {
   categoryId: string;
 }
 
-@Injectable()
-export class TransactionService {
+@Injectable({providedIn: 'root'})
+export class TransactionService extends EntityCollectionServiceBase<ITransaction> {
   transactions: Transaction[];
 
   constructor(
+    serviceElementsFactory: EntityCollectionServiceElementsFactory,
     private db: AngularFirestore,
     private fb: FirebaseApp,
     private categoryService: CategoryService,
     private accountService: AccountService,
     private budgetService: BudgetService
-  ) {}
-
-  /**
-   * Get all transactions with the id of the transactions
-   * @param  budgetId Current active budget for the user id
-   * @return          the observable for the transactions.
-   */
-  getTransactions(budgetId: string, filter: IFilter): Observable<ITransactionID[]> {
-    const transRef = '/budgets/' + budgetId + '/transactions';
-    // should not display cleared transactions by default
-    const collection = this.db.collection<ITransactionID>(transRef, ref => {
-      let query: firebase.firestore.Query = ref;
-      if (!filter.cleared) {
-        query = query.where('cleared', '==', false);
-      }
-      if (filter.accountId) {
-        query = query.where('account.accountId', '==', filter.accountId);
-      }
-      if (filter.categoryId) {
-        query = query.where('categories.' + filter.categoryId + '.categoryName', '>=', '');
-      } else {
-        query = query.orderBy('date', 'desc');
-      }
-      return query;
-    });
-
-    return collection.snapshotChanges().pipe(
-      map(actions =>
-        actions.map(a => {
-          const data = a.payload.doc.data() as ITransactionID;
-          const id = a.payload.doc.id;
-          // convert timestamp object from firebase to date object if object
-          const dateObj = a.payload.doc.get('date');
-          if (typeof dateObj === 'string') {
-            data.date = new Date(dateObj);
-          } else if (typeof dateObj === 'object') {
-            data.date = dateObj.toDate();
-          }
-          data.accountDisplayName = data.account.accountName;
-          for (const prop in data.categories) {
-            if (data.categories.hasOwnProperty(prop)) {
-              data.categoryDisplayName = data.categories[prop].categoryName;
-            }
-          }
-          if (data.type === TransactionTypes.INCOME) {
-            data.in = data.amount;
-          } else {
-            // display here needs to be a positive number
-            data.out = Math.abs(data.amount);
-          }
-
-          data.id = id;
-          return { id, ...data };
-        })
-      )
-    );
+  ) {
+    super('Transaction', serviceElementsFactory);
   }
 
   doMatching(currentTransactions: ITransactionID[], importedTransactions: IImportedTransaction[]) {
@@ -124,7 +72,6 @@ export class TransactionService {
     const batch = this.db.firestore.batch();
     transactions.forEach(transaction => {
       const ref = this.db.doc('/budgets/' + budgetId + '/transactions/' + transaction.id).ref;
-      console.log(ref);
       batch.update(ref, { matched: transaction.matched });
     });
 
@@ -170,9 +117,7 @@ export class TransactionService {
           out: outAmount
         }
       };
-      
       batch.set(ref, transRec);
-			console.log('TCL: TransactionService -> transRec', transRec);
       // count amount of account
       accAmount += transRec.amount;
       // count category amount values
@@ -200,7 +145,6 @@ export class TransactionService {
     importedTransactions
   ) {
     const transRef = 'budgets/' + budgetId + '/transactions';
-    console.log('accountId: ', accountId);
     this.db
       .collection(transRef, ref => ref.where('account.accountId', '==', accountId))
       .snapshotChanges()
@@ -226,16 +170,9 @@ export class TransactionService {
       .subscribe(async (val: ITransactionID[]) => {
         const transactions = val;
         const matchObject = this.doMatching(transactions, importedTransactions);
-        console.log('TCL: TransactionService -> matchObject', matchObject);
         if (matchObject.updated.length > 0) {
           this.batchUpdateMatched(matchObject.updated, budgetId);
         }
-        // await this.batchCreateTransactions(
-        //   matchObject.unmatched,
-        //   budgetId,
-        //   accountId,
-        //   accountName
-        // ).then(() => console.log('done?'));
       });
   }
 

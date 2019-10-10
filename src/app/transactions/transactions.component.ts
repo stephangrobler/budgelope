@@ -9,7 +9,7 @@ import { Transaction, ITransactionID } from '../shared/transaction';
 import { TransactionService, IFilter } from './transaction.service';
 import { BudgetService } from '../budgets/budget.service';
 import { UserService } from '../shared/user.service';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, Observable } from 'rxjs';
 import { IAccount } from 'app/shared/account';
 import { ImportComponent } from './import/import.component';
 import { AuthService } from 'app/shared/auth.service';
@@ -36,6 +36,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   showTransaction = false;
 
   selectedTransaction: Transaction;
+  loading$: Observable<boolean>;
 
   constructor(
     private transService: TransactionService,
@@ -44,9 +45,12 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private db: AngularFirestore,
     public dialog: MatDialog
-  ) {}
+  ) {
+    this.loading$ = this.transService.loading$;
+  }
 
   ngOnInit() {
+
     this.db
       .doc<any>('users/' + this.authService.currentUserId)
       .valueChanges()
@@ -100,7 +104,6 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe(result => {
       console.log('Account Dialog Result', result);
     });
-
   }
 
   onZeroStartingBalanceClick() {
@@ -138,15 +141,16 @@ export class TransactionDataSource extends DataSource<any> {
   }
 
   loadTransactions(accountId: string, showCleared: boolean, categoryId?: string) {
-    const filter: IFilter = {
+    const filter: any = {
       accountId: accountId,
       categoryId: categoryId,
-      cleared: showCleared
+      cleared: showCleared,
+      budgetId: this.budgetId
     };
     if (categoryId) {
       filter.cleared = true;
     }
-    this.transService.getTransactions(this.budgetId, filter).subscribe(transactions => {
+    this.transService.getWithQuery(filter).subscribe(transactions => {
       this.transactionsSubject.next(transactions);
     });
   }

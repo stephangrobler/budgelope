@@ -1,27 +1,19 @@
 import { Injectable } from '@angular/core';
 import { Category, CategoryId } from '../shared/category';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { Observable} from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { FirebaseApp } from '@angular/fire';
+import { EntityCollectionServiceBase, EntityCollectionServiceElementsFactory } from '@ngrx/data';
 
 @Injectable()
-export class CategoryService {
-  constructor(private db: AngularFirestore, private fb: FirebaseApp) {}
-
-  getCategories(budgetId: string, sortBy: string = 'sortingOrder'): Observable<CategoryId[]> {
-    return this.db
-      .collection<Category>('budgets/' + budgetId + '/categories', ref => ref.orderBy(sortBy))
-      .snapshotChanges()
-      .pipe(
-        map(actions => {
-          return actions.map(a => {
-            const data = a.payload.doc.data() as CategoryId;
-            const id = a.payload.doc.id;
-            return { id, ...data };
-          });
-        })
-      );
+export class CategoryService extends EntityCollectionServiceBase<CategoryId> {
+  constructor(
+    private db: AngularFirestore,
+    private fb: FirebaseApp,
+    serviceElementsFactory: EntityCollectionServiceElementsFactory
+  ) {
+    super('Category', serviceElementsFactory);
   }
 
   getCategory(categoryId: string, budgetId: string) {

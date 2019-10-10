@@ -4,36 +4,17 @@ import { map } from 'rxjs/operators';
 import { Account, AccountType, IAccount } from '../shared/account';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { FirebaseApp } from '@angular/fire';
+import { EntityCollectionServiceBase, EntityCollectionServiceElementsFactory } from '@ngrx/data';
 
 @Injectable()
-export class AccountService {
+export class AccountService extends EntityCollectionServiceBase<IAccount> {
+
   constructor(
     private db: AngularFirestore,
-    private fb: FirebaseApp
-  ) {}
-
-  getAccounts(budgetId: string): Observable<IAccount[]> {
-    if (!budgetId) {
-      throw new Error('Budget ID must be set to retrieve accounts. BudgetID: ' + budgetId);
-    }
-
-    return this.db
-      .collection<IAccount>('budgets/' + budgetId + '/accounts')
-      .snapshotChanges()
-      .pipe(
-        map(actions =>
-          actions.map(a => {
-            const data = a.payload.doc.data() as IAccount;
-            const id = a.payload.doc.id;
-            return { id, ...data };
-          })
-        )
-      );
-  }
-
-  getAccount(accountId: string, budgetId: string) {
-    const ref = 'budgets/' + budgetId + '/accounts/' + accountId;
-    return this.db.doc<IAccount>(ref).valueChanges();
+    private fb: FirebaseApp,
+    serviceElementsFactory: EntityCollectionServiceElementsFactory
+  ) {
+    super('Account', serviceElementsFactory);
   }
 
   createAccount(budgetId: string, account: IAccount): Promise<any> {

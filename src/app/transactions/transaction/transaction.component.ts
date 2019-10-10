@@ -1,19 +1,15 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, FormControl, FormArray, Validators } from '@angular/forms';
-import { Router, ActivatedRoute, ParamMap } from '@angular/router';
-import { AngularFireAuth } from '@angular/fire/auth';
-import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/firestore';
+import { Router, ActivatedRoute } from '@angular/router';
+import { AngularFirestoreDocument } from '@angular/fire/firestore';
 
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Observable, Subscription } from 'rxjs';
-import { switchMap, take } from 'rxjs/operators';
-import * as moment from 'moment';
-import { Profile } from '../../shared/profile';
+import { Subscription } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { Transaction } from '../../shared/transaction';
 import { Account } from '../../shared/account';
 import { Budget } from '../../shared/budget';
-import { Payee } from '../../shared/payee';
-import { Category, CategoryId } from '../../shared/category';
+import { CategoryId } from '../../shared/category';
 import { BudgetService } from '../../budgets/budget.service';
 import { UserService } from '../../shared/user.service';
 import { TransactionService } from '../transaction.service';
@@ -49,8 +45,6 @@ export class TransactionComponent implements OnInit, OnDestroy {
     private categoryService: CategoryService,
     private router: Router,
     private route: ActivatedRoute,
-    private db: AngularFirestore,
-    private af: AngularFireAuth,
     public snackBar: MatSnackBar
   ) {}
 
@@ -66,12 +60,14 @@ export class TransactionComponent implements OnInit, OnDestroy {
 
       // get the budget accounts
       this.accountService
-        .getAccounts(profile.activeBudget)
+        .getAll()
         .pipe(take(1))
-        .subscribe(accounts => (this.accounts = accounts));
+        .subscribe(accounts => {
+          this.accounts = accounts;
+        });
 
       const categorySubscription = this.categoryService
-        .getCategories(profile.activeBudget, 'name')
+        .getWithQuery({ budgetId: profile.activeBudget, orderBy: 'name' })
         .pipe(take(1))
         .subscribe(categories => {
           this.systemCategories = categories.filter(category => category.type === 'system');
@@ -83,7 +79,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
               return;
             }
             this.transactionId = params.get('id');
-            this.loadTransaction(params.get('id'), profile.activeBudget);
+            this.loadTransaction(params.get('id'));
           });
         });
       this.subscriptions.add(categorySubscription);
@@ -113,9 +109,9 @@ export class TransactionComponent implements OnInit, OnDestroy {
     this.onAddCategory();
   }
 
-  loadTransaction(transactionId: string, budgetId: string) {
+  loadTransaction(transactionId: string) {
     const subscription = this.transactionService
-      .getTransaction(budgetId, transactionId)
+      .getByKey(transactionId)
       .pipe(take(1))
       .subscribe(transaction => {
         this.clearFormCategories(<FormArray>this.transactionForm.get('categories'));
@@ -181,9 +177,11 @@ export class TransactionComponent implements OnInit, OnDestroy {
       if (!this.transactionId) {
         console.log('No id set for transaction');
       }
-      this.transactionService.removeTransaction(this.activeBudget.id, this.transactionId).then(() => {
-        this.router.navigate(['app/transactions']);
-      });
+      this.transactionService
+        .removeTransaction(this.activeBudget.id, this.transactionId)
+        .then(() => {
+          this.router.navigate(['app/transactions']);
+        });
     }
   }
 
@@ -327,7 +325,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
     } else {
       transaction.out = Math.abs(transaction.amount);
     }
-    
+
     this.transactionService.createTransaction(transaction, this.activeBudget.id).then(response => {
       const date = transaction.date;
 
