@@ -48,14 +48,15 @@ describe('BudgetviewComponent', () => {
     dragulaServiceStub = jasmine.createSpyObj('DragulaService', ['setOptions', 'find']);
     dragulaServiceStub.dropModel = of({});
 
-    budgetServiceStub = jasmine.createSpyObj('BudgetService', ['getActiveBudget$']);
-    budgetServiceStub.getActiveBudget$.and.returnValue(of({
+    budgetServiceStub = jasmine.createSpyObj('BudgetService', ['getActiveBudget$', 'getByKey']);
+    budgetServiceStub.getByKey.and.returnValue(of({
       id: '67890',
       name: 'test budget',
       allocations: {}
     }));
     userServiceStub = {};
-    categoryServiceStub = jasmine.createSpyObj('CategoryService', ['getCategories']);
+    categoryServiceStub = jasmine.createSpyObj('CategoryService', ['getWithQuery']);
+    categoryServiceStub.getWithQuery.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
       imports: [MatMenuModule],
@@ -142,11 +143,11 @@ describe('BudgetviewComponent', () => {
   });
 
   it('should load the categories for the active budget', () => {
-    expect(categoryServiceStub.getCategories).toHaveBeenCalledWith('67890');
+    expect(categoryServiceStub.getWithQuery).toHaveBeenCalledWith({budgetId: '67890', orderBy: 'sortingOrder'});
   });
 
   it('should load the active budget details and allocations', () => {
-    expect(budgetServiceStub.getActiveBudget$).toHaveBeenCalled();
+    expect(budgetServiceStub.getByKey).toHaveBeenCalled();
   });
 
   it('should get the display month from the month param', () => {

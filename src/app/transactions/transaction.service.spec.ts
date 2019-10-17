@@ -76,6 +76,15 @@ describe('Transaction Service', () => {
     budgetServiceMock = jasmine.createSpyObj('BudgetService', ['updateBudgetBalance']);
     serviceElementsFactoryMock = jasmine.createSpyObj('EntityCollectionServiceElementsFactory', ['create']);
 
+    const ecsebMock = {
+      getByKey: () => {},
+      dispatcher: {},
+      selectors$: {}
+    };
+
+    serviceElementsFactoryMock.create.and.returnValue(ecsebMock)
+
+
     TestBed.configureTestingModule({
       providers: [
         TransactionService,
@@ -83,7 +92,7 @@ describe('Transaction Service', () => {
         { provide: AccountService, useValue: accountServiceMock },
         { provide: AngularFirestore, useValue: dbMock },
         { provide: FirebaseApp, useValue: fbMock },
-        EntityCollectionServiceElementsFactory
+        { provide: EntityCollectionServiceElementsFactory, useValue: serviceElementsFactoryMock }
       ]
     });
 

@@ -118,6 +118,6 @@ describe('HomeComponent', () => {
     const fixture = TestBed.createComponent(HomeComponent);
     fixture.detectChanges();
     const app = fixture.debugElement.componentInstance;
-    expect(accountServiceStub.getAccounts).toHaveBeenCalledWith('abcde');
+    expect(accountServiceStub.getAll).toHaveBeenCalled();
   }));
 });
