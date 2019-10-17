@@ -17,7 +17,7 @@ export interface ITransaction {
   memo: string;
   payee: string;
   type: string;
-  matched: IImportedTransaction
+  matched?: IImportedTransaction
 }
 
 export interface ITransactionID extends ITransaction {

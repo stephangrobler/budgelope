@@ -41,7 +41,7 @@ describe('HomeComponent', () => {
     authStub = jasmine.createSpyObj('AngularFireAuth', ['login']);
     authStub.authState = of({ uid: '12345' });
     breakpointObserverStub = { observe: () => of({})};
-    accountServiceStub = jasmine.createSpyObj('AccountService', ['getAccounts']);
+    accountServiceStub = jasmine.createSpyObj('AccountService', ['getAll']);
     userServiceStub = jasmine.createSpyObj('UserService', ['getProfile$']);
     userServiceStub.getProfile$.and.returnValue(of({activeBudget: 'abcde'}))
 
@@ -118,6 +118,6 @@ describe('HomeComponent', () => {
     const fixture = TestBed.createComponent(HomeComponent);
     fixture.detectChanges();
     const app = fixture.debugElement.componentInstance;
-    expect(accountServiceStub.getAccounts).toHaveBeenCalledWith('abcde');
+    expect(accountServiceStub.getAll).toHaveBeenCalled();
   }));
 });

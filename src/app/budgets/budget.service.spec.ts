@@ -8,10 +8,11 @@ import { BudgetService } from './budget.service';
 import { CategoryService } from '../categories/category.service';
 import { AccountService } from '../accounts/account.service';
 import { FirebaseApp } from '@angular/fire';
+import { EntityCollectionServiceElementsFactory } from '@ngrx/data';
 
 describe('Budget service', () => {
   let budgetService: BudgetService;
-  let categoryServiceSpy, accountServiceSpy, dbSpy, docObject, docReturnObj, authSpy, firebaseAppSpy;
+  let categoryServiceSpy, accountServiceSpy, dbSpy, docObject,  authSpy, firebaseAppSpy, ecsefMock, ecsebMock;
 
   beforeEach(() => {
     categoryServiceSpy = jasmine.createSpyObj('CategoryService', ['copyCategories']);
@@ -59,6 +60,17 @@ describe('Budget service', () => {
       uid: 'abcde'
     });
 
+    ecsefMock = jasmine.createSpyObj('EntityCollectionServiceElementsFactory', ['create']);
+
+    ecsebMock = {
+      getByKey: () => {},
+      dispatcher: {},
+      selectors$: {}
+    };
+
+    ecsefMock.create.and.returnValue(ecsebMock);
+    
+
     TestBed.configureTestingModule({
       // Provide both the service-to-test and its (spy) dependency
       providers: [
@@ -83,6 +95,10 @@ describe('Budget service', () => {
           provide: FirebaseApp,
           useValue: firebaseAppSpy
         },
+        {
+          provide: EntityCollectionServiceElementsFactory,
+          useValue: ecsefMock
+        }
 
       ]
     });

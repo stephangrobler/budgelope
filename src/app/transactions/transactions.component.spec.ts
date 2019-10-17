@@ -1,5 +1,4 @@
 import { NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableModule } from '@angular/material/table';
 import { TestBed, async } from '@angular/core/testing';
@@ -16,8 +15,8 @@ import { ActivatedRouteStub } from 'testing/activate-route-stub';
 describe('TransactionsComponent', () => {
   let activatedRouteStub;
 
-  const TransactionServiceStub = jasmine.createSpyObj('TransactionService', ['getTransactions']);
-  TransactionServiceStub.getTransactions.and.returnValue(of([]));
+  const TransactionServiceStub = jasmine.createSpyObj('TransactionService', ['getWithQuery', 'getByKey']);
+  TransactionServiceStub.getWithQuery.and.returnValue(of([]));
 
   const BudgetServiceStub = jasmine.createSpyObj('BudgetService', ['getTransactions']);
   const UserServiceStub = jasmine.createSpyObj('UserService', ['getUser']);

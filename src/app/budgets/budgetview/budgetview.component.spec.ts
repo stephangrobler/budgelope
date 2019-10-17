@@ -1,4 +1,4 @@
-import { Component, Directive, NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTableModule } from '@angular/material/table';
 import { AngularFirestore } from '@angular/fire/firestore';
@@ -7,9 +7,8 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BudgetviewComponent } from './budgetview.component';
 import { BudgetService } from '../budget.service';
 import { UserService } from '../../shared/user.service';
-import { DragulaService } from 'ng2-dragula';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 import * as moment from 'moment';
 
 import { ActivatedRouteStub } from '../../../testing/activate-route-stub';
@@ -49,14 +48,15 @@ describe('BudgetviewComponent', () => {
     dragulaServiceStub = jasmine.createSpyObj('DragulaService', ['setOptions', 'find']);
     dragulaServiceStub.dropModel = of({});
 
-    budgetServiceStub = jasmine.createSpyObj('BudgetService', ['getActiveBudget$']);
-    budgetServiceStub.getActiveBudget$.and.returnValue(of({
+    budgetServiceStub = jasmine.createSpyObj('BudgetService', ['getActiveBudget$', 'getByKey']);
+    budgetServiceStub.getByKey.and.returnValue(of({
       id: '67890',
       name: 'test budget',
       allocations: {}
     }));
     userServiceStub = {};
-    categoryServiceStub = jasmine.createSpyObj('CategoryService', ['getCategories']);
+    categoryServiceStub = jasmine.createSpyObj('CategoryService', ['getWithQuery']);
+    categoryServiceStub.getWithQuery.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
       imports: [MatMenuModule],
@@ -78,10 +78,6 @@ describe('BudgetviewComponent', () => {
         {
           provide: UserService,
           useValue: userServiceStub
-        },
-        {
-          provide: DragulaService,
-          useValue: dragulaServiceStub
         },
         {
           provide: ActivatedRoute,
@@ -147,11 +143,11 @@ describe('BudgetviewComponent', () => {
   });
 
   it('should load the categories for the active budget', () => {
-    expect(categoryServiceStub.getCategories).toHaveBeenCalledWith('67890');
+    expect(categoryServiceStub.getWithQuery).toHaveBeenCalledWith({budgetId: '67890', orderBy: 'sortingOrder'});
   });
 
   it('should load the active budget details and allocations', () => {
-    expect(budgetServiceStub.getActiveBudget$).toHaveBeenCalled();
+    expect(budgetServiceStub.getByKey).toHaveBeenCalled();
   });
 
   it('should get the display month from the month param', () => {

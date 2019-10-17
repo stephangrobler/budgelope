@@ -10,7 +10,7 @@ import { BudgetService } from '../../budgets/budget.service';
 import { Budget } from '../../shared/budget';
 
 @Component({
-  templateUrl: 'account-list.component.html',
+  templateUrl: 'account-list.component.html'
 })
 export class AccountListComponent implements OnInit {
   theUser: string;
@@ -22,41 +22,38 @@ export class AccountListComponent implements OnInit {
     private accountService: AccountService,
     private budgetService: BudgetService,
     private router: Router,
-    private db:AngularFirestore,
+    private db: AngularFirestore,
     private afAuth: AngularFireAuth
   ) {
-    afAuth.authState.subscribe((user) => {
+    afAuth.authState.subscribe(user => {
       if (!user) {
         return;
       }
-      let profile = db.doc<any>('users/' + user.uid).valueChanges().subscribe(profile => {
-        this.loadAccounts(profile.activeBudget);
-      });
+      let profile = db
+        .doc<any>('users/' + user.uid)
+        .valueChanges()
+        .subscribe(profile => {
+          this.loadAccounts(profile.activeBudget);
+        });
     });
-
-
   }
 
-  ngOnInit() {
+  ngOnInit() {}
 
+  loadAccounts(budgetId: string) {
+    this.accounts = this.accountService.getAll();
   }
 
-  loadAccounts(budgetId: string){
-    let accRef = 'budgets/'+budgetId+'/accounts';
-    this.accounts = this.accountService.getAccounts(budgetId);
+  editAccount(single: Account) {
+    this.router.navigate(['/account/' + single.id]);
   }
 
-  editAccount(single: Account){
-    this.router.navigate(['/account/'+single.id]);
-  }
-
-  deleteAccount(single: Account){
+  deleteAccount(single: Account) {
     let verify = confirm(`Are you sure you want to delete this account?`);
-    if (true == verify){
+    if (true === verify) {
       // this.accountService.removeAccount(single);
     } else {
       alert(`Nothing deleted!`);
     }
   }
-
 }
