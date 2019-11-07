@@ -1,97 +1,136 @@
-<div>
-  <div>
-    <form class="form" [formGroup]="transactionForm">
-      <mat-card class="transaction-card">
-        <mat-card-content>
-          <div fxLayout="row" fxLayout.xs="column" fxLayoutGap="10px" fxFlexFill>
+<form class="form" [formGroup]="transactionForm">
+  <div fxLayout="row" fxLayout.xs="column" fxLayoutGap="10px">
+    <mat-form-field fxFlex="20" fxFlex.xs="100">
+      <input
+        matInput
+        [matDatepicker]="picker"
+        placeholder="Choose a date"
+        name="date"
+        formControlName="date"
+      />
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
 
-            <mat-form-field fxFlex="20" fxFlex.xs="100">
-              <input matInput [matDatepicker]="picker" placeholder="Choose a date" name="date" formControlName="date">
-              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-              <mat-datepicker #picker></mat-datepicker>
-            </mat-form-field>
+    <mat-form-field>
+      <mat-select placeholder="Account" name="account" formControlName="account" required>
+        <mat-option>--</mat-option>
+        <mat-option [value]="account" *ngFor="let account of accounts">
+          {{ account.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
 
-            <mat-form-field fxFlex="20" fxFlex.xs="100">
-              <mat-select placeholder="Account" name="account" formControlName="account" required>
-                <mat-option>--</mat-option>
-                <mat-option [value]="account" *ngFor="let account of accounts">
-                  {{account.name}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+    <mat-form-field *ngIf="!transferBox" fxFlex="1 0">
+      <input
+        matInput
+        placeholder="Payee"
+        value=""
+        type="text"
+        name="payee"
+        formControlName="payee"
+      />
+    </mat-form-field>
+    <!-- transfer fields -->
+    <mat-form-field *ngIf="transferBox">
+      <mat-select placeholder="Transfer Account" name="account" formControlName="transferAccount">
+        <mat-option>--</mat-option>
+        <mat-option [value]="account" *ngFor="let account of accounts">
+          {{ account.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
 
-            <mat-form-field fxFlex="60" *ngIf="!transferBox" fxFlex.xs="100">
-              <input matInput placeholder="Payee" value="" type="text" name="payee" formControlName="payee">
-            </mat-form-field>
-            <!-- transfer fields -->
-            <mat-form-field fxFlex="60" *ngIf="transferBox" fxFlex.xs="100">
-              <mat-select placeholder="Transfer Account" name="account" formControlName="transferAccount">
-                <mat-option>--</mat-option>
-                <mat-option [value]="account" *ngFor="let account of accounts">
-                  {{account.name}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field fxFlex="25" fxFlex.xs="100" *ngIf="transferBox">
-              <input matInput placeholder="Amount" type="number" name="amount" formControlName="transferAmount">
-            </mat-form-field>
-            <!-- transfer fields : end -->
-          </div>
-
-          <div formArrayName="categories" *ngIf="!transferBox">
-            <div fxLayout="row" fxLayoutGap="10px" fxFlexFill *ngFor="let categoryControl of getControls(); let i = index" [formGroupName]="i">
-              <mat-form-field fxFlex="50">
-                <mat-select placeholder="Category" formControlName="category">
-                  <mat-option>--</mat-option>
-                  <mat-option *ngFor="let category of categories" [value]="category">
-                    {{ category.name }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-
-              <mat-form-field fxFlex="25">
-                <input matInput placeholder="Out" type="number" name="out" formControlName="out">
-              </mat-form-field>
-
-              <mat-form-field fxFlex="25">
-                <input matInput placeholder="In" type="number" name="in" formControlName="in">
-              </mat-form-field>
-            </div>
-          </div>
-          <div fxFlexFill>
-            <mat-form-field style="width: 100%">
-              <textarea matInput placeholder="Memo" formControlName="memo"></textarea>
-            </mat-form-field>
-          </div> 
-        </mat-card-content>
-        <mat-checkbox name="cleared" formControlName="cleared">
-          Cleared
-        </mat-checkbox>
-        &nbsp;
-        <mat-checkbox name="transfer" formControlName="transfer" (change)="onToggleTransfer()" >
-          Transfer
-        </mat-checkbox>
-        <mat-card-actions fxLayout="row" fxLayout.xs="column" fxLayoutGap="5px" fxLayoutAlign="start stretch">
-          <button mat-raised-button fxFlex="1 1 30%" color="primary" type="submit" (click)="saveTransaction()" [disabled]="savingInProgress || transactionForm.invalid" >
-            Save Transaction 
-          </button>
-         
-          <button mat-raised-button fxFlex="1 1 15%" color="basic" type="button" (click)="onAddCategory()" [disabled]="savingInProgress || transactionForm.invalid">
-            Split
-          </button>
-          <button mat-raised-button fxFlex="1 1 15%" color="warn" type="button" (click)="cancel()" [disabled]="savingInProgress || transactionForm.invalid">
-            Cancel
-          </button>
-          <button mat-raised-button fxFlex="1 1 15%" color="warn" type="button" (click)="onDelete()" [disabled]="savingInProgress || transactionForm.invalid">
-            Delete
-          </button>
-
-        </mat-card-actions>
-        
-      </mat-card>
-      <input type="hidden" name="type" formControlName="type">
-    </form>
+    <mat-form-field *ngIf="transferBox">
+      <input
+        matInput
+        placeholder="Amount"
+        type="number"
+        name="amount"
+        formControlName="transferAmount"
+      />
+    </mat-form-field>
+    <!-- transfer fields : end -->
   </div>
 
-</div>
+  <div formArrayName="categories" *ngIf="!transferBox">
+    <div
+      fxLayout="row"
+      fxLayout.xs="column"
+      fxLayoutGap="10px"
+      *ngFor="let categoryControl of getControls(); let i = index"
+      [formGroupName]="i"
+    >
+      <mat-form-field fxFlex="2 0 30%">
+        <mat-select placeholder="Category" formControlName="category">
+          <mat-option>--</mat-option>
+          <mat-option *ngFor="let category of categories" [value]="category">
+            {{ category.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field fxFlex="1 0 25%">
+        <input matInput placeholder="Out" type="number" name="out" formControlName="out" />
+      </mat-form-field>
+
+      <mat-form-field fxFlex="1 0 25%">
+        <input matInput placeholder="In" type="number" name="in" formControlName="in" />
+      </mat-form-field>
+    </div>
+  </div>
+  <div fxLayout="row">
+    <mat-form-field fxFlex="1 0">
+      <textarea matInput placeholder="Memo" formControlName="memo"></textarea>
+    </mat-form-field>
+  </div>
+  <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px" class="checkboxes">
+    <mat-checkbox name="cleared" formControlName="cleared">
+      Cleared
+    </mat-checkbox>
+    &nbsp;
+    <mat-checkbox name="transfer" formControlName="transfer" (change)="onToggleTransfer()">
+      Transfer
+    </mat-checkbox>
+  </div>
+  <div fxLayout="row" fxLayout.xs="column" fxLayoutAlign="center center" fxLayoutGap="10px">
+    <button
+      mat-raised-button
+      color="primary"
+      type="submit"
+      (click)="saveTransaction()"
+      [disabled]="savingInProgress || transactionForm.invalid"
+    >
+      Save Transaction
+    </button>
+
+    <button
+      mat-raised-button
+      color="basic"
+      type="button"
+      (click)="onAddCategory()"
+      [disabled]="savingInProgress || transactionForm.invalid"
+    >
+      Split
+    </button>
+    <button
+      mat-raised-button
+      color="warn"
+      type="button"
+      (click)="cancel()"
+      [disabled]="savingInProgress || transactionForm.invalid"
+    >
+      Cancel
+    </button>
+    <button
+      mat-raised-button
+      color="warn"
+      type="button"
+      (click)="onDelete()"
+      [disabled]="savingInProgress || transactionForm.invalid"
+    >
+      Delete
+    </button>
+  </div>
+  <input type="hidden" name="type" formControlName="type" />
+</form>

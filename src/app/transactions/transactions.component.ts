@@ -15,6 +15,7 @@ import { ImportComponent } from './import/import.component';
 import { AuthService } from 'app/shared/auth.service';
 import { takeUntil, take } from 'rxjs/operators';
 import { AccountComponent } from 'app/accounts/account/account.component';
+import { TransactionComponent } from './transaction/transaction.component';
 
 @Component({
   templateUrl: 'transactions.component.html',
@@ -84,6 +85,16 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.unsubscribe.next();
     this.unsubscribe.complete();
+  }
+
+  openTransactionModal() {
+    const dialogRef = this.dialog.open(TransactionComponent, {
+      data: { accountId: this.accountId, budgetId: this.budgetId }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('Transaction Result', result);
+    });
   }
 
   openDialog() {
