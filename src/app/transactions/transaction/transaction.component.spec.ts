@@ -16,7 +16,7 @@ import { UserService } from '../../shared/user.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 import {
   ReactiveFormsModule,
   FormsModule,
@@ -33,16 +33,16 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Category } from '../../shared/category';
 import { Budget } from '../../shared/budget';
 import { Transaction } from '../../shared/transaction';
-import { reject } from 'q';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 describe('TransactionsComponent', () => {
   let transactionServiceStub;
 
   const BudgetServiceStub = jasmine.createSpyObj('BudgetService', [
     'getTransactions',
-    'getActiveBudget$'
+    'getActiveBudget'
   ]);
-  const UserServiceStub = jasmine.createSpyObj('UserService', ['getUser', 'getProfile$']);
+  const UserServiceStub = jasmine.createSpyObj('UserService', ['getUser', 'getProfile']);
   const RouterStub = jasmine.createSpyObj('Router', ['navigate']);
   let accountServiceStub, categoryServiceStub, matSnackBarStub, activatedRouteStub;
   const angularFireAuthServiceStub = jasmine.createSpyObj('AngularFireAuth', ['authenticate']);
@@ -81,10 +81,7 @@ describe('TransactionsComponent', () => {
         success();
       }
     });
-    accountServiceStub = jasmine.createSpyObj('AccountService', [
-      'getAll',
-      'updateAccountBalance'
-    ]);
+    accountServiceStub = jasmine.createSpyObj('AccountService', ['getAll', 'updateAccountBalance']);
     accountServiceStub.getAll.and.returnValue(of([]));
 
     categoryServiceStub = jasmine.createSpyObj('CategoryService', [
@@ -102,13 +99,13 @@ describe('TransactionsComponent', () => {
         categories: [{ categoryId: 'test', category: 'test cat name', in: 0, out: 500 }]
       })
     );
-    UserServiceStub.getProfile$.and.returnValue(
+    UserServiceStub.getProfile.and.returnValue(
       of({
         uid: '09876',
         activeBudget: '54321'
       })
     );
-    BudgetServiceStub.getActiveBudget$.and.returnValue(
+    BudgetServiceStub.getActiveBudget.and.returnValue(
       of({
         id: '54321'
       })
@@ -131,6 +128,8 @@ describe('TransactionsComponent', () => {
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [
+        { provide: MatDialogRef, useValue: {} },
+        { provide: MAT_DIALOG_DATA, useValue: {} },
         {
           provide: AngularFirestore,
           useValue: angularFirestoreServiceStub
@@ -258,6 +257,7 @@ describe('TransactionsComponent', () => {
     fixture.detectChanges();
     const comp = fixture.debugElement.componentInstance;
     const form = fixture.componentInstance.transactionForm;
+
     form.get('account').setValue({ id: 'acc1', name: 'acc1Name' });
     form.get('transferAccount').setValue({ id: 'acc2', name: 'Test Account 2' });
     form.get('transferAmount').setValue(500);

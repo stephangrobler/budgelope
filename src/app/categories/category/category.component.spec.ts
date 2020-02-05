@@ -25,7 +25,9 @@ describe('categoryComponent', () => {
   CategoryServiceStub.getCategory.and.returnValue(of([]));
 
   const BudgetServiceStub = jasmine.createSpyObj('BudgetService', ['getTransactions']);
-  const UserServiceStub = jasmine.createSpyObj('UserService', ['getUser']);
+  const UserServiceStub = jasmine.createSpyObj('UserService', ['getUser', 'getProfile']);
+
+  UserServiceStub.getProfile.and.returnValue(of({ activeBudget: '0123456' }));
   const routerStub = jasmine.createSpyObj('Router', ['navigate']);
 
   const angularFirestoreServiceStub = jasmine.createSpyObj('AngularFirestore', [

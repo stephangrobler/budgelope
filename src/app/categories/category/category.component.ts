@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute, ParamMap } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
-import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
+import { AngularFirestore } from '@angular/fire/firestore';
 
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -9,9 +9,7 @@ import { map } from 'rxjs/operators';
 import { AngularFireAuth } from '@angular/fire/auth';
 
 import { Category } from '../../shared/category';
-import { CategoryService } from '../category.service';
 import { UserService } from '../../shared/user.service';
-import { BudgetService } from '../../budgets/budget.service';
 
 export interface CategoryId extends Category {
   id: string;
@@ -36,8 +34,6 @@ export class CategoryComponent implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private budgetService: BudgetService,
-    private categoryService: CategoryService,
     private userService: UserService,
     private auth: AngularFireAuth,
     private db: AngularFirestore
@@ -49,28 +45,17 @@ export class CategoryComponent implements OnInit {
       this.categoryId = params.get('id');
     });
 
-    this.auth.authState.subscribe(user => {
-      if (!user) {
-        return;
+    this.userService.getProfile().subscribe(profile => {
+      this.activeBudget = profile.activeBudget;
+      this.loadParentCategories(profile.activeBudget);
+      if (this.categoryId !== 'add') {
+        this.db
+          .doc<any>('categories/' + profile.activeBudget + '/' + this.categoryId)
+          .valueChanges()
+          .subscribe(cat => {
+            this.category = cat;
+          });
       }
-      this.theUserId = user.uid;
-      const ref = 'users/' + user.uid;
-
-      this.profile = this.db
-        .doc<any>(ref)
-        .valueChanges()
-        .subscribe(profile => {
-          this.activeBudget = profile.activeBudget;
-          this.loadParentCategories(profile.activeBudget);
-          if (this.categoryId !== 'add') {
-            this.db
-              .doc<any>('categories/' + profile.activeBudget + '/' + this.categoryId)
-              .valueChanges()
-              .subscribe(cat => {
-                this.category = cat;
-              });
-          }
-        });
     });
   }
 

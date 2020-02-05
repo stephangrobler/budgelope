@@ -37,7 +37,7 @@ describe('Transaction Service', () => {
     dbMock.doc.and.returnValue({
       valueChanges: () => of({}),
       delete: jasmine.createSpy('delete'),
-      ref: {'ref': 'noop'}
+      ref: { ref: 'noop' }
     });
     dbMock.collection.and.returnValue({
       doc: function() {
@@ -74,7 +74,9 @@ describe('Transaction Service', () => {
       'getAccounts'
     ]);
     budgetServiceMock = jasmine.createSpyObj('BudgetService', ['updateBudgetBalance']);
-    serviceElementsFactoryMock = jasmine.createSpyObj('EntityCollectionServiceElementsFactory', ['create']);
+    serviceElementsFactoryMock = jasmine.createSpyObj('EntityCollectionServiceElementsFactory', [
+      'create'
+    ]);
 
     const ecsebMock = {
       getByKey: () => {},
@@ -82,8 +84,7 @@ describe('Transaction Service', () => {
       selectors$: {}
     };
 
-    serviceElementsFactoryMock.create.and.returnValue(ecsebMock)
-
+    serviceElementsFactoryMock.create.and.returnValue(ecsebMock);
 
     TestBed.configureTestingModule({
       providers: [
@@ -307,16 +308,15 @@ describe('Transaction Service', () => {
     it('should create a batched update of the matched transactions', () => {
       // arrange
       const transactions = [
-        <ITransactionID>{id: 'TEST001'},
-        <ITransactionID>{id: 'TEST002'},
-        <ITransactionID>{id: 'TEST003'},
-      ]
+        <ITransactionID>{ id: 'TEST001' },
+        <ITransactionID>{ id: 'TEST002' },
+        <ITransactionID>{ id: 'TEST003' }
+      ];
 
       // action
       service.batchUpdateMatched(transactions, 'TESTBUDGET');
 
       // assert
-      
     });
 
     it('should create a batched transcations of unmatched transactions', async (done: DoneFn) => {
@@ -350,7 +350,7 @@ describe('Transaction Service', () => {
             'TESTBUDGET',
             jasmine.anything(),
             -700.6600000000001
-          )
+          );
           done();
         });
     });

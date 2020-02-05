@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { DataSource } from '@angular/cdk/collections';
 import { Transaction, ITransactionID } from '../shared/transaction';
@@ -51,7 +51,6 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-
     this.db
       .doc<any>('users/' + this.authService.currentUserId)
       .valueChanges()
@@ -88,9 +87,12 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   }
 
   openTransactionModal() {
-    const dialogRef = this.dialog.open(TransactionComponent, {
+    const dialogConfig = {
+      width: '80vw',
+      height: '100vh', // this needs to have a check if it is a mobile view
       data: { accountId: this.accountId, budgetId: this.budgetId }
-    });
+    } as MatDialogConfig;
+    const dialogRef = this.dialog.open(TransactionComponent, dialogConfig);
 
     dialogRef.afterClosed().subscribe(result => {
       console.log('Transaction Result', result);

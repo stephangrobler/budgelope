@@ -8,7 +8,6 @@ import { HttpUrlGenerator, Logger } from '@ngrx/data';
 import { UserService } from 'app/shared/user.service';
 
 describe('UserDataService', () => {
-
   let afsMock;
   let httpMock;
   let httpGenMock;
@@ -18,12 +17,17 @@ describe('UserDataService', () => {
   beforeEach(() => {
     afsMock = jasmine.createSpyObj('AngularFirestore', ['collection']);
     httpMock = jasmine.createSpyObj('HttpClient', ['get']);
-    httpGenMock = jasmine.createSpyObj('HttpUrlGenerator', ['entityResource', 'collectionResource']);
+    httpGenMock = jasmine.createSpyObj('HttpUrlGenerator', [
+      'entityResource',
+      'collectionResource'
+    ]);
     loggerMock = jasmine.createSpyObj('Logger', ['log']);
-    userMock = jasmine.createSpyObj('UserService', ['getProfile$']);
-    userMock.getProfile$.and.returnValue( of({
-      activeBudget: '67890'
-    }));
+    userMock = jasmine.createSpyObj('UserService', ['getProfile']);
+    userMock.getProfile.and.returnValue(
+      of({
+        activeBudget: '67890'
+      })
+    );
 
     TestBed.configureTestingModule({
       providers: [

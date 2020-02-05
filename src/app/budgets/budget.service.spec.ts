@@ -12,7 +12,14 @@ import { EntityCollectionServiceElementsFactory } from '@ngrx/data';
 
 describe('Budget service', () => {
   let budgetService: BudgetService;
-  let categoryServiceSpy, accountServiceSpy, dbSpy, docObject,  authSpy, firebaseAppSpy, ecsefMock, ecsebMock;
+  let categoryServiceSpy,
+    accountServiceSpy,
+    dbSpy,
+    docObject,
+    authSpy,
+    firebaseAppSpy,
+    ecsefMock,
+    ecsebMock;
 
   beforeEach(() => {
     categoryServiceSpy = jasmine.createSpyObj('CategoryService', ['copyCategories']);
@@ -69,7 +76,6 @@ describe('Budget service', () => {
     };
 
     ecsefMock.create.and.returnValue(ecsebMock);
-    
 
     TestBed.configureTestingModule({
       // Provide both the service-to-test and its (spy) dependency
@@ -99,7 +105,6 @@ describe('Budget service', () => {
           provide: EntityCollectionServiceElementsFactory,
           useValue: ecsefMock
         }
-
       ]
     });
     // Inject both the service-to-test and its (spy) dependency
@@ -107,11 +112,11 @@ describe('Budget service', () => {
   });
 
   it('should have a getActiveBudget$ method', async () => {
-    expect(budgetService.getActiveBudget$()).toBeDefined('should have a method getActiveBudget$');
+    expect(budgetService.getActiveBudget()).toBeDefined('should have a method getActiveBudget$');
   });
 
   it('should have called the active budget', (done: DoneFn) => {
-    budgetService.getActiveBudget$().subscribe(testing => {
+    budgetService.getActiveBudget().subscribe(testing => {
       expect(dbSpy.doc).toHaveBeenCalledTimes(2);
       expect(testing.name).toEqual('budget', 'should have name "budget"');
       done();

@@ -71,7 +71,6 @@ export class CategoryService extends EntityCollectionServiceBase<CategoryId> {
 
   updateCategory(budgetId: string, categoryParam: Category) {
     const docRef = 'budgets/' + budgetId + '/categories/' + categoryParam.id;
-
     return this.db.doc(docRef).update(categoryParam);
   }
 

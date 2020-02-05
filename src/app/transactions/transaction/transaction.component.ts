@@ -39,8 +39,8 @@ export class TransactionComponent implements OnInit, OnDestroy {
   savingInProgress = false;
 
   constructor(
-    public dialogRef: MatDialogRef<TransactionComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
+    public dialogRef: MatDialogRef<TransactionComponent>,
     private userService: UserService,
     private budgetService: BudgetService,
     private transactionService: TransactionService,
@@ -55,7 +55,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
     this.initForm();
 
     const profileSubscription = this.userService.getProfile().subscribe(profile => {
-      const budgetSubscription = this.budgetService.getActiveBudget$().subscribe(budget => {
+      const budgetSubscription = this.budgetService.getActiveBudget().subscribe(budget => {
         this.activeBudget = budget;
         this.activeBudget.id = profile.activeBudget;
       });

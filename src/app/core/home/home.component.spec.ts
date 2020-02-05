@@ -19,6 +19,7 @@ import { AccountService } from '../../accounts/account.service';
 import { UserService } from 'app/shared/user.service';
 import { BreakpointObserver } from '@angular/cdk/layout';
 
+// tslint:disable-next-line:component-selector
 @Component({ selector: 'router-outlet', template: '' })
 class RouterOutletStubComponent {}
 
@@ -26,7 +27,13 @@ class RouterOutletStubComponent {}
 class NavigationBarStubComponent {}
 
 describe('HomeComponent', () => {
-  let analyticsServiceStub, dbStub, routerStub, authStub, breakpointObserverStub, accountServiceStub, userServiceStub;
+  let analyticsServiceStub,
+    dbStub,
+    routerStub,
+    authStub,
+    breakpointObserverStub,
+    accountServiceStub,
+    userServiceStub;
 
   beforeEach(async(() => {
     analyticsServiceStub = jasmine.createSpyObj('AnalyticsService', ['pageView']);
@@ -40,10 +47,10 @@ describe('HomeComponent', () => {
     routerStub = jasmine.createSpyObj('Router', ['navigate']);
     authStub = jasmine.createSpyObj('AngularFireAuth', ['login']);
     authStub.authState = of({ uid: '12345' });
-    breakpointObserverStub = { observe: () => of({})};
+    breakpointObserverStub = { observe: () => of({}) };
     accountServiceStub = jasmine.createSpyObj('AccountService', ['getAll']);
-    userServiceStub = jasmine.createSpyObj('UserService', ['getProfile$']);
-    userServiceStub.getProfile$.and.returnValue(of({activeBudget: 'abcde'}))
+    userServiceStub = jasmine.createSpyObj('UserService', ['getProfile']);
+    userServiceStub.getProfile.and.returnValue(of({ activeBudget: 'abcde' }));
 
     TestBed.configureTestingModule({
       declarations: [
