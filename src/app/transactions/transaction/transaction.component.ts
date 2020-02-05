@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject } from '@angular/core';
 import { FormGroup, FormControl, FormArray, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AngularFirestoreDocument } from '@angular/fire/firestore';
@@ -15,6 +15,7 @@ import { UserService } from '../../shared/user.service';
 import { TransactionService } from '../transaction.service';
 import { AccountService } from '../../accounts/account.service';
 import { CategoryService } from '../../categories/category.service';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-transaction',
@@ -38,6 +39,8 @@ export class TransactionComponent implements OnInit, OnDestroy {
   savingInProgress = false;
 
   constructor(
+    public dialogRef: MatDialogRef<TransactionComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any,
     private userService: UserService,
     private budgetService: BudgetService,
     private transactionService: TransactionService,
