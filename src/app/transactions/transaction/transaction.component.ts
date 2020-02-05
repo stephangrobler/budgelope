@@ -54,7 +54,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.initForm();
 
-    const profileSubscription = this.userService.getProfile$().subscribe(profile => {
+    const profileSubscription = this.userService.getProfile().subscribe(profile => {
       const budgetSubscription = this.budgetService.getActiveBudget$().subscribe(budget => {
         this.activeBudget = budget;
         this.activeBudget.id = profile.activeBudget;
