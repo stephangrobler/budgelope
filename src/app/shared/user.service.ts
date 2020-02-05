@@ -5,13 +5,13 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 
-import { Profile } from '../shared/profile';
+import { IProfile } from '../shared/profile';
 import { BudgetService } from '../budgets/budget.service';
 
 @Injectable()
 export class UserService implements CanActivate {
   authenticated = false;
-  profile$: Observable<Profile>;
+  profile$: Observable<IProfile>;
 
   constructor(
     private router: Router,
@@ -19,7 +19,7 @@ export class UserService implements CanActivate {
     private db: AngularFirestore,
     private budgetService: BudgetService
   ) {
-    this.getProfile$();
+    this.getProfile();
     this.verifyUser();
   }
 
@@ -55,7 +55,7 @@ export class UserService implements CanActivate {
   login(loginEmail: string, loginPassword: string) {
     return this.afAuth.auth.signInWithEmailAndPassword(loginEmail, loginPassword).then((user) => {
 
-      this.getProfile$();
+      this.getProfile();
     });
   }
 
@@ -71,10 +71,10 @@ export class UserService implements CanActivate {
     );
   }
 
-  getProfile$(): Observable<Profile> {
+  getProfile(): Observable<IProfile> {
     return this.afAuth.authState.pipe(
       mergeMap(user => {
-        return this.db.doc<Profile>('users/' + user.uid).valueChanges();
+        return this.db.doc<IProfile>('users/' + user.uid).valueChanges();
       })
     );
   }

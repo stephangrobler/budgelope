@@ -22,7 +22,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   watcher: Subscription;
   activeMediaQuery = '';
   theUser = true;
-  isHandset$ = this.breakpointObserver
+  isHandset = this.breakpointObserver
     .observe(Breakpoints.Handset)
     .pipe(map(results => results.matches));
 
@@ -40,7 +40,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this._analytics.pageView('/');
     this.currentMonth = moment().format('YYYYMM');
     this.userService
-      .getProfile$()
+      .getProfile()
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(profile => {
         this.accounts = this.accountService.getAll();

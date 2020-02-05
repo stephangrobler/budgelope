@@ -1,4 +1,4 @@
-export class Profile {
+export interface IProfile {
   activeBudget: string;
   name: string;
   availableBudgets: any;

@@ -25,7 +25,7 @@ export class CategoryDataService extends DefaultDataService<CategoryId> {
     super('Category', httpClient, httpUrlGenerator);
     logger.log('Created custom Category EntityDataService');
     // TODO: may cause concurrency issues
-    this.userService.getProfile$().subscribe(profile => {
+    this.userService.getProfile().subscribe(profile => {
       this.activeBudgetID = profile.activeBudget;
       logger.log('CategoryService -> this.activeBudgetID:', this.activeBudgetID);
     });

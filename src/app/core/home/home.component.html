@@ -3,14 +3,13 @@
     class="side-nav"
     #drawer
     fixedInViewport="true"
-    [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
-    [mode]="(isHandset$ | async) ? 'over' : 'side'"
-    [opened]="!(isHandset$ | async)"
+    [attr.role]="(isHandset | async) ? 'dialog' : 'navigation'"
+    [mode]="(isHandset | async) ? 'over' : 'side'"
+    [opened]="!(isHandset | async)"
   >
     <mat-toolbar color="primary">
       <mat-icon>menu</mat-icon>
       <a mat-button (click)="gotoBudget()">Budgalope</a>
-      <span style="flex: 1 1 auto"></span>
       <div *ngIf="theUser">
         <a mat-button href (click)="logout()">{{ theUser.email }}</a>
       </div>
@@ -43,21 +42,18 @@
       <mat-list-item *ngIf="(accounts | async)?.length == 0">
         It seems you dont have any accounts, create one now!
       </mat-list-item>
-
-      <a mat-list-item [routerLink]="['/app/transactions']">Transactions</a>
     </mat-nav-list>
   </mat-sidenav>
 
   <mat-sidenav-content>
     <mat-toolbar color="primary">
-      <div *ngIf="(isHandset$ | async)">
+      <div *ngIf="(isHandset | async)">
         <button mat-button color="secondary" (click)="drawer.toggle()">
           <mat-icon>menu</mat-icon>
         </button>
 
         <a mat-button (click)="gotoBudget()">Budgalope</a>
       </div>
-      <span style="flex: 1 1 auto"></span>
       <div *ngIf="theUser">
         <a mat-button href (click)="logout()">{{ theUser.email }}</a>
       </div>

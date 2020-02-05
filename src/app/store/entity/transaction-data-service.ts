@@ -25,7 +25,7 @@ export class TransactionDataService extends DefaultDataService<ITransactionID> {
   ) {
     super('ITransaction', http, httpUrlGenerator);
     logger.log('Created custom Transaction EntityDataService');
-    this.userService.getProfile$().subscribe(profile => {
+    this.userService.getProfile().subscribe(profile => {
       this.activeBudgetID = profile.activeBudget;
       logger.log('TransactionService -> this.activeBudgetID:', this.activeBudgetID);
     });

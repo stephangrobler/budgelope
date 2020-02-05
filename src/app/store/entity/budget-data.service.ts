@@ -22,7 +22,7 @@ export class BudgetDataService extends DefaultDataService<Budget> {
     private userService: UserService
   ) {
     super('Budget', http, httpUrlGenerator);
-    this.userService.getProfile$().subscribe(profile => {
+    this.userService.getProfile().subscribe(profile => {
       this.activeBudgetID = profile.activeBudget;
       logger.log('BudgetDataService -> this.activeBudgetID:', this.activeBudgetID);
     });

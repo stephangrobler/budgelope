@@ -10,23 +10,23 @@ export class SignUpComponent implements OnInit {
   email: string;
   password1: string;
   password2: string;
-  passwordFail: boolean = false;
+  passwordFail = false;
 
-  constructor(private userSVC: UserService, private router: Router) {  }
+  constructor(private userService: UserService, private router: Router) {  }
 
   ngOnInit() {}
 
-  signUp(){
-    if (this.password1 !== this.password2){
+  signUp() {
+    if (this.password1 !== this.password2) {
       this.passwordFail = true;
     } else {
       this.passwordFail = false;
-      this.userSVC.register(this.email, this.password1);
-      this.userSVC.verifyUser();
+      this.userService.register(this.email, this.password1);
+      this.userService.verifyUser();
     }
   }
 
-  cancel(){
+  cancel() {
     this.router.navigate(['/login']);
   }
 }
