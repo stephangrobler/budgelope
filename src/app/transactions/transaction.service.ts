@@ -18,7 +18,7 @@ export interface IFilter {
   categoryId: string;
 }
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class TransactionService extends EntityCollectionServiceBase<ITransaction> {
   transactions: Transaction[];
 
@@ -50,10 +50,9 @@ export class TransactionService extends EntityCollectionServiceBase<ITransaction
           const dateDiff = moment(curTrans.date).diff(moment(importedTrans.dtposted), 'days');
           if (curTrans.amount === +importedTrans.trnamt && dateDiff > -6) {
             if (curTrans.matched === null) {
-            // flag current transactions as matched
-            curTrans.matched = importedTrans;
-            matching.updated.push(curTrans);
-
+              // flag current transactions as matched
+              curTrans.matched = importedTrans;
+              matching.updated.push(curTrans);
             }
             importedTransactions.splice(j, 1);
             j--;
@@ -455,16 +454,16 @@ export class TransactionService extends EntityCollectionServiceBase<ITransaction
    * @param  {string} budgetId    [description]
    * @return {[type]}             [description]
    */
-  createTransaction(transaction: Transaction, budgetId: string) {
+  createTransaction(transaction: Transaction, budgetId: string): Promise<any> {
     const items = this.db.collection<Transaction>('budgets/' + budgetId + '/transactions'),
       shortDate = moment(transaction.date).format('YYYYMM');
 
     return new Promise((resolve, reject) => {
       const transactionObj = JSON.parse(JSON.stringify(transaction));
       items.add(transactionObj).then(
-        response => {
+        async response => {
           // after successfull response, we update the account budgets (could go to cloud functions)
-          this.accountService.updateAccountBalance(
+          await this.accountService.updateAccountBalance(
             transaction.account.accountId,
             budgetId,
             transaction.amount
@@ -473,7 +472,7 @@ export class TransactionService extends EntityCollectionServiceBase<ITransaction
           for (const key in transaction.categories) {
             if (transaction.categories.hasOwnProperty(key)) {
               const category = transaction.categories[key];
-              this.categoryService.updateCategoryBudget(
+              await this.categoryService.updateCategoryBudget(
                 budgetId,
                 key,
                 shortDate,

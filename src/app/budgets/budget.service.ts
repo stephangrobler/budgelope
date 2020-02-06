@@ -68,10 +68,10 @@ export class BudgetService extends EntityCollectionServiceBase<Budget> {
    * @param date The date of the transaction
    * @param amount The amount of the transaction
    */
-  updateBudgetBalance(budgetId: string, date: Date, amount: number) {
+  updateBudgetBalance(budgetId: string, date: Date, amount: number): Promise<any> {
     const docRef = this.db.doc('budgets/' + budgetId).ref;
 
-    this.fb.firestore().runTransaction(transaction => {
+    return this.fb.firestore().runTransaction(transaction => {
       return transaction.get(docRef).then(
         budgetRaw => {
           const shortDate = moment(date).format('YYYYMM');
@@ -91,13 +91,10 @@ export class BudgetService extends EntityCollectionServiceBase<Budget> {
           } else {
             budget.allocations[shortDate].expense += Math.abs(amount);
           }
-          transaction.update(docRef, budget);
+          return transaction.update(docRef, budget);
         },
         error => {
-          console.log(
-            'There was an error updating the budget: ' + budgetId + ' - ' + date + ' - ' + amount,
-            error
-          );
+          throw Error(error);
         }
       );
     });

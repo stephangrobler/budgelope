@@ -9,6 +9,8 @@ import { Account } from '../../shared/account';
 import { takeUntil, map } from 'rxjs/operators';
 import { UserService } from 'app/shared/user.service';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { MatDialog } from '@angular/material/dialog';
+import { AccountComponent } from '../../accounts/account/account.component';
 
 @Component({
   templateUrl: 'home.component.html',
@@ -33,7 +35,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private router: Router,
     private breakpointObserver: BreakpointObserver,
     private accountService: AccountService,
-    private userService: UserService
+    private userService: UserService,
+    public dialog: MatDialog
   ) {}
 
   ngOnInit() {
@@ -59,5 +62,17 @@ export class HomeComponent implements OnInit, OnDestroy {
   gotoBudget() {
     const shortDate = moment().format('YYYYMM');
     this.router.navigate(['/app/budget/' + shortDate]);
+  }
+
+  onAddAccount() {
+    const dialogRef = this.dialog.open(AccountComponent, {
+      data: {
+        accountId: 'add'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('Account Dialog Result', result);
+    });
   }
 }

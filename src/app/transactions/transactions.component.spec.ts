@@ -21,11 +21,19 @@ describe('TransactionsComponent', () => {
   ]);
   TransactionServiceStub.getWithQuery.and.returnValue(of([]));
 
-  const BudgetServiceStub = jasmine.createSpyObj('BudgetService', ['getTransactions']);
-  const UserServiceStub = jasmine.createSpyObj('UserService', ['getUser']);
+  const BudgetServiceStub = jasmine.createSpyObj('BudgetService', [
+    'getTransactions'
+  ]);
+  const UserServiceStub = jasmine.createSpyObj('UserService', [
+    'getUser',
+    'getProfile'
+  ]);
+  UserServiceStub.getProfile.and.returnValue(of({ activeBudget: '0123456' }));
   const RouterStub = jasmine.createSpyObj('Router', ['navigate']);
 
-  const angularFireAuthServiceStub = jasmine.createSpyObj('AngularFireAuth', ['authenticate']);
+  const angularFireAuthServiceStub = jasmine.createSpyObj('AngularFireAuth', [
+    'authenticate'
+  ]);
   angularFireAuthServiceStub.authState = of([]);
 
   const angularFirestoreServiceStub = jasmine.createSpyObj('AngularFirestore', [
@@ -38,7 +46,10 @@ describe('TransactionsComponent', () => {
     }
   });
 
-  const matDialogStub = jasmine.createSpyObj('MatDialog', ['open', 'afterClosed']);
+  const matDialogStub = jasmine.createSpyObj('MatDialog', [
+    'open',
+    'afterClosed'
+  ]);
 
   beforeEach(async(() => {
     activatedRouteStub = new ActivatedRouteStub();

@@ -27,10 +27,10 @@ export class CategoryService extends EntityCollectionServiceBase<CategoryId> {
     shortDate: string,
     inAmount: number,
     outAmount: number
-  ) {
+  ): Promise<any> {
     const docRef = this.db.doc('budgets/' + budgetId + '/categories/' + categoryId).ref;
 
-    this.fb.firestore().runTransaction(transaction => {
+    return this.fb.firestore().runTransaction(transaction => {
       return transaction.get(docRef).then(
         categoryRaw => {
           const category = categoryRaw.data() as Category;
@@ -48,22 +48,10 @@ export class CategoryService extends EntityCollectionServiceBase<CategoryId> {
             };
           }
           category['allocations'][shortDate].actual += amount;
-          transaction.update(docRef, category);
+          return transaction.update(docRef, category);
         },
         error => {
-          console.log(
-            'There was an error updating the category: ' +
-              budgetId +
-              ' - ' +
-              categoryId +
-              ' - ' +
-              shortDate +
-              ' - ' +
-              inAmount +
-              ' - ' +
-              outAmount,
-            error
-          );
+          throw Error(error);
         }
       );
     });

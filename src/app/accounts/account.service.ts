@@ -8,7 +8,6 @@ import { EntityCollectionServiceBase, EntityCollectionServiceElementsFactory } f
 
 @Injectable()
 export class AccountService extends EntityCollectionServiceBase<IAccount> {
-
   constructor(
     private db: AngularFirestore,
     private fb: FirebaseApp,
@@ -58,29 +57,19 @@ export class AccountService extends EntityCollectionServiceBase<IAccount> {
   /**
    * Updates the balance of an account in a transaction
    *
-   * @param accountId The id of the account to be updated
-   * @param budgetId The budget of which the account needs to be updated
-   * @param amount The amount that the account needs to be updated with
    */
-  updateAccountBalance(accountId: string, budgetId: string, amount: number) {
+  updateAccountBalance(accountId: string, budgetId: string, amount: number): Promise<any> {
     const dbRef = 'budgets/' + budgetId + '/accounts/' + accountId;
     const docRef = this.db.doc(dbRef).ref;
 
-    this.fb.firestore().runTransaction(dbTransaction => {
+    return this.fb.firestore().runTransaction(dbTransaction => {
       return dbTransaction.get(docRef).then(
         account => {
           const newBalance = Number(account.data().balance) + Number(amount);
-          dbTransaction.update(docRef, { balance: newBalance });
+          return dbTransaction.update(docRef, { balance: newBalance });
         },
         error => {
-          console.log(
-            'There was an error updating the balance of the account: ' +
-              accountId +
-              ' - ' +
-              budgetId +
-              ' - ',
-            error
-          );
+          throw Error(error);
         }
       );
     });

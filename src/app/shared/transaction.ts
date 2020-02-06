@@ -1,6 +1,10 @@
-import { Category } from './category';
-import { Account } from './account';
 import { IImportedTransaction } from 'app/transactions/import/importedTransaction';
+
+export const enum TransactionTypes {
+  INCOME = 'income',
+  EXPENSE = 'expense',
+  TRANSFER = 'transfer'
+}
 
 export interface ITransaction {
   account: { accountId: string; accountName: string };
@@ -17,7 +21,7 @@ export interface ITransaction {
   memo: string;
   payee: string;
   type: string;
-  matched?: IImportedTransaction
+  matched?: IImportedTransaction;
 }
 
 export interface ITransactionID extends ITransaction {
@@ -38,7 +42,10 @@ export class Transaction implements ITransaction {
     };
   }; // object with category id for keys
   categoryDisplayName: string;
-  account: { accountId: string; accountName: string } = { accountId: '', accountName: '' };
+  account: { accountId: string; accountName: string } = {
+    accountId: '',
+    accountName: ''
+  };
   accountDisplayName: string;
   transferAccount: { accountId: string; accountName: string } = null;
   transferAccountDisplayName: string = null;
@@ -67,7 +74,10 @@ export class Transaction implements ITransaction {
 
       if (transactionData.categories && transactionData.categories.length > 1) {
         this.categoryDisplayName = 'Split';
-      } else if (transactionData.categories && transactionData.categories[0].category) {
+      } else if (
+        transactionData.categories &&
+        transactionData.categories[0].category
+      ) {
         this.categoryDisplayName = transactionData.categories[0].category.name;
       }
 
@@ -96,8 +106,12 @@ export class Transaction implements ITransaction {
         this.transferAccount = transactionData.transferAccount;
       }
       this.memo = transactionData.memo ? transactionData.memo : '';
-      this.transferAmount = transactionData.transferAmount ? transactionData.transferAmount : 0;
-      this.transfer = transactionData.transfer ? transactionData.transfer : false;
+      this.transferAmount = transactionData.transferAmount
+        ? transactionData.transferAmount
+        : 0;
+      this.transfer = transactionData.transfer
+        ? transactionData.transfer
+        : false;
       this.payeeId = transactionData.payeeId ? transactionData.payeeId : null;
       this.payee = transactionData.payee ? transactionData.payee : null;
       this.amount = transactionData.amount ? transactionData.amount : null;
@@ -129,10 +143,4 @@ export class Transaction implements ITransaction {
   //     transfer: this.transfer
   //   };
   // }
-}
-
-export enum TransactionTypes {
-  INCOME = 'income',
-  EXPENSE = 'expense',
-  TRANSFER = 'transfer'
 }

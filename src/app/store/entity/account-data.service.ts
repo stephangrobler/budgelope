@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { DefaultDataService, HttpUrlGenerator, Logger } from '@ngrx/data';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { HttpClient } from '@angular/common/http';
-import { Account } from 'app/shared/account';
-import { Observable, of } from 'rxjs';
+import { Account, IAccount, IAccountId } from 'app/shared/account';
+import { Observable, of, from } from 'rxjs';
 import { UserService } from 'app/shared/user.service';
-import { map } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { Update } from '@ngrx/entity';
 
 @Injectable({
@@ -24,7 +24,6 @@ export class AccountDataService extends DefaultDataService<Account> {
     super('Account', http, httpUrlGenerator);
     this.userService.getProfile().subscribe(profile => {
       this.activeBudgetID = profile.activeBudget;
-      logger.log('AccountDataService -> this.activeBudgetID:', this.activeBudgetID);
     });
   }
 
@@ -38,7 +37,7 @@ export class AccountDataService extends DefaultDataService<Account> {
           return actions.map(a => {
             const data = a.payload.doc.data() as Account;
             const id = a.payload.doc.id;
-            return {id, ...data};
+            return { id, ...data };
           });
         })
       );
@@ -46,8 +45,9 @@ export class AccountDataService extends DefaultDataService<Account> {
 
   getWithQuery(params: any): Observable<Account[]> {
     return this.db
-      .collection<Account>('budgets/' + this.activeBudgetID + '/categories', ref =>
-        ref.orderBy(params.orderBy)
+      .collection<Account>(
+        'budgets/' + this.activeBudgetID + '/categories',
+        ref => ref.orderBy(params.orderBy)
       )
       .snapshotChanges()
       .pipe(
@@ -65,5 +65,16 @@ export class AccountDataService extends DefaultDataService<Account> {
     const docRef = 'budgets/' + this.activeBudgetID + '/account/' + account.id;
     this.db.doc(docRef).update(account.changes);
     return of(account.changes as Account);
+  }
+
+  add(account: IAccount): Observable<IAccountId> {
+    const docRef = 'budgets/' + this.activeBudgetID + '/account';
+    this.db.collection(docRef).add(account);
+    return from(this.db.collection(docRef).add(account)).pipe(
+      switchMap(response => {
+        console.log('SFG: AccountDataService -> response', response);
+        return of({ ...account, id: response.id });
+      })
+    );
   }
 }

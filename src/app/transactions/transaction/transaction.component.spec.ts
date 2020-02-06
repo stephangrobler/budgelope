@@ -42,10 +42,18 @@ describe('TransactionsComponent', () => {
     'getTransactions',
     'getActiveBudget'
   ]);
-  const UserServiceStub = jasmine.createSpyObj('UserService', ['getUser', 'getProfile']);
+  const UserServiceStub = jasmine.createSpyObj('UserService', [
+    'getUser',
+    'getProfile'
+  ]);
   const RouterStub = jasmine.createSpyObj('Router', ['navigate']);
-  let accountServiceStub, categoryServiceStub, matSnackBarStub, activatedRouteStub;
-  const angularFireAuthServiceStub = jasmine.createSpyObj('AngularFireAuth', ['authenticate']);
+  let accountServiceStub,
+    categoryServiceStub,
+    matSnackBarStub,
+    activatedRouteStub;
+  const angularFireAuthServiceStub = jasmine.createSpyObj('AngularFireAuth', [
+    'authenticate'
+  ]);
   angularFireAuthServiceStub.authState = of([]);
 
   const angularFirestoreServiceStub = jasmine.createSpyObj('AngularFirestore', [
@@ -71,17 +79,16 @@ describe('TransactionsComponent', () => {
       'calculateAmount'
     ]);
     transactionServiceStub.getWithQuery.and.returnValue(of([]));
-    transactionServiceStub.createTransaction.and.returnValue({
-      then: (success, failure) => {
-        success();
-      }
-    });
+    transactionServiceStub.createTransaction.and.returnValue(Promise.resolve());
     transactionServiceStub.removeTransaction.and.returnValue({
       then: (success, failure) => {
         success();
       }
     });
-    accountServiceStub = jasmine.createSpyObj('AccountService', ['getAll', 'updateAccountBalance']);
+    accountServiceStub = jasmine.createSpyObj('AccountService', [
+      'getAll',
+      'updateAccountBalance'
+    ]);
     accountServiceStub.getAll.and.returnValue(of([]));
 
     categoryServiceStub = jasmine.createSpyObj('CategoryService', [
@@ -96,7 +103,9 @@ describe('TransactionsComponent', () => {
       of({
         date: '2018-01-01',
         payee: 'Test Payee',
-        categories: [{ categoryId: 'test', category: 'test cat name', in: 0, out: 500 }]
+        categories: [
+          { categoryId: 'test', category: 'test cat name', in: 0, out: 500 }
+        ]
       })
     );
     UserServiceStub.getProfile.and.returnValue(
@@ -245,7 +254,7 @@ describe('TransactionsComponent', () => {
     const comp = fixture.debugElement.componentInstance;
   });
 
-  it('should call the transfer function', () => {
+  it('should call the transfer function', (done: DoneFn) => {
     categoryServiceStub.getWithQuery.and.returnValue(
       of([
         { id: 'cat1', name: 'Transfer In', type: 'system' },
@@ -259,13 +268,16 @@ describe('TransactionsComponent', () => {
     const form = fixture.componentInstance.transactionForm;
 
     form.get('account').setValue({ id: 'acc1', name: 'acc1Name' });
-    form.get('transferAccount').setValue({ id: 'acc2', name: 'Test Account 2' });
+    form
+      .get('transferAccount')
+      .setValue({ id: 'acc2', name: 'Test Account 2' });
     form.get('transferAmount').setValue(500);
     form.get('transfer').setValue(true);
 
-    comp.transfer(form);
-
-    expect(transactionServiceStub.createTransaction).toHaveBeenCalledTimes(2);
+    comp.transfer(form).then(results => {
+      expect(transactionServiceStub.createTransaction).toHaveBeenCalledTimes(2);
+      done();
+    });
   });
 
   it('should call the transfer function with a from Transaction of values', () => {
@@ -281,7 +293,9 @@ describe('TransactionsComponent', () => {
     const comp = fixture.debugElement.componentInstance;
     const form = fixture.componentInstance.transactionForm;
     form.get('account').setValue({ id: 'acc1', name: 'acc1Name' });
-    form.get('transferAccount').setValue({ id: 'acc2', name: 'Test Account 2' });
+    form
+      .get('transferAccount')
+      .setValue({ id: 'acc2', name: 'Test Account 2' });
     form.get('transferAmount').setValue(500);
     form.get('transfer').setValue(true);
 
@@ -302,12 +316,14 @@ describe('TransactionsComponent', () => {
     comp.transfer(form);
 
     expect(transactionServiceStub.createTransaction).toHaveBeenCalledWith(
-      jasmine.objectContaining({ categoryDisplayName: 'Transfer to Test Account 2' }),
+      jasmine.objectContaining({
+        categoryDisplayName: 'Transfer to Test Account 2'
+      }),
       '54321'
     );
   });
 
-  it('should call the transfer function with a to Transaction of values', () => {
+  it('should call the transfer function with a to Transaction of values', (done: DoneFn) => {
     categoryServiceStub.getWithQuery.and.returnValue(
       of([
         { id: 'cat1', name: 'Transfer In', type: 'system' },
@@ -320,7 +336,9 @@ describe('TransactionsComponent', () => {
     const comp = fixture.debugElement.componentInstance;
     const form = fixture.componentInstance.transactionForm;
     form.get('account').setValue({ id: 'acc1', name: 'acc1Name' });
-    form.get('transferAccount').setValue({ id: 'acc2', name: 'Test Account 2' });
+    form
+      .get('transferAccount')
+      .setValue({ id: 'acc2', name: 'Test Account 2' });
     form.get('transferAmount').setValue(500);
     form.get('transfer').setValue(true);
 
@@ -334,17 +352,24 @@ describe('TransactionsComponent', () => {
       accountName: 'acc1Name'
     };
     transaction.accountDisplayName = transaction.account.accountName;
-    transaction.categories['cat1'] = { categoryName: 'Transfer In', in: 500, out: 0 };
+    transaction.categories['cat1'] = {
+      categoryName: 'Transfer In',
+      in: 500,
+      out: 0
+    };
 
     transaction.amount = 500;
     transaction.in = 500;
 
-    comp.transfer(form);
-
-    expect(transactionServiceStub.createTransaction).toHaveBeenCalledWith(
-      jasmine.objectContaining({ categoryDisplayName: 'Transfer from acc1Name' }),
-      '54321'
-    );
+    comp.transfer(form).then(() => {
+      expect(transactionServiceStub.createTransaction).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          categoryDisplayName: 'Transfer from acc1Name'
+        }),
+        '54321'
+      );
+      done();
+    });
   });
 
   it('should update the categories and call update 3 times', () => {
@@ -523,7 +548,9 @@ describe('TransactionsComponent', () => {
     form.get('account').setValue({ id: 'acc1', name: 'acc1Name' });
     form
       .get('categories')
-      .setValue([{ category: { id: 'cat1', name: 'cat1Name' }, in: 0, out: 500 }]);
+      .setValue([
+        { category: { id: 'cat1', name: 'cat1Name' }, in: 0, out: 500 }
+      ]);
 
     // action
     comp.create(comp.transactionForm);
@@ -547,12 +574,17 @@ describe('TransactionsComponent', () => {
     form.get('account').setValue({ id: 'acc1', name: 'acc1Name' });
     form
       .get('categories')
-      .setValue([{ category: { id: 'cat1', name: 'cat1Name' }, in: 0, out: 500 }]);
+      .setValue([
+        { category: { id: 'cat1', name: 'cat1Name' }, in: 0, out: 500 }
+      ]);
     spyOn(window, 'confirm').and.returnValue(true);
     // action
     comp.onDelete();
 
     // assert
-    expect(transactionServiceStub.removeTransaction).toHaveBeenCalledWith('54321', '12345');
+    expect(transactionServiceStub.removeTransaction).toHaveBeenCalledWith(
+      '54321',
+      '12345'
+    );
   });
 });

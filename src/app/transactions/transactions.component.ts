@@ -1,6 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
+import {
+  AngularFirestore,
+  AngularFirestoreCollection
+} from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
@@ -30,7 +33,16 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   accountId: string;
   account: IAccount;
   categoryId: string;
-  displayedColumns = ['date', 'account', 'payee', 'category', 'out', 'in', 'cleared', 'matched'];
+  displayedColumns = [
+    'date',
+    'account',
+    'payee',
+    'category',
+    'out',
+    'in',
+    'cleared',
+    'matched'
+  ];
   dataSource: TransactionDataSource;
   newTransaction: Transaction;
   showCleared = false;
@@ -42,6 +54,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   constructor(
     private transService: TransactionService,
     private authService: AuthService,
+    private userService: UserService,
     private router: Router,
     private route: ActivatedRoute,
     private db: AngularFirestore,
@@ -51,33 +64,43 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.db
-      .doc<any>('users/' + this.authService.currentUserId)
-      .valueChanges()
+    this.userService
+      .getProfile()
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(profileRead => {
         this.budgetId = profileRead.activeBudget;
         this.accountId = null;
-        this.dataSource = new TransactionDataSource(this.transService, profileRead.activeBudget);
-        this.route.paramMap.pipe(takeUntil(this.unsubscribe)).subscribe(params => {
-          if (params.get('accountId')) {
-            this.accountId = params.get('accountId');
-            this.db
-              .doc<IAccount>('budgets/' + this.budgetId + '/accounts/' + this.accountId)
-              .valueChanges()
-              .pipe(takeUntil(this.unsubscribe))
-              .subscribe(account => {
-                this.account = account;
-              });
-          }
-          if (params.get('categoryId')) {
-            this.categoryId = params.get('categoryId');
-          }
-          if (params.get('id')) {
-            this.showTransaction = true;
-          }
-          this.dataSource.loadTransactions(this.accountId, this.showCleared, this.categoryId);
-        });
+        this.dataSource = new TransactionDataSource(
+          this.transService,
+          profileRead.activeBudget
+        );
+        this.route.paramMap
+          .pipe(takeUntil(this.unsubscribe))
+          .subscribe(params => {
+            if (params.get('accountId')) {
+              this.accountId = params.get('accountId');
+              this.db
+                .doc<IAccount>(
+                  'budgets/' + this.budgetId + '/accounts/' + this.accountId
+                )
+                .valueChanges()
+                .pipe(takeUntil(this.unsubscribe))
+                .subscribe(account => {
+                  this.account = account;
+                });
+            }
+            if (params.get('categoryId')) {
+              this.categoryId = params.get('categoryId');
+            }
+            if (params.get('id')) {
+              this.showTransaction = true;
+            }
+            this.dataSource.loadTransactions(
+              this.accountId,
+              this.showCleared,
+              this.categoryId
+            );
+          });
       });
   }
 
@@ -89,7 +112,6 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   openTransactionModal() {
     const dialogConfig = {
       width: '80vw',
-      height: '100vh', // this needs to have a check if it is a mobile view
       data: { accountId: this.accountId, budgetId: this.budgetId }
     } as MatDialogConfig;
     const dialogRef = this.dialog.open(TransactionComponent, dialogConfig);
@@ -101,7 +123,11 @@ export class TransactionsComponent implements OnInit, OnDestroy {
 
   openDialog() {
     const dialogRef = this.dialog.open(ImportComponent, {
-      data: { accountId: this.accountId, budgetId: this.budgetId, accountName: this.account.name }
+      data: {
+        accountId: this.accountId,
+        budgetId: this.budgetId,
+        accountName: this.account.name
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -111,7 +137,11 @@ export class TransactionsComponent implements OnInit, OnDestroy {
 
   openAccountDialog() {
     const dialogRef = this.dialog.open(AccountComponent, {
-      data: { accountId: this.accountId, budgetId: this.budgetId, accountName: this.account.name }
+      data: {
+        accountId: this.accountId,
+        budgetId: this.budgetId,
+        accountName: this.account.name
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -141,7 +171,10 @@ export class TransactionsComponent implements OnInit, OnDestroy {
 export class TransactionDataSource extends DataSource<any> {
   private transactionsSubject = new BehaviorSubject<any>([]);
 
-  constructor(private transService: TransactionService, private budgetId: string) {
+  constructor(
+    private transService: TransactionService,
+    private budgetId: string
+  ) {
     super();
   }
 
@@ -153,7 +186,11 @@ export class TransactionDataSource extends DataSource<any> {
     this.transactionsSubject.complete();
   }
 
-  loadTransactions(accountId: string, showCleared: boolean, categoryId?: string) {
+  loadTransactions(
+    accountId: string,
+    showCleared: boolean,
+    categoryId?: string
+  ) {
     const filter: any = {
       accountId: accountId,
       categoryId: categoryId,

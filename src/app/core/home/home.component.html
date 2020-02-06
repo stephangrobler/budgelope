@@ -15,7 +15,11 @@
       </div>
     </mat-toolbar>
     <mat-nav-list>
-      <a mat-list-item [routerLink]="['/app/budget', currentMonth]" routerLinkActive="active">
+      <a
+        mat-list-item
+        [routerLink]="['/app/budget', currentMonth]"
+        routerLinkActive="active"
+      >
         Budget
       </a>
       <mat-list-item disableRipple="true"> Accounts </mat-list-item>
@@ -23,7 +27,7 @@
         <a
           mat-list-item
           (click)="navigateTo(account.id)"
-          *ngFor="let account of (accounts | async)"
+          *ngFor="let account of accounts | async"
           routerLinkActive="active"
         >
           <h4 matLine>{{ account.name }}</h4>
@@ -38,6 +42,9 @@
             {{ account.balance | currency: 'ZAR':'symbol-narrow' }}
           </div>
         </a>
+        <a mat-list-item (click)="onAddAccount()">
+          Add Account
+        </a>
       </mat-nav-list>
       <mat-list-item *ngIf="(accounts | async)?.length == 0">
         It seems you dont have any accounts, create one now!
@@ -47,7 +54,7 @@
 
   <mat-sidenav-content>
     <mat-toolbar color="primary">
-      <div *ngIf="(isHandset | async)">
+      <div *ngIf="isHandset | async">
         <button mat-button color="secondary" (click)="drawer.toggle()">
           <mat-icon>menu</mat-icon>
         </button>
