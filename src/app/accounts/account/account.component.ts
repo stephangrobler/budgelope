@@ -37,7 +37,7 @@ export class AccountComponent implements OnInit {
   ngOnInit() {
     this.userService.getProfile().subscribe(profile => {
       this.budgetId = profile.activeBudget;
-
+      console.log(this.data);
       if (this.data.accountId !== 'add') {
         const accRef =
           'budgets/' + this.data.budgetId + '/accounts/' + this.data.accountId;
@@ -55,9 +55,11 @@ export class AccountComponent implements OnInit {
   }
 
   onSaveAccount() {
-    if (this.accountId !== 'add') {
+    console.log('Saving Account', this.data.accountId);
+    if (this.data.accountId !== 'add') {
       this.editAccount();
     } else {
+      console.log('creating...');
       this.createAccount(this.account);
     }
   }
@@ -75,11 +77,16 @@ export class AccountComponent implements OnInit {
         this.account.balance
       );
     } else {
-      this.db.doc<Account>(accountRef).update(this.account);
+      const updateAccount = {
+        id: this.account.id,
+        changes: { ...this.account }
+      };
+      this.accountDataService.update(updateAccount);
     }
   }
 
   createAccount(account: IAccount) {
+    console.log('SFG: AccountComponent -> createAccount -> account', account);
     this.accountDataService.add(account).subscribe(savedAccount => {
       this.transactionService.createStartingBalance(
         savedAccount.id,

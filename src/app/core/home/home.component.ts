@@ -5,12 +5,13 @@ import { Observable, Subscription, of, Subject } from 'rxjs';
 import * as moment from 'moment';
 // import { ObservableMedia, MediaChange } from '@angular/flex-layout';
 import { AccountService } from '../../accounts/account.service';
-import { Account } from '../../shared/account';
+import { Account, IAccount, IAccountId } from '../../shared/account';
 import { takeUntil, map } from 'rxjs/operators';
 import { UserService } from 'app/shared/user.service';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { MatDialog } from '@angular/material/dialog';
 import { AccountComponent } from '../../accounts/account/account.component';
+import { AccountDataService } from 'app/store/entity/account-data.service';
 
 @Component({
   templateUrl: 'home.component.html',
@@ -18,7 +19,7 @@ import { AccountComponent } from '../../accounts/account/account.component';
 })
 export class HomeComponent implements OnInit, OnDestroy {
   items: Observable<any[]>;
-  accounts: Observable<Account[]>;
+  accounts: Observable<IAccountId[]>;
   currentMonth: string;
   sideNavState: any = {};
   watcher: Subscription;
@@ -34,7 +35,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _analytics: AnalyticsService,
     private router: Router,
     private breakpointObserver: BreakpointObserver,
-    private accountService: AccountService,
+    private accountData: AccountDataService,
     private userService: UserService,
     public dialog: MatDialog
   ) {}
@@ -46,7 +47,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       .getProfile()
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(profile => {
-        this.accounts = this.accountService.getAll();
+        this.accounts = this.accountData.getAll();
       });
   }
 
