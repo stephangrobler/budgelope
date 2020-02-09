@@ -19,7 +19,6 @@ import {
   EntityCollectionServiceBase,
   EntityCollectionServiceElementsFactory
 } from '@ngrx/data';
-import { TransactionDataService } from 'app/store/entity/transaction-data-service';
 
 export interface IFilter {
   accountId: string;
@@ -39,8 +38,7 @@ export class TransactionService extends EntityCollectionServiceBase<
     private fb: FirebaseApp,
     private categoryService: CategoryService,
     private accountService: AccountService,
-    private budgetService: BudgetService,
-    private transactionData: TransactionDataService
+    private budgetService: BudgetService
   ) {
     super('Transaction', serviceElementsFactory);
   }
@@ -517,7 +515,7 @@ export class TransactionService extends EntityCollectionServiceBase<
   ): Promise<any> {
     const shortDate = moment(transaction.date).format('YYYYMM');
     try {
-      await this.transactionData.add({ ...transaction }).toPromise();
+      const savedTransaction = await this.add({ ...transaction }).toPromise();
       await this.accountService
         .updateAccountBalance(transaction.account.accountId, transaction.amount)
         .toPromise();
@@ -541,6 +539,9 @@ export class TransactionService extends EntityCollectionServiceBase<
           transaction.amount
         );
       }
-    } catch (error) {}
+      return savedTransaction;
+    } catch (error) {
+      console.log('SFG: createTransaction -> error', error);
+    }
   }
 }

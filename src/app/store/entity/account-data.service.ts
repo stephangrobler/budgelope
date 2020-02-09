@@ -39,8 +39,7 @@ export class AccountDataService extends DefaultDataService<Account> {
             const id = a.payload.doc.id;
             return { id, ...data };
           });
-        }),
-        tap(actions => console.log('getting changes:', actions))
+        })
       );
   }
 

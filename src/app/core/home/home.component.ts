@@ -11,7 +11,6 @@ import { UserService } from 'app/shared/user.service';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { MatDialog } from '@angular/material/dialog';
 import { AccountComponent } from '../../accounts/account/account.component';
-import { AccountDataService } from 'app/store/entity/account-data.service';
 
 @Component({
   templateUrl: 'home.component.html',
@@ -30,15 +29,19 @@ export class HomeComponent implements OnInit, OnDestroy {
     .pipe(map(results => results.matches));
 
   unsubscribe = new Subject<any>();
+  loading: Observable<boolean>;
 
   constructor(
     private _analytics: AnalyticsService,
     private router: Router,
     private breakpointObserver: BreakpointObserver,
-    private accountData: AccountDataService,
+    private accountService: AccountService,
     private userService: UserService,
     public dialog: MatDialog
-  ) {}
+  ) {
+    this.accounts = this.accountService.entities$;
+    this.loading = this.accountService.loading$;
+  }
 
   ngOnInit() {
     this._analytics.pageView('/');
@@ -47,7 +50,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       .getProfile()
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(profile => {
-        this.accounts = this.accountData.getAll();
+        this.accountService.getAll();
       });
   }
 

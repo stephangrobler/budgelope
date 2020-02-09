@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { DefaultDataService, HttpUrlGenerator, Logger } from '@ngrx/data';
 
 import { Observable, of, from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import {
   ITransactionID,
   TransactionTypes,
@@ -95,11 +95,12 @@ export class TransactionDataService extends DefaultDataService<ITransactionID> {
             // display here needs to be a positive number
             data.out = Math.abs(data.amount);
           }
-
-          data.id = id;
-          return { id, ...data };
+          return { ...data, id };
         })
-      )
+      ),
+      tap(response => {
+        console.log('Data Changes:', response, params);
+      })
     );
   }
 

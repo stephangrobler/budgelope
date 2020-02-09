@@ -8,14 +8,12 @@ import {
   EntityCollectionServiceBase,
   EntityCollectionServiceElementsFactory
 } from '@ngrx/data';
-import { AccountDataService } from 'app/store/entity/account-data.service';
 
 @Injectable()
 export class AccountService extends EntityCollectionServiceBase<IAccount> {
   constructor(
     private db: AngularFirestore,
     private fb: FirebaseApp,
-    private accountData: AccountDataService,
     serviceElementsFactory: EntityCollectionServiceElementsFactory
   ) {
     super('Account', serviceElementsFactory);
@@ -73,14 +71,11 @@ export class AccountService extends EntityCollectionServiceBase<IAccount> {
     accountId: string,
     amount: number
   ): Observable<IAccountId> {
-    return this.accountData.getById(accountId).pipe(
+    return this.getByKey(accountId).pipe(
       take(1),
       switchMap(account => {
         const newBalance = Number(account.balance) + Number(amount);
-        return this.accountData.update({
-          id: accountId,
-          changes: { balance: newBalance }
-        });
+        return this.update({ ...account, balance: newBalance });
       })
     );
   }
