@@ -1,23 +1,30 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { Account, AccountType, IAccount } from '../shared/account';
+import { map, switchMap, take } from 'rxjs/operators';
+import { Account, AccountType, IAccount, IAccountId } from '../shared/account';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { FirebaseApp } from '@angular/fire';
-import { EntityCollectionServiceBase, EntityCollectionServiceElementsFactory } from '@ngrx/data';
+import {
+  EntityCollectionServiceBase,
+  EntityCollectionServiceElementsFactory
+} from '@ngrx/data';
+import { AccountDataService } from 'app/store/entity/account-data.service';
 
 @Injectable()
 export class AccountService extends EntityCollectionServiceBase<IAccount> {
   constructor(
     private db: AngularFirestore,
     private fb: FirebaseApp,
+    private accountData: AccountDataService,
     serviceElementsFactory: EntityCollectionServiceElementsFactory
   ) {
     super('Account', serviceElementsFactory);
   }
 
   createAccount(budgetId: string, account: IAccount): Promise<any> {
-    const accountStore = this.db.collection<IAccount>('budgets/' + budgetId + '/accounts');
+    const accountStore = this.db.collection<IAccount>(
+      'budgets/' + budgetId + '/accounts'
+    );
     // create the account with 0 balance as starting balance is created on the component where
     // the method call is made
     const accountObj = {
@@ -30,7 +37,11 @@ export class AccountService extends EntityCollectionServiceBase<IAccount> {
     return accountStore.add(accountObj);
   }
 
-  updateClearedBalance(budgetId: string, accountId: string, clearedAmount: number): void {
+  updateClearedBalance(
+    budgetId: string,
+    accountId: string,
+    clearedAmount: number
+  ): void {
     const dbRef = 'budgets/' + budgetId + '/accounts/' + accountId;
     const docRef = this.db.doc<IAccount>(dbRef).ref;
 
@@ -58,21 +69,20 @@ export class AccountService extends EntityCollectionServiceBase<IAccount> {
    * Updates the balance of an account in a transaction
    *
    */
-  updateAccountBalance(accountId: string, budgetId: string, amount: number): Promise<any> {
-    const dbRef = 'budgets/' + budgetId + '/accounts/' + accountId;
-    const docRef = this.db.doc(dbRef).ref;
-
-    return this.fb.firestore().runTransaction(dbTransaction => {
-      return dbTransaction.get(docRef).then(
-        account => {
-          const newBalance = Number(account.data().balance) + Number(amount);
-          return dbTransaction.update(docRef, { balance: newBalance });
-        },
-        error => {
-          throw Error(error);
-        }
-      );
-    });
+  public updateAccountBalance(
+    accountId: string,
+    amount: number
+  ): Observable<IAccountId> {
+    return this.accountData.getById(accountId).pipe(
+      take(1),
+      switchMap(account => {
+        const newBalance = Number(account.balance) + Number(amount);
+        return this.accountData.update({
+          id: accountId,
+          changes: { balance: newBalance }
+        });
+      })
+    );
   }
 
   changeAccount(fromAccountID: string, toAccountID: string, amount: number) {}
@@ -95,7 +105,9 @@ export class AccountService extends EntityCollectionServiceBase<IAccount> {
       )
       .subscribe(accounts => {
         accounts.forEach(function(item) {
-          const store = this.db.collection('budgets/' + toBudgetId + '/accounts').doc(item.id);
+          const store = this.db
+            .collection('budgets/' + toBudgetId + '/accounts')
+            .doc(item.id);
           item.balance = 0;
           delete item.id;
           store.set(item);

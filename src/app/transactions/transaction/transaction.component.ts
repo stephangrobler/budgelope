@@ -220,19 +220,23 @@ export class TransactionComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateAccount(amount: number, oldAccount: Account, newAccount: Account) {
-    oldAccount.balance -= amount;
-    newAccount.balance += amount;
-    this.accountService.updateAccountBalance(
-      oldAccount.id,
-      this.activeBudget.id,
-      amount
-    );
-    this.accountService.updateAccountBalance(
-      newAccount.id,
-      this.activeBudget.id,
-      amount
-    );
+  async updateAccount(
+    amount: number,
+    oldAccount: Account,
+    newAccount: Account
+  ) {
+    try {
+      oldAccount.balance -= amount;
+      newAccount.balance += amount;
+      await this.accountService
+        .updateAccountBalance(oldAccount.id, amount)
+        .toPromise();
+      await this.accountService
+        .updateAccountBalance(newAccount.id, amount)
+        .toPromise();
+    } catch (error) {
+      console.log('SFG: TransactionComponent -> updateAccount -> error', error);
+    }
   }
 
   /**

@@ -1,16 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {
-  DefaultDataService,
-  HttpUrlGenerator,
-  Logger
-} from '@ngrx/data';
+import { DefaultDataService, HttpUrlGenerator, Logger } from '@ngrx/data';
 
-import { Observable, of } from 'rxjs';
+import { Observable, of, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ITransactionID, TransactionTypes } from 'app/shared/transaction';
+import {
+  ITransactionID,
+  TransactionTypes,
+  ITransaction
+} from 'app/shared/transaction';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { UserService } from 'app/shared/user.service';
+import { Update } from '@ngrx/entity';
 
 @Injectable()
 export class TransactionDataService extends DefaultDataService<ITransactionID> {
@@ -27,7 +28,10 @@ export class TransactionDataService extends DefaultDataService<ITransactionID> {
     logger.log('Created custom Transaction EntityDataService');
     this.userService.getProfile().subscribe(profile => {
       this.activeBudgetID = profile.activeBudget;
-      logger.log('TransactionService -> this.activeBudgetID:', this.activeBudgetID);
+      logger.log(
+        'TransactionService -> this.activeBudgetID:',
+        this.activeBudgetID
+      );
     });
   }
 
@@ -37,7 +41,11 @@ export class TransactionDataService extends DefaultDataService<ITransactionID> {
   }
 
   getById(id: string): Observable<ITransactionID> {
-    return this.db.doc<ITransactionID>('budgets/' + this.activeBudgetID + '/transactions/' + id).valueChanges();
+    return this.db
+      .doc<ITransactionID>(
+        'budgets/' + this.activeBudgetID + '/transactions/' + id
+      )
+      .valueChanges();
   }
 
   getWithQuery(params: any): Observable<ITransactionID[]> {
@@ -52,7 +60,11 @@ export class TransactionDataService extends DefaultDataService<ITransactionID> {
         query = query.where('account.accountId', '==', params.accountId);
       }
       if (params.categoryId) {
-        query = query.where('categories.' + params.categoryId + '.categoryName', '>=', '');
+        query = query.where(
+          'categories.' + params.categoryId + '.categoryName',
+          '>=',
+          ''
+        );
       } else {
         query = query.orderBy('date', 'desc');
       }
@@ -87,6 +99,23 @@ export class TransactionDataService extends DefaultDataService<ITransactionID> {
           data.id = id;
           return { id, ...data };
         })
+      )
+    );
+  }
+
+  add(transaction: ITransaction): Observable<ITransactionID> {
+    const colRef = '/budgets/' + this.activeBudgetID + '/transactions';
+    return from(this.db.collection(colRef).add(transaction)).pipe(
+      map(docRef => ({ id: docRef.id, ...transaction } as ITransactionID))
+    );
+  }
+
+  update(transaction: Update<ITransactionID>): Observable<ITransactionID> {
+    const docRef =
+      '/budgets/' + this.activeBudgetID + '/transactions/' + transaction.id;
+    return from(this.db.doc(docRef).update({ ...transaction.changes })).pipe(
+      map(
+        () => ({ id: transaction.id, ...transaction.changes } as ITransactionID)
       )
     );
   }
