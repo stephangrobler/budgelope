@@ -10,7 +10,7 @@ import {
 } from '@ngrx/data';
 
 @Injectable()
-export class AccountService extends EntityCollectionServiceBase<IAccount> {
+export class AccountService extends EntityCollectionServiceBase<IAccountId> {
   constructor(
     private db: AngularFirestore,
     private fb: FirebaseApp,
@@ -19,48 +19,17 @@ export class AccountService extends EntityCollectionServiceBase<IAccount> {
     super('Account', serviceElementsFactory);
   }
 
-  createAccount(budgetId: string, account: IAccount): Promise<any> {
-    const accountStore = this.db.collection<IAccount>(
-      'budgets/' + budgetId + '/accounts'
-    );
-    // create the account with 0 balance as starting balance is created on the component where
-    // the method call is made
-    const accountObj = {
-      name: account.name,
-      balance: 0,
-      clearedBalance: 0,
-      type: AccountType.CHEQUE
-    };
-
-    return accountStore.add(accountObj);
-  }
-
   updateClearedBalance(
-    budgetId: string,
     accountId: string,
     clearedAmount: number
-  ): void {
-    const dbRef = 'budgets/' + budgetId + '/accounts/' + accountId;
-    const docRef = this.db.doc<IAccount>(dbRef).ref;
-
-    this.fb.firestore().runTransaction(dbTransaction => {
-      return dbTransaction.get(docRef).then(
-        account => {
-          const newBalance = account.data().clearedBalance + clearedAmount;
-          dbTransaction.update(docRef, { clearedBalance: newBalance });
-        },
-        error => {
-          console.log(
-            'There was an error updating the cleared balance of the account: ' +
-              accountId +
-              ' - ' +
-              budgetId +
-              ' - ',
-            error
-          );
-        }
-      );
-    });
+  ): Observable<IAccountId> {
+    return this.getByKey(accountId).pipe(
+      take(1),
+      switchMap(account => {
+        const newBalance = account.clearedBalance + clearedAmount;
+        return this.update({ ...account, clearedBalance: newBalance });
+      })
+    );
   }
 
   /**

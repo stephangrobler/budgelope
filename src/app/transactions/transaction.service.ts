@@ -209,39 +209,9 @@ export class TransactionService extends EntityCollectionServiceBase<
       });
   }
 
-  getTransaction(
-    budgetId: string,
-    transactionId: string
-  ): Observable<ITransaction> {
-    const transRef = 'budgets/' + budgetId + '/transactions/' + transactionId;
-    return this.db
-      .doc<ITransaction>(transRef)
-      .valueChanges()
-      .pipe(
-        map((transaction: ITransactionID) => {
-          if (typeof transaction.date === 'string') {
-            transaction.date = new Date(transaction.date);
-          } else if (typeof transaction.date === 'object') {
-            // transaction.date = transaction.date.toDate();
-          }
-          transaction.accountDisplayName = transaction.account.accountName;
-          for (const prop in transaction.categories) {
-            if (transaction.categories.hasOwnProperty(prop)) {
-              transaction.categoryDisplayName =
-                transaction.categories[prop].categoryName;
-            }
-          }
-          return transaction;
-        })
-      );
-  }
-
   removeTransaction(budgetId: string, transactionId: string) {
-    const docRef = 'budgets/' + budgetId + '/transactions/' + transactionId;
     return new Promise((resolve, reject) => {
-      this.db
-        .doc<ITransaction>(docRef)
-        .valueChanges()
+      this.getByKey(transactionId)
         .pipe(take(1))
         .subscribe(async transaction => {
           // get the opposite amount value
@@ -276,25 +246,14 @@ export class TransactionService extends EntityCollectionServiceBase<
             inverseAmount
           );
 
-          this.db
-            .doc(docRef)
-            .delete()
-            .then(
-              () => {
-                resolve();
-              },
-              () => {
-                reject();
-              }
-            );
+          await this.delete(transaction).toPromise();
+          resolve();
         });
     });
   }
 
   updateClearedStatus(budgetId: string, transaction: ITransactionID) {
-    this.db
-      .doc('budgets/' + budgetId + '/transactions/' + transaction.id)
-      .update({ cleared: transaction.cleared });
+    this.update(transaction);
 
     if (!transaction.cleared) {
       transaction.amount =
@@ -304,7 +263,6 @@ export class TransactionService extends EntityCollectionServiceBase<
     }
 
     this.accountService.updateClearedBalance(
-      budgetId,
       transaction.account.accountId,
       transaction.amount
     );
@@ -505,9 +463,6 @@ export class TransactionService extends EntityCollectionServiceBase<
    * Creates a new transaction and updates the relevant paths with the correct
    * data sets
    *
-   * TODO: This needs to be modelled :P
-   *
-   * @return {[type]}             [description]
    */
   public async createTransaction(
     transaction: Transaction,

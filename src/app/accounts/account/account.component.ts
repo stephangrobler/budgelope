@@ -2,12 +2,14 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 
 import { AccountService } from '../account.service';
-import { Account, IAccount } from '../../shared/account';
+import { Account, IAccount, IAccountId } from '../../shared/account';
 import { TransactionService } from 'app/transactions/transaction.service';
 import { AuthService } from 'app/shared/auth.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { UserService } from 'app/shared/user.service';
 import { AccountDataService } from 'app/store/entity/account-data.service';
+import { Observable, of } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 @Component({
   templateUrl: 'account.component.html'
@@ -18,7 +20,7 @@ export class AccountComponent implements OnInit {
   accName: string;
   accStartingBalance: number;
 
-  account: Account;
+  account: Observable<IAccountId>;
   accountId: any;
   accountType: string;
   budgetId: string;
@@ -26,68 +28,46 @@ export class AccountComponent implements OnInit {
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     private accountService: AccountService,
-    private accountDataService: AccountDataService,
     public dialogRef: MatDialogRef<AccountComponent>,
     public userService: UserService,
-    private db: AngularFirestore,
-    private transactionService: TransactionService,
-    private auth: AuthService
+    private transactionService: TransactionService
   ) {}
 
   ngOnInit() {
     this.userService.getProfile().subscribe(profile => {
       this.budgetId = profile.activeBudget;
-      console.log(this.data);
       if (this.data.accountId !== 'add') {
-        const accRef =
-          'budgets/' + this.data.budgetId + '/accounts/' + this.data.accountId;
-        this.db
-          .doc<Account>(accRef)
-          .valueChanges()
-          .subscribe(account => {
-            this.account = account;
-            this.accStartingBalance = account.balance;
-          });
+        this.account = this.accountService.getByKey(this.data.accountId);
       } else {
-        this.account = new Account();
+        this.account = of({} as IAccount);
       }
     });
   }
 
   onSaveAccount() {
-    console.log('Saving Account', this.data.accountId);
-    if (this.data.accountId !== 'add') {
-      this.editAccount();
-    } else {
-      console.log('creating...');
-      this.createAccount(this.account);
-    }
+    this.account.pipe(take(1)).subscribe(account => {
+      if (this.data.accountId !== 'add') {
+        this.editAccount(account);
+      } else {
+        this.createAccount(account);
+      }
+    });
   }
 
-  editAccount() {
-    const accountRef =
-      'budgets/' + this.budgetId + '/accounts/' + this.data.accountId;
-
-    // starting balance was changed create a starting balance
-    if (this.account.balance !== this.accStartingBalance) {
-      // console.log(this.account, this.accStartingBalance);
+  editAccount(account) {
+    if (account.balance !== this.accStartingBalance) {
       this.transactionService.createStartingBalance(
         this.data.accountId,
         this.budgetId,
-        this.account.balance
+        account.balance
       );
     } else {
-      const updateAccount = {
-        id: this.account.id,
-        changes: { ...this.account }
-      };
-      this.accountDataService.update(updateAccount);
+      this.accountService.update(account);
     }
   }
 
   createAccount(account: IAccount) {
-    console.log('SFG: AccountComponent -> createAccount -> account', account);
-    this.accountDataService.add(account).subscribe(savedAccount => {
+    this.accountService.add(account).subscribe(savedAccount => {
       this.transactionService.createStartingBalance(
         savedAccount.id,
         this.budgetId,
@@ -97,6 +77,6 @@ export class AccountComponent implements OnInit {
   }
 
   onCancel() {
-    this.dialogRef.close('Pizza!');
+    this.dialogRef.close('Account Dialog Closed.');
   }
 }
