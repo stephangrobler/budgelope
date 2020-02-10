@@ -24,6 +24,7 @@ import { takeUntil, take, tap } from 'rxjs/operators';
 import { AccountComponent } from 'app/accounts/account/account.component';
 import { TransactionComponent } from './transaction/transaction.component';
 import { AccountService } from 'app/accounts/account.service';
+import { QueryParams, MergeStrategy } from '@ngrx/data';
 
 @Component({
   templateUrl: 'transactions.component.html',
@@ -99,7 +100,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
             }
             this.dataSource.loadTransactions(
               this.accountId,
-              this.showCleared,
+              '' + this.showCleared,
               this.categoryId
             );
           });
@@ -156,7 +157,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   }
 
   onFilterClearedToggle() {
-    this.dataSource.loadTransactions(this.accountId, this.showCleared);
+    this.dataSource.loadTransactions(this.accountId, '' + this.showCleared);
   }
 
   toggleCleared(transaction: ITransactionID) {
@@ -180,7 +181,7 @@ export class TransactionDataSource extends DataSource<any> {
     private budgetId: string
   ) {
     super();
-    this.transactions = this.transService.entities$;
+    this.transactions = this.transService.filteredEntities$;
     this.loading = this.transService.loading$;
   }
 
@@ -188,24 +189,23 @@ export class TransactionDataSource extends DataSource<any> {
     return this.transactions;
   }
 
-  disconnect() {
-    this.transactions = of([]);
-  }
+  disconnect() {}
 
   loadTransactions(
     accountId: string,
-    showCleared: boolean,
+    showCleared: string,
     categoryId?: string
   ) {
-    const filter: any = {
+    const filter: QueryParams = {
       accountId: accountId,
       categoryId: categoryId,
       cleared: showCleared,
       budgetId: this.budgetId
     };
     if (categoryId) {
-      filter.cleared = true;
+      filter.cleared = 'true';
     }
+    this.transService.setFilter(filter);
     this.transService.getWithQuery(filter).pipe(
       tap(response => {
         console.log('Data Get:', response, filter);
