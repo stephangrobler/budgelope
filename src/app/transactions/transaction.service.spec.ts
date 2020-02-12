@@ -5,7 +5,12 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { Account } from '../shared/account';
 import { Category } from '../shared/category';
 import { Budget } from '../shared/budget';
-import { Transaction, ITransaction, ITransactionID, TransactionTypes } from '../shared/transaction';
+import {
+  Transaction,
+  ITransaction,
+  ITransactionID,
+  TransactionTypes
+} from '../shared/transaction';
 import { Observable, of } from 'rxjs';
 import { AccountService } from '../accounts/account.service';
 import { resolve } from 'path';
@@ -24,6 +29,7 @@ describe('Transaction Service', () => {
     category,
     budget,
     transaction,
+    ecsebMock,
     serviceElementsFactoryMock;
 
   beforeEach(() => {
@@ -32,7 +38,11 @@ describe('Transaction Service', () => {
     budget = new Budget();
     transaction = new Transaction();
 
-    dbMock = jasmine.createSpyObj('AngularFirestore', ['collection', 'doc', 'createId']);
+    dbMock = jasmine.createSpyObj('AngularFirestore', [
+      'collection',
+      'doc',
+      'createId'
+    ]);
     dbMock.createId.and.returnValue('RandomString');
     dbMock.doc.and.returnValue({
       valueChanges: () => of({}),
@@ -73,14 +83,24 @@ describe('Transaction Service', () => {
       'updateAccountBalance',
       'getAccounts'
     ]);
-    budgetServiceMock = jasmine.createSpyObj('BudgetService', ['updateBudgetBalance']);
-    serviceElementsFactoryMock = jasmine.createSpyObj('EntityCollectionServiceElementsFactory', [
-      'create'
+    accountServiceMock.updateAccountBalance.and.returnValue(of({}));
+    budgetServiceMock = jasmine.createSpyObj('BudgetService', [
+      'updateBudgetBalance'
     ]);
+    serviceElementsFactoryMock = jasmine.createSpyObj(
+      'EntityCollectionServiceElementsFactory',
+      ['create']
+    );
 
-    const ecsebMock = {
-      getByKey: () => {},
-      dispatcher: {},
+    ecsebMock = {
+      add: () => of({}),
+      getByKey: () => of({ account: { accountId: 'ACC_01' } }),
+      delete: () => of({}),
+      dispatcher: {
+        add: () => of({}),
+        getByKey: () => of({ account: { accountId: 'ACC_01' } }),
+        delete: () => of({})
+      },
       selectors$: {}
     };
 
@@ -93,7 +113,10 @@ describe('Transaction Service', () => {
         { provide: AccountService, useValue: accountServiceMock },
         { provide: AngularFirestore, useValue: dbMock },
         { provide: FirebaseApp, useValue: fbMock },
-        { provide: EntityCollectionServiceElementsFactory, useValue: serviceElementsFactoryMock }
+        {
+          provide: EntityCollectionServiceElementsFactory,
+          useValue: serviceElementsFactoryMock
+        }
       ]
     });
 
@@ -105,11 +128,6 @@ describe('Transaction Service', () => {
       accountServiceMock,
       budgetServiceMock
     );
-  });
-
-  it('should register as a service', () => {
-    const subscription = service.getTransaction('string', 'string2');
-    expect(dbMock.doc).toHaveBeenCalledWith('budgets/string/transactions/string2');
   });
 
   it('should create a transaction with the correct income transaction', (done: DoneFn) => {
@@ -141,7 +159,6 @@ describe('Transaction Service', () => {
         );
         expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledWith(
           'acc1',
-          'CurrentBudget',
           500
         );
         done();
@@ -181,7 +198,6 @@ describe('Transaction Service', () => {
         );
         expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledWith(
           'acc1',
-          'CurrentBudget',
           -500
         );
         done();
@@ -193,38 +209,16 @@ describe('Transaction Service', () => {
     );
   });
 
-  it('should call the the firestore method on the firebase service', () => {
-    service.updateTransaction('12345', transaction);
-    expect(fbMock.firestore).toHaveBeenCalled();
-  });
-
-  it('should call get on the transaction', () => {
-    service.updateTransaction('12345', transaction);
-    expect(fbMock.firestore).toHaveBeenCalled();
-  });
-
   it('should remove a transaction from the store', (done: DoneFn) => {
     // arrange
-    dbMock.doc.and.returnValue({
-      valueChanges: () =>
-        of({
-          account: {
-            accountId: 'ACC_001'
-          },
-          amount: -500,
-          categories: {
-            TEST_CAT1: { in: 0, out: 500 }
-          },
-          date: '2018-12-01'
-        }),
-      delete: () => {
-        return {
-          then: success => {
-            success();
-          }
-        };
-      }
-    });
+    spyOn(service, 'getByKey').and.returnValue(
+      of({
+        account: { accountId: 'TEST_ACC' },
+        categories: { TEST_CAT: { in: 0, out: 500 } },
+        amount: -500,
+        date: '2018-12-01'
+      })
+    );
     // action
     service.removeTransaction('12345', 'REMOVE_ME').then(() => {
       // assert
@@ -233,10 +227,13 @@ describe('Transaction Service', () => {
         '2018-12-01',
         500
       );
-      expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledWith('ACC_001', '12345', 500);
+      expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledWith(
+        'TEST_ACC',
+        500
+      );
       expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledWith(
         '12345',
-        'TEST_CAT1',
+        'TEST_CAT',
         '201812',
         500,
         0
@@ -261,10 +258,30 @@ describe('Transaction Service', () => {
     it('should match the stored transactions with the imported values', () => {
       // arrange
       const importedTransactions: IImportedTransaction[] = [
-        { dtposted: '20190304', trnamt: '-50.33', fitid: 'testid001', trntype: 'DEBIT' },
-        { dtposted: '20190304', trnamt: '-150.33', fitid: 'testid002', trntype: 'DEBIT' },
-        { dtposted: '20190305', trnamt: '-250.33', fitid: 'testid003', trntype: 'DEBIT' },
-        { dtposted: '20190305', trnamt: '-350.33', fitid: 'testid005', trntype: 'DEBIT' }
+        {
+          dtposted: '20190304',
+          trnamt: '-50.33',
+          fitid: 'testid001',
+          trntype: 'DEBIT'
+        },
+        {
+          dtposted: '20190304',
+          trnamt: '-150.33',
+          fitid: 'testid002',
+          trntype: 'DEBIT'
+        },
+        {
+          dtposted: '20190305',
+          trnamt: '-250.33',
+          fitid: 'testid003',
+          trntype: 'DEBIT'
+        },
+        {
+          dtposted: '20190305',
+          trnamt: '-350.33',
+          fitid: 'testid005',
+          trntype: 'DEBIT'
+        }
       ];
 
       const day = new Date('2019-03-04');
@@ -300,7 +317,10 @@ describe('Transaction Service', () => {
 
       // assert
 
-      const matching = service.doMatching(currentTransactions, importedTransactions);
+      const matching = service.doMatching(
+        currentTransactions,
+        importedTransactions
+      );
       expect(matching.matched.length).toBe(1);
       expect(matching.unmatched.length).toBe(3);
     });
@@ -322,20 +342,44 @@ describe('Transaction Service', () => {
     it('should create a batched transcations of unmatched transactions', async (done: DoneFn) => {
       // arrange
       const importedTransactions: IImportedTransaction[] = [
-        { dtposted: '20190304', trnamt: '50.33', fitid: 'testid001', trntype: 'CREDIT' },
-        { dtposted: '20190304', trnamt: '-150.33', fitid: 'testid002', trntype: 'DEBIT' },
-        { dtposted: '20190305', trnamt: '-250.33', fitid: 'testid003', trntype: 'DEBIT' },
-        { dtposted: '20190305', trnamt: '-350.33', fitid: 'testid005', trntype: 'DEBIT' }
+        {
+          dtposted: '20190304',
+          trnamt: '50.33',
+          fitid: 'testid001',
+          trntype: 'CREDIT'
+        },
+        {
+          dtposted: '20190304',
+          trnamt: '-150.33',
+          fitid: 'testid002',
+          trntype: 'DEBIT'
+        },
+        {
+          dtposted: '20190305',
+          trnamt: '-250.33',
+          fitid: 'testid003',
+          trntype: 'DEBIT'
+        },
+        {
+          dtposted: '20190305',
+          trnamt: '-350.33',
+          fitid: 'testid005',
+          trntype: 'DEBIT'
+        }
       ];
       const transDate = new Date('2019-03-05');
       // action
       service
-        .batchCreateTransactions(importedTransactions, 'TESTBUDGET', 'ACC001', 'ACCOUNTNAME')
+        .batchCreateTransactions(
+          importedTransactions,
+          'TESTBUDGET',
+          'ACC001',
+          'ACCOUNTNAME'
+        )
         .then(() => {
           // assert
           expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledWith(
             'ACC001',
-            'TESTBUDGET',
             -700.6600000000001
           );
           expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledWith(
@@ -358,19 +402,43 @@ describe('Transaction Service', () => {
     it('should update the account balance with the correct amount', async (done: DoneFn) => {
       // arrange
       const importedTransactions: IImportedTransaction[] = [
-        { dtposted: '20190304', trnamt: '50.33', fitid: 'testid001', trntype: 'CREDIT' },
-        { dtposted: '20190304', trnamt: '-150.33', fitid: 'testid002', trntype: 'DEBIT' },
-        { dtposted: '20190305', trnamt: '-250.33', fitid: 'testid003', trntype: 'DEBIT' },
-        { dtposted: '20190305', trnamt: '-350.33', fitid: 'testid005', trntype: 'DEBIT' }
+        {
+          dtposted: '20190304',
+          trnamt: '50.33',
+          fitid: 'testid001',
+          trntype: 'CREDIT'
+        },
+        {
+          dtposted: '20190304',
+          trnamt: '-150.33',
+          fitid: 'testid002',
+          trntype: 'DEBIT'
+        },
+        {
+          dtposted: '20190305',
+          trnamt: '-250.33',
+          fitid: 'testid003',
+          trntype: 'DEBIT'
+        },
+        {
+          dtposted: '20190305',
+          trnamt: '-350.33',
+          fitid: 'testid005',
+          trntype: 'DEBIT'
+        }
       ];
       // action
       service
-        .batchCreateTransactions(importedTransactions, 'TESTBUDGET', 'ACC001', 'ACCOUNTNAME')
+        .batchCreateTransactions(
+          importedTransactions,
+          'TESTBUDGET',
+          'ACC001',
+          'ACCOUNTNAME'
+        )
         .then(() => {
           // assert
           expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledWith(
             'ACC001',
-            'TESTBUDGET',
             -700.6600000000001
           );
           done();
@@ -388,7 +456,9 @@ describe('Transaction Service', () => {
           name: 'TestAccount'
         },
         amount: -500,
-        categories: [{ in: 0, out: 500, category: { id: 'TEST001', name: 'TEST001' } }],
+        categories: [
+          { in: 0, out: 500, category: { id: 'TEST001', name: 'TEST001' } }
+        ],
         date: '2018-01-01'
       });
       currentTransaction = new Transaction({
@@ -398,47 +468,23 @@ describe('Transaction Service', () => {
           name: 'TestAccount'
         },
         amount: -500,
-        categories: [{ in: 0, out: 500, category: { id: 'TEST001', name: 'TEST001' } }],
+        categories: [
+          { in: 0, out: 500, category: { id: 'TEST001', name: 'TEST001' } }
+        ],
         date: '2018-01-01'
       });
-      fbMock.firestore.and.returnValue({
-        runTransaction: callback => {
-          callback({
-            get: () => {
-              return Promise.resolve({
-                data: () => {
-                  return currentTransaction;
-                }
-              });
-            },
-            update: () => {
-              return Promise.resolve({});
-            }
-          });
-          return Promise.resolve({});
-        }
-      });
-      dbMock.doc.and.returnValue({
-        valueChanges: () =>
-          of({
-            account: {
-              accountId: 'ACC_001'
-            },
-            amount: -500,
-            categories: {
-              TEST_CAT1: { in: 0, out: 500 }
-            },
-            date: '2018-12-01'
-          }),
-        update: () => {},
-        delete: () => {
-          return {
-            then: success => {
-              success();
-            }
-          };
-        }
-      });
+
+      ecsebMock = {
+        add: () => of({}),
+        getByKey: () => of({ account: { accountId: 'ACC_01' } }),
+        delete: () => of({}),
+        dispatcher: {
+          add: () => of({}),
+          getByKey: () => of({ account: { accountId: 'ACC_01' } }),
+          delete: () => of({})
+        },
+        selectors$: {}
+      };
     });
 
     it('should update the account balance if account changed and is income type', (done: DoneFn) => {
@@ -450,25 +496,10 @@ describe('Transaction Service', () => {
           name: 'TestAccount'
         },
         amount: 500,
-        categories: [{ in: 500, out: 0, category: { id: 'TEST001', name: 'TEST001' } }],
+        categories: [
+          { in: 500, out: 0, category: { id: 'TEST001', name: 'TEST001' } }
+        ],
         date: '2018-01-01'
-      });
-      fbMock.firestore.and.returnValue({
-        runTransaction: callback => {
-          callback({
-            get: () => {
-              return Promise.resolve({
-                data: () => {
-                  return currentTransaction;
-                }
-              });
-            },
-            update: () => {
-              return Promise.resolve({});
-            }
-          });
-          return Promise.resolve({});
-        }
       });
 
       newTransaction.account = {
@@ -476,10 +507,13 @@ describe('Transaction Service', () => {
         accountName: 'TestAccount002'
       };
       newTransaction.amount = 500;
-
+      spyOn(service, 'getByKey').and.returnValue(of(currentTransaction));
+      spyOn(service, 'update').and.returnValue(of(currentTransaction));
       // action
       service.updateTransaction('BUDGETSTRING', newTransaction).then(() => {
-        expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledTimes(2);
+        expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledTimes(
+          2
+        );
         // assert
         done();
       });
@@ -492,10 +526,14 @@ describe('Transaction Service', () => {
         accountName: 'TestAccount002'
       };
       newTransaction.amount = -500;
+      spyOn(service, 'getByKey').and.returnValue(of(currentTransaction));
+      spyOn(service, 'update').and.returnValue(of(currentTransaction));
 
       // action
       service.updateTransaction('BUDGETSTRING', newTransaction).then(() => {
-        expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledTimes(2);
+        expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledTimes(
+          2
+        );
         // assert
         done();
       });
@@ -508,10 +546,14 @@ describe('Transaction Service', () => {
         accountName: 'TestAccount'
       };
       newTransaction.amount = 500;
+      spyOn(service, 'getByKey').and.returnValue(of(currentTransaction));
+      spyOn(service, 'update').and.returnValue(of(currentTransaction));
 
       // action
       service.updateTransaction('BUDGETSTRING', newTransaction).then(() => {
-        expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledTimes(1);
+        expect(accountServiceMock.updateAccountBalance).toHaveBeenCalledTimes(
+          1
+        );
         // assert
         done();
       });
@@ -523,10 +565,14 @@ describe('Transaction Service', () => {
         TEST001: { categoryName: 'TestCat', in: 0, out: 400 }
       };
       newTransaction.amount = 400;
+      spyOn(service, 'getByKey').and.returnValue(of(currentTransaction));
+      spyOn(service, 'update').and.returnValue(of(currentTransaction));
 
       // action
       service.updateTransaction('BUDGETSTRING', newTransaction).then(() => {
-        expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledTimes(2);
+        expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledTimes(
+          2
+        );
         // assert
         done();
       });
@@ -537,10 +583,14 @@ describe('Transaction Service', () => {
       newTransaction.categories = {
         TEST: { categoryName: 'TestCat', in: 0, out: 500 }
       };
+      spyOn(service, 'getByKey').and.returnValue(of(currentTransaction));
+      spyOn(service, 'update').and.returnValue(of(currentTransaction));
 
       // action
       service.updateTransaction('BUDGETSTRING', newTransaction).then(() => {
-        expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledTimes(2);
+        expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledTimes(
+          2
+        );
         // reverse check
         expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledWith(
           'BUDGETSTRING',
@@ -566,10 +616,14 @@ describe('Transaction Service', () => {
       newTransaction.categories = {
         TEST001: { categoryName: 'TEST001', in: 0, out: 500 }
       };
+      spyOn(service, 'getByKey').and.returnValue(of(currentTransaction));
+      spyOn(service, 'update').and.returnValue(of(currentTransaction));
 
       // action
       service.updateTransaction('BUDGETSTRING', newTransaction).then(() => {
-        expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledTimes(0);
+        expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledTimes(
+          0
+        );
         done();
       });
     });
@@ -577,10 +631,30 @@ describe('Transaction Service', () => {
     it('should return void if 1 option in array is a boolean', () => {
       // arrange
       const importedTransactions: IImportedTransaction[] = [
-        { dtposted: '20190304', trnamt: '-50.33', fitid: 'testid001', trntype: 'DEBIT' },
-        { dtposted: '20190304', trnamt: '-150.33', fitid: 'testid002', trntype: 'DEBIT' },
-        { dtposted: '20190305', trnamt: '-250.33', fitid: 'testid003', trntype: 'DEBIT' },
-        { dtposted: '20190305', trnamt: '-350.33', fitid: 'testid005', trntype: 'DEBIT' }
+        {
+          dtposted: '20190304',
+          trnamt: '-50.33',
+          fitid: 'testid001',
+          trntype: 'DEBIT'
+        },
+        {
+          dtposted: '20190304',
+          trnamt: '-150.33',
+          fitid: 'testid002',
+          trntype: 'DEBIT'
+        },
+        {
+          dtposted: '20190305',
+          trnamt: '-250.33',
+          fitid: 'testid003',
+          trntype: 'DEBIT'
+        },
+        {
+          dtposted: '20190305',
+          trnamt: '-350.33',
+          fitid: 'testid005',
+          trntype: 'DEBIT'
+        }
       ];
 
       const currentTransactions = [];

@@ -213,7 +213,7 @@ export class TransactionService extends EntityCollectionServiceBase<
     return new Promise((resolve, reject) => {
       this.getByKey(transactionId)
         .pipe(take(1))
-        .subscribe(async transaction => {
+        .subscribe(async (transaction: ITransactionID) => {
           // get the opposite amount value
           const inverseAmount =
             transaction.amount > 0
@@ -268,140 +268,151 @@ export class TransactionService extends EntityCollectionServiceBase<
     );
   }
 
-  updateTransaction(budgetId: string, newTransaction: Transaction) {
-    const docRef = this.db.doc(
-      'budgets/' + budgetId + '/transactions/' + newTransaction.id
-    ).ref;
-    return this.fb.firestore().runTransaction(dbTransaction => {
-      return dbTransaction.get(docRef).then(
-        async readTransaction => {
-          const currentTransaction = readTransaction.data();
-          const amountDiffers =
-            currentTransaction.amount !== newTransaction.amount;
+  async updateTransaction(budgetId: string, newTransaction: Transaction) {
+    const currentTransaction = await this.getByKey(
+      newTransaction.id
+    ).toPromise();
+    const amountDiffers = currentTransaction.amount !== newTransaction.amount;
 
-          // check if the account has changed
-          if (
-            currentTransaction.account &&
-            currentTransaction.account.accountId !==
-              newTransaction.account.accountId
-          ) {
-            // if it was a expense/negative number
-            if (currentTransaction.amount < 0) {
-              // add the amount to the previous account
-              await this.accountService
-                .updateAccountBalance(
-                  currentTransaction.account.accountId,
-                  Math.abs(currentTransaction.amount)
-                )
-                .toPromise();
-              // subtract from current account
-              await this.accountService
-                .updateAccountBalance(
-                  newTransaction.account.accountId,
-                  -Math.abs(newTransaction.amount)
-                )
-                .toPromise();
-            } else {
-              // add the amount to the previous account
-              await this.accountService
-                .updateAccountBalance(
-                  currentTransaction.account.accountId,
-                  -Math.abs(currentTransaction.amount)
-                )
-                .toPromise();
-              // subtract from current account
-              await this.accountService
-                .updateAccountBalance(
-                  newTransaction.account.accountId,
-                  Math.abs(newTransaction.amount)
-                )
-                .toPromise();
-            }
-          }
+    // check if the account has changed
+    await this.checkAndUpdateAccounts(currentTransaction, newTransaction);
 
-          // check if the categories have changed and update where necessary
-          const currentCategories = Object.keys(currentTransaction.categories);
-          const newCategories = Object.keys(newTransaction.categories);
-          const diffA = currentCategories.filter(
-            t => newCategories.indexOf(t) === -1
-          );
-          const diffB = newCategories.filter(
-            t => currentCategories.indexOf(t) === -1
-          );
+    // check if the categories have changed and update where necessary
+    this.checkAndUpdateCategories(
+      currentTransaction,
+      newTransaction,
+      amountDiffers,
+      budgetId
+    );
 
-          const shortDate = moment(newTransaction.date).format('YYYYMM');
+    // if the type has changed by changing the in or out values,
+    // ensure to update the budget values as well
+    await this.checkAndUpdateBudget(
+      amountDiffers,
+      currentTransaction,
+      budgetId,
+      newTransaction
+    );
+    return this.update({ ...newTransaction }).toPromise();
+  }
 
-          // there is a difference, we revert all previous categories and apply the
-          // new ones
-          if (diffA.length > 0 || diffB.length > 0 || amountDiffers) {
-            // reverse previous categories
-            for (const key in currentTransaction.categories) {
-              if (currentTransaction.categories.hasOwnProperty(key)) {
-                const category = currentTransaction.categories[key];
-                this.categoryService.updateCategoryBudget(
-                  budgetId,
-                  key,
-                  shortDate,
-                  category.out,
-                  category.in
-                );
-              }
-            }
+  private async checkAndUpdateBudget(
+    amountDiffers: boolean,
+    currentTransaction: ITransaction,
+    budgetId: string,
+    newTransaction: Transaction
+  ) {
+    if (amountDiffers && currentTransaction.amount > 0) {
+      this.budgetService.updateBudgetBalance(
+        budgetId,
+        newTransaction.date,
+        Math.abs(newTransaction.amount)
+      );
+      // subtract from current account
+      await this.accountService
+        .updateAccountBalance(
+          newTransaction.account.accountId,
+          Math.abs(newTransaction.amount)
+        )
+        .toPromise();
+    } else if (amountDiffers && currentTransaction.amount <= 0) {
+      // subtract from current account
+      await this.accountService
+        .updateAccountBalance(
+          newTransaction.account.accountId,
+          -Math.abs(newTransaction.amount)
+        )
+        .toPromise();
+    }
+  }
 
-            for (const key in newTransaction.categories) {
-              if (newTransaction.categories.hasOwnProperty(key)) {
-                const category = newTransaction.categories[key];
-                this.categoryService.updateCategoryBudget(
-                  budgetId,
-                  key,
-                  shortDate,
-                  category.in,
-                  category.out
-                );
-              }
-            }
-          }
-
-          // if the type has changed by changing the in or out values,
-          // ensure to update the budget values as well
-          if (amountDiffers && currentTransaction.amount > 0) {
-            this.budgetService.updateBudgetBalance(
-              budgetId,
-              newTransaction.date,
-              Math.abs(newTransaction.amount)
-            );
-            // subtract from current account
-            await this.accountService
-              .updateAccountBalance(
-                newTransaction.account.accountId,
-                Math.abs(newTransaction.amount)
-              )
-              .toPromise();
-          } else if (amountDiffers && currentTransaction.amount <= 0) {
-            // subtract from current account
-            await this.accountService
-              .updateAccountBalance(
-                newTransaction.account.accountId,
-                -Math.abs(newTransaction.amount)
-              )
-              .toPromise();
-          }
-          const newTransObj = JSON.parse(JSON.stringify(newTransaction));
-          dbTransaction.update(docRef, newTransObj);
-        },
-        error => {
-          console.log(
-            'There was an error updating the transaction: ' +
-              budgetId +
-              ' - ' +
-              newTransaction.id +
-              ' - ' +
-              newTransaction.amount,
-            error
+  private checkAndUpdateCategories(
+    currentTransaction: ITransaction,
+    newTransaction: Transaction,
+    amountDiffers: boolean,
+    budgetId: string
+  ) {
+    const currentCategories = Object.keys(currentTransaction.categories);
+    const newCategories = Object.keys(newTransaction.categories);
+    const diffA = currentCategories.filter(
+      t => newCategories.indexOf(t) === -1
+    );
+    const diffB = newCategories.filter(
+      t => currentCategories.indexOf(t) === -1
+    );
+    const shortDate = moment(newTransaction.date).format('YYYYMM');
+    // there is a difference, we revert all previous categories and apply the
+    // new ones
+    if (diffA.length > 0 || diffB.length > 0 || amountDiffers) {
+      // reverse previous categories
+      for (const key in currentTransaction.categories) {
+        if (currentTransaction.categories.hasOwnProperty(key)) {
+          const category = currentTransaction.categories[key];
+          this.categoryService.updateCategoryBudget(
+            budgetId,
+            key,
+            shortDate,
+            category.out,
+            category.in
           );
         }
-      );
-    });
+      }
+      for (const key in newTransaction.categories) {
+        if (newTransaction.categories.hasOwnProperty(key)) {
+          const category = newTransaction.categories[key];
+          this.categoryService.updateCategoryBudget(
+            budgetId,
+            key,
+            shortDate,
+            category.in,
+            category.out
+          );
+        }
+      }
+    }
+  }
+
+  private async checkAndUpdateAccounts(
+    currentTransaction: ITransaction,
+    newTransaction: Transaction
+  ) {
+    if (
+      currentTransaction.account &&
+      currentTransaction.account.accountId !== newTransaction.account.accountId
+    ) {
+      // if it was a expense/negative number
+      if (currentTransaction.amount < 0) {
+        // add the amount to the previous account
+        await this.accountService
+          .updateAccountBalance(
+            currentTransaction.account.accountId,
+            Math.abs(currentTransaction.amount)
+          )
+          .toPromise();
+        // subtract from current account
+        await this.accountService
+          .updateAccountBalance(
+            newTransaction.account.accountId,
+            -Math.abs(newTransaction.amount)
+          )
+          .toPromise();
+      } else {
+        // add the amount to the previous account
+        await this.accountService
+          .updateAccountBalance(
+            currentTransaction.account.accountId,
+            -Math.abs(currentTransaction.amount)
+          )
+          .toPromise();
+        // subtract from current account
+        await this.accountService
+          .updateAccountBalance(
+            newTransaction.account.accountId,
+            Math.abs(newTransaction.amount)
+          )
+          .toPromise();
+      }
+    }
   }
 
   createStartingBalance(accountId: string, budgetId: string, amount: number) {

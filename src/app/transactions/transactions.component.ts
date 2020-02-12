@@ -59,11 +59,9 @@ export class TransactionsComponent implements OnInit, OnDestroy {
 
   constructor(
     private transService: TransactionService,
-    private authService: AuthService,
     private userService: UserService,
     private router: Router,
     private route: ActivatedRoute,
-    private db: AngularFirestore,
     public dialog: MatDialog,
     public accountService: AccountService
   ) {
@@ -124,7 +122,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     });
   }
 
-  openDialog() {
+  openImportDialog() {
     const dialogRef = this.dialog.open(ImportComponent, {
       data: {
         accountId: this.accountId,

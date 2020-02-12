@@ -14,9 +14,14 @@ export function accountAndCategoryFilter(
   }
 }
 
+export function sortDate(a: { date: string }, b: { date: string }) {
+  return a.date < b.date ? 1 : -1;
+}
+
 const entityMetadata: EntityMetadataMap = {
   Transaction: {
-    filterFn: accountAndCategoryFilter
+    filterFn: accountAndCategoryFilter,
+    sortComparer: sortDate
   },
   Account: {},
   Category: {},

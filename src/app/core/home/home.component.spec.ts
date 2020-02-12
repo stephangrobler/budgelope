@@ -1,4 +1,8 @@
-import { NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA, Component } from '@angular/core';
+import {
+  NO_ERRORS_SCHEMA,
+  CUSTOM_ELEMENTS_SCHEMA,
+  Component
+} from '@angular/core';
 
 import { TestBed, async } from '@angular/core/testing';
 import { HomeComponent } from './home.component';
@@ -18,6 +22,7 @@ import * as moment from 'moment';
 import { AccountService } from '../../accounts/account.service';
 import { UserService } from 'app/shared/user.service';
 import { BreakpointObserver } from '@angular/cdk/layout';
+import { MatDialogModule } from '@angular/material/dialog';
 
 // tslint:disable-next-line:component-selector
 @Component({ selector: 'router-outlet', template: '' })
@@ -36,7 +41,9 @@ describe('HomeComponent', () => {
     userServiceStub;
 
   beforeEach(async(() => {
-    analyticsServiceStub = jasmine.createSpyObj('AnalyticsService', ['pageView']);
+    analyticsServiceStub = jasmine.createSpyObj('AnalyticsService', [
+      'pageView'
+    ]);
     dbStub = jasmine.createSpyObj('AngularFirestore', ['doc', 'collection']);
     dbStub.doc.and.returnValue({
       valueChanges: () => of({ activeBudget: 'abcde' })
@@ -64,6 +71,7 @@ describe('HomeComponent', () => {
         MatListModule,
         MatIconModule,
         MatToolbarModule,
+        MatDialogModule,
         BrowserAnimationsModule
       ],
       schemas: [],

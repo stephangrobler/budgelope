@@ -11,15 +11,18 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { Observable, of } from 'rxjs';
 import { ActivatedRouteStub } from 'testing/activate-route-stub';
+import { AccountService } from 'app/accounts/account.service';
 
 describe('TransactionsComponent', () => {
   let activatedRouteStub;
 
   const TransactionServiceStub = jasmine.createSpyObj('TransactionService', [
     'getWithQuery',
-    'getByKey'
+    'getByKey',
+    'setFilter'
   ]);
   TransactionServiceStub.getWithQuery.and.returnValue(of([]));
+  TransactionServiceStub.filteredEntities$ = of([]);
 
   const BudgetServiceStub = jasmine.createSpyObj('BudgetService', [
     'getTransactions'
@@ -31,20 +34,7 @@ describe('TransactionsComponent', () => {
   UserServiceStub.getProfile.and.returnValue(of({ activeBudget: '0123456' }));
   const RouterStub = jasmine.createSpyObj('Router', ['navigate']);
 
-  const angularFireAuthServiceStub = jasmine.createSpyObj('AngularFireAuth', [
-    'authenticate'
-  ]);
-  angularFireAuthServiceStub.authState = of([]);
-
-  const angularFirestoreServiceStub = jasmine.createSpyObj('AngularFirestore', [
-    'doc',
-    'collection'
-  ]);
-  angularFirestoreServiceStub.doc.and.returnValue({
-    valueChanges: function() {
-      return of({});
-    }
-  });
+  const accountStub = jasmine.createSpyObj('AccountService', ['noop']);
 
   const matDialogStub = jasmine.createSpyObj('MatDialog', [
     'open',
@@ -61,12 +51,8 @@ describe('TransactionsComponent', () => {
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [
         {
-          provide: AngularFirestore,
-          useValue: angularFirestoreServiceStub
-        },
-        {
-          provide: AngularFireAuth,
-          useValue: angularFireAuthServiceStub
+          provide: AccountService,
+          useValue: accountStub
         },
         {
           provide: TransactionService,

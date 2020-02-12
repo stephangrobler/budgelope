@@ -35,7 +35,7 @@ import { Budget } from '../../shared/budget';
 import { Transaction } from '../../shared/transaction';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
-describe('TransactionsComponent', () => {
+describe('TransactionComponent', () => {
   let transactionServiceStub;
 
   const BudgetServiceStub = jasmine.createSpyObj('BudgetService', [
@@ -90,6 +90,7 @@ describe('TransactionsComponent', () => {
       'updateAccountBalance'
     ]);
     accountServiceStub.getAll.and.returnValue(of([]));
+    accountServiceStub.updateAccountBalance.and.returnValue(of({}));
 
     categoryServiceStub = jasmine.createSpyObj('CategoryService', [
       'getWithQuery',
@@ -193,7 +194,7 @@ describe('TransactionsComponent', () => {
     expect(app.title).toEqual('Transaction');
   }));
 
-  it('should update the old account and new selected account', () => {
+  it('should update the old account and new selected account', (done: DoneFn) => {
     const fixture = TestBed.createComponent(TransactionComponent);
     const account = new Account();
     const oldAccount = new Account();
@@ -202,12 +203,17 @@ describe('TransactionsComponent', () => {
     account.balance = 500;
     oldAccount.balance = 500;
 
-    fixture.componentInstance.updateAccount(500, oldAccount, account);
-
-    expect(accountServiceStub.updateAccountBalance).toHaveBeenCalledTimes(2);
+    fixture.componentInstance
+      .updateAccount(500, oldAccount, account)
+      .then(() => {
+        expect(accountServiceStub.updateAccountBalance).toHaveBeenCalledTimes(
+          2
+        );
+        done();
+      });
   });
 
-  it('should update the old account and new selected account', () => {
+  it('should update the old account and new selected account', (done: DoneFn) => {
     const fixture = TestBed.createComponent(TransactionComponent);
     const account = new Account();
     const oldAccount = new Account();
@@ -218,16 +224,18 @@ describe('TransactionsComponent', () => {
     oldAccount.id = 'acc2';
     oldAccount.balance = 500;
 
-    fixture.componentInstance.updateAccount(500, oldAccount, account);
-
-    expect(accountServiceStub.updateAccountBalance).toHaveBeenCalledWith(
-      'acc2',
-      'CurrentBudgetID',
-      500
-    );
+    fixture.componentInstance
+      .updateAccount(500, oldAccount, account)
+      .then(() => {
+        expect(accountServiceStub.updateAccountBalance).toHaveBeenCalledWith(
+          'acc2',
+          500
+        );
+        done();
+      });
   });
 
-  it('should update the old account and new selected account', () => {
+  it('should update the old account and new selected account', (done: DoneFn) => {
     const fixture = TestBed.createComponent(TransactionComponent);
     const account = new Account();
     const oldAccount = new Account();
@@ -239,13 +247,15 @@ describe('TransactionsComponent', () => {
     oldAccount.id = 'acc2';
     oldAccount.balance = 0;
 
-    fixture.componentInstance.updateAccount(-500, oldAccount, account);
-
-    expect(accountServiceStub.updateAccountBalance).toHaveBeenCalledWith(
-      'acc1',
-      'CurrentBudgetID',
-      -500
-    );
+    fixture.componentInstance
+      .updateAccount(-500, oldAccount, account)
+      .then(() => {
+        expect(accountServiceStub.updateAccountBalance).toHaveBeenCalledWith(
+          'acc1',
+          -500
+        );
+        done();
+      });
   });
 
   it('should display an additional account drop down if type is transfer', () => {
