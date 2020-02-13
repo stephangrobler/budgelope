@@ -5,16 +5,16 @@ import { DefaultDataService, HttpUrlGenerator, Logger } from '@ngrx/data';
 import { Observable, of, from } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import {
-  ITransactionID,
+  TransactionID,
   TransactionTypes,
-  ITransaction
+  TransactionClass
 } from 'app/shared/transaction';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { UserService } from 'app/shared/user.service';
 import { Update } from '@ngrx/entity';
 
 @Injectable()
-export class TransactionDataService extends DefaultDataService<ITransactionID> {
+export class TransactionDataService extends DefaultDataService<TransactionID> {
   activeBudgetID: string;
 
   constructor(
@@ -35,23 +35,23 @@ export class TransactionDataService extends DefaultDataService<ITransactionID> {
     });
   }
 
-  getAll(): Observable<ITransactionID[]> {
+  getAll(): Observable<TransactionID[]> {
     const transRef = '/budgets/' + this.activeBudgetID + '/transactions';
-    return this.db.collection<ITransactionID>(transRef).valueChanges();
+    return this.db.collection<TransactionID>(transRef).valueChanges();
   }
 
-  getById(id: string): Observable<ITransactionID> {
+  getById(id: string): Observable<TransactionID> {
     return this.db
-      .doc<ITransactionID>(
+      .doc<TransactionID>(
         'budgets/' + this.activeBudgetID + '/transactions/' + id
       )
       .valueChanges();
   }
 
-  getWithQuery(params: any): Observable<ITransactionID[]> {
+  getWithQuery(params: any): Observable<TransactionID[]> {
     const transRef = '/budgets/' + this.activeBudgetID + '/transactions';
     // should not display cleared transactions by default
-    const collection = this.db.collection<ITransactionID>(transRef, ref => {
+    const collection = this.db.collection<TransactionID>(transRef, ref => {
       let query: firebase.firestore.Query = ref;
       if (!params.cleared) {
         query = query.where('cleared', '==', false);
@@ -74,7 +74,7 @@ export class TransactionDataService extends DefaultDataService<ITransactionID> {
     return collection.snapshotChanges().pipe(
       map(actions =>
         actions.map(a => {
-          const data = a.payload.doc.data() as ITransactionID;
+          const data = a.payload.doc.data() as TransactionID;
           const id = a.payload.doc.id;
           // convert timestamp object from firebase to date object if object
           const dateObj = a.payload.doc.get('date');
@@ -104,19 +104,19 @@ export class TransactionDataService extends DefaultDataService<ITransactionID> {
     );
   }
 
-  add(transaction: ITransaction): Observable<ITransactionID> {
+  add(transaction: TransactionID): Observable<TransactionID> {
     const colRef = '/budgets/' + this.activeBudgetID + '/transactions';
     return from(this.db.collection(colRef).add(transaction)).pipe(
-      map(docRef => ({ id: docRef.id, ...transaction } as ITransactionID))
+      map(docRef => ({ id: docRef.id, ...transaction } as TransactionID))
     );
   }
 
-  update(transaction: Update<ITransactionID>): Observable<ITransactionID> {
+  update(transaction: Update<TransactionID>): Observable<TransactionID> {
     const docRef =
       '/budgets/' + this.activeBudgetID + '/transactions/' + transaction.id;
     return from(this.db.doc(docRef).update({ ...transaction.changes })).pipe(
       map(
-        () => ({ id: transaction.id, ...transaction.changes } as ITransactionID)
+        () => ({ id: transaction.id, ...transaction.changes } as TransactionID)
       )
     );
   }

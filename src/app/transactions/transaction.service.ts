@@ -1,15 +1,9 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { Observable, forkJoin, of } from 'rxjs';
-import { map, catchError, take, last } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import * as moment from 'moment';
 
-import {
-  ITransaction,
-  Transaction,
-  TransactionTypes,
-  ITransactionID
-} from '../shared/transaction';
+import { TransactionTypes, TransactionID } from '../shared/transaction';
 import { CategoryService } from '../categories/category.service';
 import { AccountService } from '../accounts/account.service';
 import { BudgetService } from '../budgets/budget.service';
@@ -28,9 +22,9 @@ export interface IFilter {
 
 @Injectable({ providedIn: 'root' })
 export class TransactionService extends EntityCollectionServiceBase<
-  ITransaction
+  TransactionID
 > {
-  transactions: Transaction[];
+  transactions: TransactionID[];
 
   constructor(
     serviceElementsFactory: EntityCollectionServiceElementsFactory,
@@ -44,7 +38,7 @@ export class TransactionService extends EntityCollectionServiceBase<
   }
 
   doMatching(
-    currentTransactions: ITransactionID[],
+    currentTransactions: TransactionID[],
     importedTransactions: IImportedTransaction[]
   ) {
     const matching = { matched: [], unmatched: [], updated: [] };
@@ -86,7 +80,7 @@ export class TransactionService extends EntityCollectionServiceBase<
     // commit batch
   }
 
-  batchUpdateMatched(transactions: ITransactionID[], budgetId: string) {
+  batchUpdateMatched(transactions: TransactionID[], budgetId: string) {
     const batch = this.db.firestore.batch();
     transactions.forEach(transaction => {
       const ref = this.db.doc(
@@ -115,7 +109,7 @@ export class TransactionService extends EntityCollectionServiceBase<
       const ref = this.db.doc('/budgets/' + budgetId + '/transactions/' + id)
         .ref;
       // create transaction to write
-      const transRec = <ITransactionID>{ account: {} };
+      const transRec = <TransactionID>{ account: {} };
       transRec.account.accountId = accountId;
       transRec.account.accountName = accountName;
       transRec.amount = Number(transaction.trnamt);
@@ -157,7 +151,6 @@ export class TransactionService extends EntityCollectionServiceBase<
         .toPromise();
       // after successfull response, we update the category budgets (could go to cloud functions)
       this.categoryService.updateCategoryBudget(
-        budgetId,
         'UNCATEGORIZED',
         shortDate,
         0,
@@ -200,7 +193,7 @@ export class TransactionService extends EntityCollectionServiceBase<
           });
         })
       )
-      .subscribe(async (val: ITransactionID[]) => {
+      .subscribe(async (val: TransactionID[]) => {
         const transactions = val;
         const matchObject = this.doMatching(transactions, importedTransactions);
         if (matchObject.updated.length > 0) {
@@ -213,7 +206,7 @@ export class TransactionService extends EntityCollectionServiceBase<
     return new Promise((resolve, reject) => {
       this.getByKey(transactionId)
         .pipe(take(1))
-        .subscribe(async (transaction: ITransactionID) => {
+        .subscribe(async (transaction: TransactionID) => {
           // get the opposite amount value
           const inverseAmount =
             transaction.amount > 0
@@ -230,7 +223,6 @@ export class TransactionService extends EntityCollectionServiceBase<
             if (transaction.categories.hasOwnProperty(key)) {
               const category = transaction.categories[key];
               this.categoryService.updateCategoryBudget(
-                budgetId,
                 key,
                 shortDate,
                 category.out,
@@ -252,7 +244,7 @@ export class TransactionService extends EntityCollectionServiceBase<
     });
   }
 
-  updateClearedStatus(budgetId: string, transaction: ITransactionID) {
+  updateClearedStatus(budgetId: string, transaction: TransactionID) {
     this.update(transaction);
 
     if (!transaction.cleared) {
@@ -268,7 +260,7 @@ export class TransactionService extends EntityCollectionServiceBase<
     );
   }
 
-  async updateTransaction(budgetId: string, newTransaction: Transaction) {
+  async updateTransaction(budgetId: string, newTransaction: TransactionID) {
     const currentTransaction = await this.getByKey(
       newTransaction.id
     ).toPromise();
@@ -298,9 +290,9 @@ export class TransactionService extends EntityCollectionServiceBase<
 
   private async checkAndUpdateBudget(
     amountDiffers: boolean,
-    currentTransaction: ITransaction,
+    currentTransaction: TransactionID,
     budgetId: string,
-    newTransaction: Transaction
+    newTransaction: TransactionID
   ) {
     if (amountDiffers && currentTransaction.amount > 0) {
       this.budgetService.updateBudgetBalance(
@@ -327,8 +319,8 @@ export class TransactionService extends EntityCollectionServiceBase<
   }
 
   private checkAndUpdateCategories(
-    currentTransaction: ITransaction,
-    newTransaction: Transaction,
+    currentTransaction: TransactionID,
+    newTransaction: TransactionID,
     amountDiffers: boolean,
     budgetId: string
   ) {
@@ -349,7 +341,6 @@ export class TransactionService extends EntityCollectionServiceBase<
         if (currentTransaction.categories.hasOwnProperty(key)) {
           const category = currentTransaction.categories[key];
           this.categoryService.updateCategoryBudget(
-            budgetId,
             key,
             shortDate,
             category.out,
@@ -361,7 +352,6 @@ export class TransactionService extends EntityCollectionServiceBase<
         if (newTransaction.categories.hasOwnProperty(key)) {
           const category = newTransaction.categories[key];
           this.categoryService.updateCategoryBudget(
-            budgetId,
             key,
             shortDate,
             category.in,
@@ -373,8 +363,8 @@ export class TransactionService extends EntityCollectionServiceBase<
   }
 
   private async checkAndUpdateAccounts(
-    currentTransaction: ITransaction,
-    newTransaction: Transaction
+    currentTransaction: TransactionID,
+    newTransaction: TransactionID
   ) {
     if (
       currentTransaction.account &&
@@ -421,7 +411,7 @@ export class TransactionService extends EntityCollectionServiceBase<
       .getByKey(accountId)
       .pipe(take(1))
       .subscribe(account => {
-        const transaction = new Transaction();
+        const transaction = {} as TransactionID;
         let inAmount, outAmount, type: string;
 
         if (amount > 0) {
@@ -455,7 +445,7 @@ export class TransactionService extends EntityCollectionServiceBase<
       });
   }
 
-  calculateAmount(transaction: Transaction): number {
+  calculateAmount(transaction: TransactionID): number {
     let amount = 0;
 
     for (const key in transaction.categories) {
@@ -476,7 +466,7 @@ export class TransactionService extends EntityCollectionServiceBase<
    *
    */
   public async createTransaction(
-    transaction: Transaction,
+    transaction: TransactionID,
     budgetId: string
   ): Promise<any> {
     const shortDate = moment(transaction.date).format('YYYYMM');
@@ -489,7 +479,6 @@ export class TransactionService extends EntityCollectionServiceBase<
         if (transaction.categories.hasOwnProperty(key)) {
           const category = transaction.categories[key];
           await this.categoryService.updateCategoryBudget(
-            budgetId,
             key,
             shortDate,
             category.in,

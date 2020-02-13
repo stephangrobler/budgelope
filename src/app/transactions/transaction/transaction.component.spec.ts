@@ -32,7 +32,7 @@ import { ActivatedRouteStub } from '../../../testing/activate-route-stub';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Category } from '../../shared/category';
 import { Budget } from '../../shared/budget';
-import { Transaction } from '../../shared/transaction';
+import { TransactionClass } from '../../shared/transaction';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 describe('TransactionComponent', () => {
@@ -309,7 +309,7 @@ describe('TransactionComponent', () => {
     form.get('transferAmount').setValue(500);
     form.get('transfer').setValue(true);
 
-    const transaction = new Transaction(form.value);
+    const transaction = new TransactionClass(form.value);
     transaction.account = {
       accountId: 'acc1',
       accountName: 'acc1Name'
@@ -352,7 +352,7 @@ describe('TransactionComponent', () => {
     form.get('transferAmount').setValue(500);
     form.get('transfer').setValue(true);
 
-    const transaction = new Transaction(form.value);
+    const transaction = new TransactionClass(form.value);
     transaction.account = {
       accountId: 'acc2',
       accountName: 'Test Account 2'

@@ -5,12 +5,7 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { Account } from '../shared/account';
 import { Category } from '../shared/category';
 import { Budget } from '../shared/budget';
-import {
-  Transaction,
-  ITransaction,
-  ITransactionID,
-  TransactionTypes
-} from '../shared/transaction';
+import { TransactionID, TransactionTypes } from '../shared/transaction';
 import { Observable, of } from 'rxjs';
 import { AccountService } from '../accounts/account.service';
 import { resolve } from 'path';
@@ -36,7 +31,7 @@ describe('Transaction Service', () => {
     account = new Account();
     category = new Category();
     budget = new Budget();
-    transaction = new Transaction();
+    transaction = {} as TransactionID;
 
     dbMock = jasmine.createSpyObj('AngularFirestore', [
       'collection',
@@ -286,7 +281,7 @@ describe('Transaction Service', () => {
 
       const day = new Date('2019-03-04');
 
-      const currentTransactions: ITransactionID[] = [
+      const currentTransactions: TransactionID[] = [
         {
           id: '001',
           date: day,
@@ -310,7 +305,7 @@ describe('Transaction Service', () => {
           },
           memo: '',
           payee: ''
-        }
+        } as TransactionID
       ];
 
       // action
@@ -328,9 +323,9 @@ describe('Transaction Service', () => {
     it('should create a batched update of the matched transactions', () => {
       // arrange
       const transactions = [
-        <ITransactionID>{ id: 'TEST001' },
-        <ITransactionID>{ id: 'TEST002' },
-        <ITransactionID>{ id: 'TEST003' }
+        <TransactionID>{ id: 'TEST001' },
+        <TransactionID>{ id: 'TEST002' },
+        <TransactionID>{ id: 'TEST003' }
       ];
 
       // action
@@ -449,30 +444,37 @@ describe('Transaction Service', () => {
   describe('Update transactions', () => {
     let newTransaction, currentTransaction;
     beforeEach(() => {
-      newTransaction = new Transaction({
+      const date = new Date('2018-01-01');
+      newTransaction = {
         id: 'TESTTRANSACTION',
         account: {
-          id: 'ACC001',
-          name: 'TestAccount'
+          accountId: 'ACC001',
+          accountName: 'TestAccount'
         },
         amount: -500,
-        categories: [
-          { in: 0, out: 500, category: { id: 'TEST001', name: 'TEST001' } }
-        ],
-        date: '2018-01-01'
-      });
-      currentTransaction = new Transaction({
+        categories: {
+          TEST_CAT: { in: 0, out: 500, categoryName: 'TEST_CAT' }
+        },
+        cleared: false,
+        payee: 'Test',
+        type: TransactionTypes.EXPENSE,
+        date
+      } as TransactionID;
+      currentTransaction = {
         id: 'TESTTRANSACTION',
         account: {
-          id: 'ACC001',
-          name: 'TestAccount'
+          accountId: 'ACC001',
+          accountName: 'TestAccount'
         },
         amount: -500,
-        categories: [
-          { in: 0, out: 500, category: { id: 'TEST001', name: 'TEST001' } }
-        ],
-        date: '2018-01-01'
-      });
+        categories: {
+          TEST_CAT: { in: 0, out: 500, categoryName: 'TEST001' }
+        },
+        cleared: false,
+        payee: 'Someone',
+        type: TransactionTypes.EXPENSE,
+        date
+      } as TransactionID;
 
       ecsebMock = {
         add: () => of({}),
@@ -489,7 +491,7 @@ describe('Transaction Service', () => {
 
     it('should update the account balance if account changed and is income type', (done: DoneFn) => {
       // arrange
-      currentTransaction = new Transaction({
+      currentTransaction = {
         id: 'TESTTRANSACTION',
         account: {
           id: 'ACC001',
@@ -500,7 +502,7 @@ describe('Transaction Service', () => {
           { in: 500, out: 0, category: { id: 'TEST001', name: 'TEST001' } }
         ],
         date: '2018-01-01'
-      });
+      };
 
       newTransaction.account = {
         accountId: 'ACC002',

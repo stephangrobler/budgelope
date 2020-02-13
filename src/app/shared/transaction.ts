@@ -6,7 +6,7 @@ export const enum TransactionTypes {
   TRANSFER = 'transfer'
 }
 
-export interface ITransaction {
+export interface Transaction {
   account: { accountId: string; accountName: string };
   amount: number;
   categories: {
@@ -17,22 +17,26 @@ export interface ITransaction {
     };
   };
   cleared: boolean;
+  transfer?: boolean;
+  transferAccount?: { accountId: string; accountName: string };
+  transferAccountDisplayName?: string;
+  transferAmount?: number;
   date: Date;
-  memo: string;
+  memo?: string;
   payee: string;
   type: string;
   matched?: IImportedTransaction;
 }
 
-export interface ITransactionID extends ITransaction {
-  id: string;
-  accountDisplayName: string;
-  categoryDisplayName: string;
-  in: number;
-  out: number;
+export interface TransactionID extends Transaction {
+  id?: string;
+  accountDisplayName?: string;
+  categoryDisplayName?: string;
+  in?: number;
+  out?: number;
 }
 
-export class Transaction implements ITransaction {
+export class TransactionClass implements TransactionID {
   id?: string;
   categories: {
     [s: string]: {
@@ -59,7 +63,7 @@ export class Transaction implements ITransaction {
   memo = '';
   type: string; // income or expense
   cleared: boolean;
-  transfer = false;
+  transfer?: false;
   matched: IImportedTransaction;
 
   constructor(transactionData?: any) {

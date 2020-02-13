@@ -6,7 +6,7 @@ import { AngularFirestoreDocument } from '@angular/fire/firestore';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { Transaction } from '../../shared/transaction';
+import { TransactionClass, TransactionID } from '../../shared/transaction';
 import { Account } from '../../shared/account';
 import { Budget } from '../../shared/budget';
 import { CategoryId } from '../../shared/category';
@@ -206,6 +206,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
 
   saveTransaction() {
     this.savingInProgress = true;
+
     if (this.transactionId != null) {
       console.log('updating ', this.transactionId);
       this.update(this.transactionForm);
@@ -251,20 +252,14 @@ export class TransactionComponent implements OnInit, OnDestroy {
     oldCategories.value.forEach(categoryItem => {
       categoryItem.category.balance -= +categoryItem.in;
       categoryItem.category.balance += +categoryItem.out;
-      this.categoryService.updateCategory(
-        this.activeBudget.id,
-        categoryItem.category
-      );
+      this.categoryService.update(categoryItem.category);
     });
 
     // adjust new categories
     newCategories.value.forEach(categoryItem => {
       categoryItem.category.balance += +categoryItem.in;
       categoryItem.category.balance -= +categoryItem.out;
-      this.categoryService.updateCategory(
-        this.activeBudget.id,
-        categoryItem.category
-      );
+      this.categoryService.update(categoryItem.category);
     });
   }
 
@@ -274,7 +269,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
    * @param form FormGroup
    */
   update(form: FormGroup) {
-    const transaction = new Transaction(form.value);
+    const transaction = { ...form.value } as TransactionID;
 
     // id is needed to update correctly
     transaction.id = this.transactionId;
@@ -296,8 +291,8 @@ export class TransactionComponent implements OnInit, OnDestroy {
    * @param form FormGroup
    */
   async transfer(form: FormGroup) {
-    const fromTransaction = new Transaction(form.value);
-    const toTransaction = new Transaction(form.value);
+    const fromTransaction = new TransactionClass(form.value);
+    const toTransaction = new TransactionClass(form.value);
     const fromAccount = form.get('account').value;
     const toAccount = form.get('transferAccount').value;
 
@@ -323,7 +318,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
   }
 
   private toTransaction(
-    toTransaction: Transaction,
+    toTransaction: TransactionID,
     toAccount: any,
     fromAccount: any
   ) {
@@ -348,7 +343,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
   }
 
   private fromTransaction(
-    fromTransaction: Transaction,
+    fromTransaction: TransactionClass,
     fromAccount: any,
     fromCategory: CategoryId,
     toAccount: any
@@ -374,7 +369,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
   }
 
   create(form: FormGroup) {
-    const transaction = new Transaction(form.value);
+    const transaction = new TransactionClass(form.value);
     transaction.account = {
       accountId: form.value.account.id,
       accountName: form.value.account.name

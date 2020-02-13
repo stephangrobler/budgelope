@@ -8,11 +8,7 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { DataSource } from '@angular/cdk/collections';
-import {
-  Transaction,
-  ITransactionID,
-  ITransaction
-} from '../shared/transaction';
+import { TransactionID } from '../shared/transaction';
 import { TransactionService, IFilter } from './transaction.service';
 import { BudgetService } from '../budgets/budget.service';
 import { UserService } from '../shared/user.service';
@@ -50,11 +46,11 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     'matched'
   ];
   dataSource: TransactionDataSource;
-  newTransaction: Transaction;
+  newTransaction: TransactionID;
   showCleared = false;
   showTransaction = false;
 
-  selectedTransaction: Transaction;
+  selectedTransaction: TransactionID;
   loading$: Observable<boolean>;
 
   constructor(
@@ -158,7 +154,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     this.dataSource.loadTransactions(this.accountId, '' + this.showCleared);
   }
 
-  toggleCleared(transaction: ITransactionID) {
+  toggleCleared(transaction: TransactionID) {
     transaction.cleared = !transaction.cleared;
     this.transService.updateClearedStatus(this.budgetId, transaction);
   }
@@ -171,7 +167,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
 
 export class TransactionDataSource extends DataSource<any> {
   private transactionsSubject = new BehaviorSubject<any>([]);
-  private transactions: Observable<ITransaction[]>;
+  private transactions: Observable<TransactionID[]>;
   private loading: Observable<boolean>;
 
   constructor(

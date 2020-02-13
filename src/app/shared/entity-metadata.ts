@@ -1,8 +1,8 @@
 import { EntityMetadataMap } from '@ngrx/data';
-import { ITransactionID } from './transaction';
+import { TransactionID } from './transaction';
 
 export function accountAndCategoryFilter(
-  entities: ITransactionID[],
+  entities: TransactionID[],
   pattern: any
 ) {
   if (pattern.accountId) {
