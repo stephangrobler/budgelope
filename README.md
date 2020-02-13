@@ -1,4 +1,4 @@
-# Budgelope [![Build Status](https://travis-ci.com/stephanfx/budgelope.svg?branch=master)](https://travis-ci.com/stephanfx/budgelope)
+# Budgelope [![Build Status](https://travis-ci.com/stephangrobler/budgelope.svg?branch=master)](https://travis-ci.com/stephanfx/budgelope)
 
 A budget software like the other thing YNAB, to learn Angular, coming from AngularJS.
 
