@@ -1,26 +1,19 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import {
-  AngularFirestore,
-  AngularFirestoreCollection
-} from '@angular/fire/firestore';
-import { AngularFireAuth } from '@angular/fire/auth';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { DataSource } from '@angular/cdk/collections';
 import { TransactionID } from '../shared/transaction';
-import { TransactionService, IFilter } from './transaction.service';
-import { BudgetService } from '../budgets/budget.service';
+import { TransactionService } from './transaction.service';
 import { UserService } from '../shared/user.service';
-import { BehaviorSubject, Subject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Subject, Observable } from 'rxjs';
 import { IAccount } from 'app/shared/account';
 import { ImportComponent } from './import/import.component';
-import { AuthService } from 'app/shared/auth.service';
 import { takeUntil, take, tap } from 'rxjs/operators';
 import { AccountComponent } from 'app/accounts/account/account.component';
 import { TransactionComponent } from './transaction/transaction.component';
 import { AccountService } from 'app/accounts/account.service';
-import { QueryParams, MergeStrategy } from '@ngrx/data';
+import { QueryParams } from '@ngrx/data';
 
 @Component({
   templateUrl: 'transactions.component.html',
@@ -35,16 +28,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   accountId: string;
   account: IAccount;
   categoryId: string;
-  displayedColumns = [
-    'date',
-    'account',
-    'payee',
-    'category',
-    'out',
-    'in',
-    'cleared',
-    'matched'
-  ];
+  displayedColumns = ['date', 'payee', 'category', 'out', 'in', 'cleared'];
   dataSource: TransactionDataSource;
   newTransaction: TransactionID;
   showCleared = false;

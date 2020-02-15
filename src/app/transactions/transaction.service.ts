@@ -20,6 +20,23 @@ export interface IFilter {
   categoryId: string;
 }
 
+export function TransactionFilter(entities: TransactionID[], pattern: any) {
+  if (pattern.accountId) {
+    entities = entities.filter(
+      entity => entity.account.accountId === pattern.accountId
+    );
+  }
+  if (pattern.cleared === 'false') {
+    entities = entities.filter(entity => entity.cleared === false);
+  }
+  if (pattern.categoryId) {
+    entities = entities.filter(entity => {
+      return entity.categories[pattern.categoryId];
+    });
+  }
+  return entities;
+}
+
 @Injectable({ providedIn: 'root' })
 export class TransactionService extends EntityCollectionServiceBase<
   TransactionID

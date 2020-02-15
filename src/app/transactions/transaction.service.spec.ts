@@ -227,7 +227,6 @@ describe('Transaction Service', () => {
         500
       );
       expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledWith(
-        '12345',
         'TEST_CAT',
         '201812',
         500,
@@ -378,7 +377,6 @@ describe('Transaction Service', () => {
             -700.6600000000001
           );
           expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledWith(
-            'TESTBUDGET',
             'UNCATEGORIZED',
             '201903',
             0,
@@ -468,7 +466,7 @@ describe('Transaction Service', () => {
         },
         amount: -500,
         categories: {
-          TEST_CAT: { in: 0, out: 500, categoryName: 'TEST001' }
+          TEST001: { in: 0, out: 500, categoryName: 'TEST001' }
         },
         cleared: false,
         payee: 'Someone',
@@ -595,7 +593,6 @@ describe('Transaction Service', () => {
         );
         // reverse check
         expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledWith(
-          'BUDGETSTRING',
           'TEST001',
           '201801',
           500,
@@ -603,7 +600,6 @@ describe('Transaction Service', () => {
         );
         // new check
         expect(categoryServiceMock.updateCategoryBudget).toHaveBeenCalledWith(
-          'BUDGETSTRING',
           'TEST',
           '201801',
           0,

@@ -221,48 +221,6 @@ export class TransactionComponent implements OnInit, OnDestroy {
     }
   }
 
-  async updateAccount(
-    amount: number,
-    oldAccount: Account,
-    newAccount: Account
-  ) {
-    try {
-      oldAccount.balance -= amount;
-      newAccount.balance += amount;
-      await this.accountService
-        .updateAccountBalance(oldAccount.id, amount)
-        .toPromise();
-      await this.accountService
-        .updateAccountBalance(newAccount.id, amount)
-        .toPromise();
-    } catch (error) {
-      console.log('SFG: TransactionComponent -> updateAccount -> error', error);
-    }
-  }
-
-  /**
-   * Updates the categories for the transaction based on changes made to saved
-   * transactions
-   *
-   * @param oldCategories FormArray
-   * @param newCategories FormArray
-   */
-  updateCategories(oldCategories: FormArray, newCategories: FormArray) {
-    // reset old categories
-    oldCategories.value.forEach(categoryItem => {
-      categoryItem.category.balance -= +categoryItem.in;
-      categoryItem.category.balance += +categoryItem.out;
-      this.categoryService.update(categoryItem.category);
-    });
-
-    // adjust new categories
-    newCategories.value.forEach(categoryItem => {
-      categoryItem.category.balance += +categoryItem.in;
-      categoryItem.category.balance -= +categoryItem.out;
-      this.categoryService.update(categoryItem.category);
-    });
-  }
-
   /**
    * Update the transaction
    *

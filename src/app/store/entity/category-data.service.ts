@@ -3,11 +3,10 @@ import { DefaultDataService, Logger, HttpUrlGenerator } from '@ngrx/data';
 import { Category, CategoryId } from 'app/shared/category';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of, from } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { UserService } from 'app/shared/user.service';
 import { Update } from '@ngrx/entity';
-
 
 @Injectable({
   providedIn: 'root'
@@ -23,17 +22,28 @@ export class CategoryDataService extends DefaultDataService<CategoryId> {
     private userService: UserService
   ) {
     super('Category', httpClient, httpUrlGenerator);
-    logger.log('Created custom Category EntityDataService');
     // TODO: may cause concurrency issues
     this.userService.getProfile().subscribe(profile => {
       this.activeBudgetID = profile.activeBudget;
-      logger.log('CategoryService -> this.activeBudgetID:', this.activeBudgetID);
+      logger.log(
+        'CategoryService -> this.activeBudgetID:',
+        this.activeBudgetID
+      );
     });
+  }
+
+  getById(id: string): Observable<CategoryId> {
+    return this.db
+      .doc<CategoryId>('budgets/' + this.activeBudgetID + '/categories/' + id)
+      .valueChanges();
   }
 
   getWithQuery(params: any): Observable<CategoryId[]> {
     return this.db
-      .collection<CategoryId>('budgets/' + this.activeBudgetID + '/categories', ref => ref.orderBy(params.orderBy))
+      .collection<CategoryId>(
+        'budgets/' + this.activeBudgetID + '/categories',
+        ref => ref.orderBy(params.orderBy)
+      )
       .snapshotChanges()
       .pipe(
         map(actions => {
@@ -47,8 +57,17 @@ export class CategoryDataService extends DefaultDataService<CategoryId> {
   }
 
   update(category: Update<CategoryId>): Observable<CategoryId> {
-    const docRef = 'budgets/' + this.activeBudgetID + '/categories/' + category.id;
-    this.db.doc(docRef).update(category.changes);
-    return of(category.changes as CategoryId);
+    const docRef =
+      'budgets/' + this.activeBudgetID + '/categories/' + category.id;
+    return from(this.db.doc(docRef).update(category.changes)).pipe(
+      map(() => ({ ...category.changes, id: category.id } as CategoryId))
+    );
+  }
+
+  add(category: CategoryId): Observable<CategoryId> {
+    const colRef = '/budgets/' + this.activeBudgetID + '/categories';
+    return from(this.db.collection(colRef).add(category)).pipe(
+      map(docRef => ({ id: docRef.id, ...category } as CategoryId))
+    );
   }
 }

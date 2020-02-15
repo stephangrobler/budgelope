@@ -8,44 +8,61 @@
     <mat-icon>add</mat-icon>
   </button>
   <div class="page-header">
-    <h1>
+    <h3>
       Transactions <span *ngIf="account">for {{ account.name }}</span>
-    </h1>
+    </h3>
     <app-transaction *ngIf="showTransaction"></app-transaction>
   </div>
   <p *ngIf="loading$ | async">Loading...</p>
   <mat-card>
     <mat-card-content>
-      <mat-slide-toggle
-        color="primary"
-        [(ngModel)]="showCleared"
-        (change)="onFilterClearedToggle()"
-      >
-        Show Cleared
-      </mat-slide-toggle>
-      <button
+      <div
         *ngIf="account"
-        mat-icon-button
-        color="accent"
-        (click)="openDialog()"
+        fxLayout.xs="column"
+        fxLayout="row"
+        fxLayoutGap="10px"
+        fxLayoutAlign="end center"
       >
-        <mat-icon>import_export</mat-icon>
-      </button>
+        <div>
+          Cleared: <b>{{ account.clearedBalance | currency: 'R' }}</b>
+        </div>
+        <div>
+          Uncleared:
+          <b>{{ account.clearedBalance - account.balance | currency: 'R' }} </b>
+        </div>
+        <div>
+          Working: <b>{{ account.balance | currency: 'R' }}</b>
+        </div>
 
-      <button
-        *ngIf="account"
-        mat-icon-button
-        color="accent"
-        (click)="openAccountDialog()"
-      >
-        <mat-icon>settings</mat-icon>
-      </button>
-
-      <div *ngIf="account">
-        Filtered on Account: <b>{{ account.name }}</b> : Cleared:
-        <b>{{ account.clearedBalance | currency: 'R' }}</b> Uncleared:
-        <b>{{ account.clearedBalance - account.balance | currency: 'R' }} </b>=
-        Working: <b>{{ account.balance | currency: 'R' }}</b>
+        <div>
+          <mat-slide-toggle
+            color="primary"
+            [(ngModel)]="showCleared"
+            (change)="onFilterClearedToggle()"
+          >
+            Show Cleared
+          </mat-slide-toggle>
+        </div>
+        <div>
+          <button
+            *ngIf="account"
+            mat-stroked-button
+            color="accent"
+            (click)="openDialog()"
+          >
+            <mat-icon>import_export</mat-icon> Import
+          </button>
+        </div>
+        <div>
+          <button
+            *ngIf="account"
+            mat-stroked-button
+            color="accent"
+            (click)="openAccountDialog()"
+          >
+            <mat-icon>settings</mat-icon> Settings
+          </button>
+        </div>
       </div>
     </mat-card-content>
   </mat-card>
@@ -62,12 +79,6 @@
           <mat-header-cell *matHeaderCellDef>Payee</mat-header-cell>
           <mat-cell *matCellDef="let transaction" class="payee">{{
             transaction.payee
-          }}</mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="account">
-          <mat-header-cell *matHeaderCellDef>Account</mat-header-cell>
-          <mat-cell *matCellDef="let transaction">{{
-            transaction.accountDisplayName
           }}</mat-cell>
         </ng-container>
         <ng-container matColumnDef="category">
@@ -98,12 +109,6 @@
             >
             </mat-checkbox>
           </mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="matched">
-          <mat-header-cell *matHeaderCellDef>Matched</mat-header-cell>
-          <mat-cell *matCellDef="let transaction" style="text-align: right">{{
-            transaction.matched?.trnamt
-          }}</mat-cell>
         </ng-container>
         <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
         <mat-row
