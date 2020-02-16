@@ -1,20 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { DefaultDataService, HttpUrlGenerator, Logger } from '@ngrx/data';
-
 import { Observable, of, from } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import {
-  TransactionID,
-  TransactionTypes,
-  TransactionClass
-} from 'app/shared/transaction';
+import { Transaction } from 'app/shared/transaction';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { UserService } from 'app/shared/user.service';
 import { Update } from '@ngrx/entity';
 
 @Injectable()
-export class TransactionDataService extends DefaultDataService<TransactionID> {
+export class TransactionDataService extends DefaultDataService<Transaction> {
   activeBudgetID: string;
 
   constructor(
@@ -24,49 +19,74 @@ export class TransactionDataService extends DefaultDataService<TransactionID> {
     logger: Logger,
     private userService: UserService
   ) {
-    super('ITransaction', http, httpUrlGenerator);
-    logger.log('Created custom Transaction EntityDataService');
+    super('Transaction', http, httpUrlGenerator);
     this.userService.getProfile().subscribe(profile => {
       this.activeBudgetID = profile.activeBudget;
-      logger.log(
-        'TransactionService -> this.activeBudgetID:',
-        this.activeBudgetID
-      );
     });
   }
 
-  getAll(): Observable<TransactionID[]> {
+  getAll(): Observable<Transaction[]> {
     const transRef = '/budgets/' + this.activeBudgetID + '/transactions';
-    return this.db.collection<TransactionID>(transRef).valueChanges();
+    return this.db
+      .collection<Transaction>(transRef)
+      .snapshotChanges()
+      .pipe(
+        map(actions =>
+          actions.map(a => {
+            const data = a.payload.doc.data() as Transaction;
+            const id = a.payload.doc.id;
+            // convert timestamp object from firebase to date object if object
+            const dateObj = a.payload.doc.get('date');
+            if (typeof dateObj === 'string') {
+              data.date = new Date(dateObj);
+            } else if (typeof dateObj === 'object') {
+              data.date = dateObj.toDate();
+            }
+            return { ...data, id };
+          })
+        )
+      );
   }
 
-  getById(id: string): Observable<TransactionID> {
+  getById(id: string): Observable<Transaction> {
     return this.db
-      .doc<TransactionID>(
+      .doc<Transaction>(
         'budgets/' + this.activeBudgetID + '/transactions/' + id
       )
-      .valueChanges();
+      .snapshotChanges()
+      .pipe(
+        map(a => {
+          const data = a.payload.data() as Transaction;
+          // convert timestamp object from firebase to date object if object
+          const dateObj = a.payload.get('date');
+          if (typeof dateObj === 'string') {
+            data.date = new Date(dateObj);
+          } else if (typeof dateObj === 'object') {
+            data.date = dateObj.toDate();
+          }
+          return { ...data, id };
+        })
+      );
   }
 
-  getWithQuery(params: any): Observable<TransactionID[]> {
+  getWithQuery(params: any): Observable<Transaction[]> {
+    console.log('SFG: TransactionDataService -> params', params);
     const transRef = '/budgets/' + this.activeBudgetID + '/transactions';
     // should not display cleared transactions by default
-    const collection = this.db.collection<TransactionID>(transRef, ref => {
+    const collection = this.db.collection<Transaction>(transRef, ref => {
       let query: firebase.firestore.Query = ref;
-      if (!params.cleared) {
+      if (params.cleared === 'false') {
         query = query.where('cleared', '==', false);
       }
       if (params.accountId) {
-        query = query.where('account.accountId', '==', params.accountId);
+        query = query.where('account.id', '==', params.accountId);
       }
       if (params.categoryId) {
         query = query.where(
-          'categories.' + params.categoryId + '.categoryName',
+          'categories.' + params.categoryId + '.name',
           '>=',
           ''
         );
-      } else {
-        query = query.orderBy('date', 'desc');
       }
       return query;
     });
@@ -74,7 +94,7 @@ export class TransactionDataService extends DefaultDataService<TransactionID> {
     return collection.snapshotChanges().pipe(
       map(actions =>
         actions.map(a => {
-          const data = a.payload.doc.data() as TransactionID;
+          const data = a.payload.doc.data() as Transaction;
           const id = a.payload.doc.id;
           // convert timestamp object from firebase to date object if object
           const dateObj = a.payload.doc.get('date');
@@ -83,41 +103,25 @@ export class TransactionDataService extends DefaultDataService<TransactionID> {
           } else if (typeof dateObj === 'object') {
             data.date = dateObj.toDate();
           }
-          data.accountDisplayName = data.account.accountName;
-          for (const prop in data.categories) {
-            if (data.categories.hasOwnProperty(prop)) {
-              data.categoryDisplayName = data.categories[prop].categoryName;
-            }
-          }
-          if (data.type === TransactionTypes.INCOME) {
-            data.in = data.amount;
-          } else {
-            // display here needs to be a positive number
-            data.out = Math.abs(data.amount);
-          }
           return { ...data, id };
         })
       ),
-      tap(response => {
-        console.log('Data Changes:', response, params);
-      })
+      tap(transactions => console.log('Transactions: ', transactions))
     );
   }
 
-  add(transaction: TransactionID): Observable<TransactionID> {
+  add(transaction: Transaction): Observable<Transaction> {
     const colRef = '/budgets/' + this.activeBudgetID + '/transactions';
     return from(this.db.collection(colRef).add(transaction)).pipe(
-      map(docRef => ({ id: docRef.id, ...transaction } as TransactionID))
+      map(docRef => ({ id: docRef.id, ...transaction } as Transaction))
     );
   }
 
-  update(transaction: Update<TransactionID>): Observable<TransactionID> {
+  update(transaction: Update<Transaction>): Observable<Transaction> {
     const docRef =
       '/budgets/' + this.activeBudgetID + '/transactions/' + transaction.id;
     return from(this.db.doc(docRef).update({ ...transaction.changes })).pipe(
-      map(
-        () => ({ id: transaction.id, ...transaction.changes } as TransactionID)
-      )
+      map(() => ({ id: transaction.id, ...transaction.changes } as Transaction))
     );
   }
 }

@@ -3,17 +3,19 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { DataSource } from '@angular/cdk/collections';
-import { TransactionID } from '../shared/transaction';
+import { Transaction } from '../shared/transaction';
 import { TransactionService } from './transaction.service';
 import { UserService } from '../shared/user.service';
 import { BehaviorSubject, Subject, Observable } from 'rxjs';
-import { IAccount } from 'app/shared/account';
+import { IAccount, IAccountId } from 'app/shared/account';
 import { ImportComponent } from './import/import.component';
 import { takeUntil, take, tap } from 'rxjs/operators';
 import { AccountComponent } from 'app/accounts/account/account.component';
 import { TransactionComponent } from './transaction/transaction.component';
 import { AccountService } from 'app/accounts/account.service';
 import { QueryParams } from '@ngrx/data';
+import { TransactionDataService } from 'app/store/entity/transaction-data-service';
+import { CategoryId } from 'app/categories/category/category.component';
 
 @Component({
   templateUrl: 'transactions.component.html',
@@ -26,15 +28,15 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   userId: string;
   budgetId: string;
   accountId: string;
-  account: IAccount;
+  account: IAccountId;
   categoryId: string;
   displayedColumns = ['date', 'payee', 'category', 'out', 'in', 'cleared'];
   dataSource: TransactionDataSource;
-  newTransaction: TransactionID;
+  newTransaction: Transaction;
   showCleared = false;
   showTransaction = false;
 
-  selectedTransaction: TransactionID;
+  selectedTransaction: Transaction;
   loading$: Observable<boolean>;
 
   constructor(
@@ -43,7 +45,8 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     public dialog: MatDialog,
-    public accountService: AccountService
+    public accountService: AccountService,
+    public transData: TransactionDataService
   ) {
     this.loading$ = this.transService.loading$;
   }
@@ -55,6 +58,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
       .subscribe(profileRead => {
         this.budgetId = profileRead.activeBudget;
         this.accountId = null;
+        this.renameTransactions();
         this.dataSource = new TransactionDataSource(
           this.transService,
           profileRead.activeBudget
@@ -64,11 +68,11 @@ export class TransactionsComponent implements OnInit, OnDestroy {
           .subscribe(params => {
             if (params.get('accountId')) {
               this.accountId = params.get('accountId');
-              this.accountService
-                .getByKey(params.get('accountId'))
-                .subscribe(account => {
-                  this.account = account;
-                });
+              this.accountService.collection$.subscribe(collection => {
+                if (collection.entities[this.accountId]) {
+                  this.account = collection.entities[this.accountId];
+                }
+              });
             }
             if (params.get('categoryId')) {
               this.categoryId = params.get('categoryId');
@@ -90,6 +94,12 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     this.unsubscribe.complete();
   }
 
+  renameTransactions() {
+    this.transService.getAll().pipe(take(1)).subscribe(async transactions => {
+      // this.transService.batchUpdateInterface(transactions, this.budgetId);
+    })
+  }
+
   openTransactionModal() {
     const dialogConfig = {
       width: '80vw',
@@ -107,7 +117,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
       data: {
         accountId: this.accountId,
         budgetId: this.budgetId,
-        accountName: this.account.name
+        accountName: this.account
       }
     });
 
@@ -121,7 +131,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
       data: {
         accountId: this.accountId,
         budgetId: this.budgetId,
-        accountName: this.account.name
+        accountName: this.account
       }
     });
 
@@ -138,7 +148,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     this.dataSource.loadTransactions(this.accountId, '' + this.showCleared);
   }
 
-  toggleCleared(transaction: TransactionID) {
+  toggleCleared(transaction: Transaction) {
     transaction.cleared = !transaction.cleared;
     this.transService.updateClearedStatus(this.budgetId, transaction);
   }
@@ -147,27 +157,59 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     this.selectedTransaction = row;
     this.router.navigate(['/app/transactions', row.id]);
   }
+
+  displayCategories(categories: { [categoryId: string]: Partial<CategoryId>}) {
+    const keys = Object.keys(categories);
+    if (keys.length > 1) {
+      return 'Split';
+    } else if (!categories[keys[0]]) {
+      return 'No Category Specified';
+    } else {
+      return categories[keys[0]].name;
+    }
+  }
 }
 
 export class TransactionDataSource extends DataSource<any> {
   private transactionsSubject = new BehaviorSubject<any>([]);
-  private transactions: Observable<TransactionID[]>;
+  private transactions: Observable<Transaction[]>;
   private loading: Observable<boolean>;
+  private unsubscribe = new Subject<boolean>();
 
   constructor(
     private transService: TransactionService,
     private budgetId: string
   ) {
     super();
-    this.transactions = this.transService.filteredEntities$;
+    this.transactions = this.transService.filteredEntities$.pipe(
+      tap(this.calculateTotal)
+    );
     this.loading = this.transService.loading$;
   }
+
+  calculateTotal = (transactions: Transaction[]) => {
+    if (transactions.length > 0) {
+      const total = transactions.reduce((acc, curVal) => {
+        acc += curVal.amount;
+        return acc;
+      }, 0);
+      const totalCleared = transactions.reduce((acc, curVal) => {
+        acc += curVal.cleared ? curVal.amount : 0;
+        return acc;
+      }, 0);
+      console.log('Total: ', total);
+      console.log('Total Cleared: ', totalCleared);
+    }
+  };
 
   connect() {
     return this.transactions;
   }
 
-  disconnect() {}
+  disconnect() {
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
+  }
 
   loadTransactions(
     accountId: string,
@@ -184,10 +226,7 @@ export class TransactionDataSource extends DataSource<any> {
       filter.cleared = 'true';
     }
     this.transService.setFilter(filter);
-    this.transService.getWithQuery(filter).pipe(
-      tap(response => {
-        console.log('Data Get:', response, filter);
-      })
-    );
+    this.transService.clearCache();
+    this.transService.getWithQuery(filter).pipe(takeUntil(this.unsubscribe));
   }
 }

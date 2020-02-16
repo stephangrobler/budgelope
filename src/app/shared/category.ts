@@ -1,10 +1,5 @@
 
 export interface Category {
-  name: string;
-}
-
-export class Category implements Category {
-  $key?: string;
   id?: string;
   name: string;
   parent: string;
@@ -16,4 +11,9 @@ export class Category implements Category {
   allocations?: { [s: string]: { actual: number, planned: number} };
 }
 
-export interface CategoryId extends Category { id: string };
+export interface TransactionCategory {
+  name: string;
+  in: number;
+  out: number;
+}
+

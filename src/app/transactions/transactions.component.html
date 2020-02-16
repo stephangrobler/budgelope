@@ -1,4 +1,5 @@
 <div fxLayout="column" fxLayoutGap="10px" fxFlexFill style="padding: 10px">
+  
   <button
     mat-mini-fab
     class="add-transaction-button"
@@ -9,11 +10,12 @@
   </button>
   <div class="page-header">
     <h3>
-      Transactions <span *ngIf="account">for {{ account.name }}</span>
+      Transactions
+      <span *ngIf="account">for {{ account.name }}</span>
     </h3>
     <app-transaction *ngIf="showTransaction"></app-transaction>
   </div>
-  <p *ngIf="loading$ | async">Loading...</p>
+  
   <mat-card>
     <mat-card-content>
       <div
@@ -28,7 +30,9 @@
         </div>
         <div>
           Uncleared:
-          <b>{{ account.clearedBalance - account.balance | currency: 'R' }} </b>
+          <b
+            >{{ account.clearedBalance - account.balance | currency: 'R' }}
+          </b>
         </div>
         <div>
           Working: <b>{{ account.balance | currency: 'R' }}</b>
@@ -48,7 +52,7 @@
             *ngIf="account"
             mat-stroked-button
             color="accent"
-            (click)="openDialog()"
+            (click)="openImportDialog()"
           >
             <mat-icon>import_export</mat-icon> Import
           </button>
@@ -68,6 +72,10 @@
   </mat-card>
   <mat-card class="transaction-table">
     <mat-card-content>
+      <div *ngIf="loading$ | async">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      </div>
+
       <mat-table #table [dataSource]="dataSource">
         <ng-container matColumnDef="date">
           <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
@@ -83,21 +91,28 @@
         </ng-container>
         <ng-container matColumnDef="category">
           <mat-header-cell *matHeaderCellDef>Category</mat-header-cell>
-          <mat-cell *matCellDef="let transaction">{{
-            transaction.categoryDisplayName
-          }}</mat-cell>
+          <mat-cell *matCellDef="let transaction">
+            <span *ngIf="transaction.categories">
+              {{ displayCategories(transaction.categories) }}
+            </span>
+            
+          </mat-cell>
         </ng-container>
         <ng-container matColumnDef="out">
           <mat-header-cell *matHeaderCellDef>Out</mat-header-cell>
-          <mat-cell *matCellDef="let transaction" style="text-align: right">{{
-            transaction.out | number: '1.2'
-          }}</mat-cell>
+          <mat-cell *matCellDef="let transaction" style="text-align: right">
+            <span *ngIf="transaction.amount < 0">
+              {{ transaction.amount | number: '1.2' }}
+            </span>
+          </mat-cell>
         </ng-container>
         <ng-container matColumnDef="in">
           <mat-header-cell *matHeaderCellDef>In</mat-header-cell>
-          <mat-cell *matCellDef="let transaction" style="text-align: right">{{
-            transaction.in | number: '1.2'
-          }}</mat-cell>
+          <mat-cell *matCellDef="let transaction" style="text-align: right">
+            <span *ngIf="transaction.amount > 0">
+              {{ transaction.amount | number: '1.2' }}
+            </span>
+          </mat-cell>
         </ng-container>
         <ng-container matColumnDef="cleared">
           <mat-header-cell *matHeaderCellDef>Cleared</mat-header-cell>

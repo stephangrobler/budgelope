@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { CategoryId } from '../shared/category';
+import { Category } from '../shared/category';
 import {
   EntityCollectionServiceBase,
   EntityCollectionServiceElementsFactory
 } from '@ngrx/data';
 
 @Injectable()
-export class CategoryService extends EntityCollectionServiceBase<CategoryId> {
+export class CategoryService extends EntityCollectionServiceBase<Category> {
   constructor(serviceElementsFactory: EntityCollectionServiceElementsFactory) {
     super('Category', serviceElementsFactory);
   }

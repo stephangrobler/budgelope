@@ -1,13 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-
 import { AngularFirestore } from '@angular/fire/firestore';
-
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-
 import { AngularFireAuth } from '@angular/fire/auth';
-
 import { Category } from '../../shared/category';
 import { UserService } from '../../shared/user.service';
 
@@ -28,7 +24,7 @@ export class CategoryComponent implements OnInit {
   theUserId: string;
   activeBudget: string;
   categoryId: string;
-  category: Category = new Category();
+  category = {} as Category;
   profile: any;
 
   constructor(

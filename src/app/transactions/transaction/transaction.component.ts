@@ -6,10 +6,10 @@ import { AngularFirestoreDocument } from '@angular/fire/firestore';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { TransactionClass, TransactionID } from '../../shared/transaction';
-import { Account } from '../../shared/account';
+import { Transaction, TransactionTypes } from '../../shared/transaction';
+import { Account, IAccountId } from '../../shared/account';
 import { Budget } from '../../shared/budget';
-import { CategoryId } from '../../shared/category';
+import { Category } from '../../shared/category';
 import { BudgetService } from '../../budgets/budget.service';
 import { UserService } from '../../shared/user.service';
 import { TransactionService } from '../transaction.service';
@@ -32,8 +32,8 @@ export class TransactionComponent implements OnInit, OnDestroy {
   activeBudget: Budget;
   item: AngularFirestoreDocument<any>;
   accounts: Account[];
-  categories: CategoryId[];
-  systemCategories: CategoryId[];
+  categories: Category[];
+  systemCategories: Category[];
   selectedAccount: Account;
   transferBox = false;
   savingInProgress = false;
@@ -131,7 +131,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
         );
 
         const selectedAccount = this.accounts.filter(
-          account => transaction.account.accountId === account.id
+          account => transaction.account.id === account.id
         )[0];
 
         this.transactionForm.get('account').setValue(selectedAccount);
@@ -227,7 +227,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
    * @param form FormGroup
    */
   update(form: FormGroup) {
-    const transaction = { ...form.value } as TransactionID;
+    const transaction = { ...form.value } as Transaction;
 
     // id is needed to update correctly
     transaction.id = this.transactionId;
@@ -249,24 +249,15 @@ export class TransactionComponent implements OnInit, OnDestroy {
    * @param form FormGroup
    */
   async transfer(form: FormGroup) {
-    const fromTransaction = new TransactionClass(form.value);
-    const toTransaction = new TransactionClass(form.value);
+    const fromTransaction = {...form.value} as Transaction;
+    const toTransaction = {...form.value} as Transaction;
     const fromAccount = form.get('account').value;
     const toAccount = form.get('transferAccount').value;
-
-    const toCategory = this.systemCategories.find(
-      cat => cat.name === 'Transfer In'
-    );
-    const fromCategory = this.systemCategories.find(
-      cat => cat.name === 'Transfer Out'
-    );
 
     // first the from account transaction
     const from = await this.fromTransaction(
       fromTransaction,
-      fromAccount,
-      fromCategory,
-      toAccount
+      fromAccount
     );
 
     // switch accounts to let the correct things get updated
@@ -276,24 +267,18 @@ export class TransactionComponent implements OnInit, OnDestroy {
   }
 
   private toTransaction(
-    toTransaction: TransactionID,
+    toTransaction: Transaction,
     toAccount: any,
     fromAccount: any
   ) {
-    toTransaction.account = {
-      accountId: toAccount.id,
-      accountName: toAccount.name
-    };
     toTransaction.transferAccount = {
-      accountId: fromAccount.id,
-      accountName: fromAccount.name
+      id: fromAccount.id,
+      name: fromAccount.name
     };
-    toTransaction.accountDisplayName = toTransaction.account.accountName;
     toTransaction.categories = {};
     toTransaction.payee = fromAccount.name;
-    toTransaction.categoryDisplayName = 'Transfer from ' + fromAccount.name;
-    toTransaction.amount = toTransaction.transferAmount;
-    toTransaction.in = toTransaction.transferAmount;
+    toTransaction.type = TransactionTypes.INCOME;
+    toTransaction.cleared = false;
     return this.transactionService.createTransaction(
       toTransaction,
       this.activeBudget.id
@@ -301,25 +286,12 @@ export class TransactionComponent implements OnInit, OnDestroy {
   }
 
   private fromTransaction(
-    fromTransaction: TransactionClass,
-    fromAccount: any,
-    fromCategory: CategoryId,
-    toAccount: any
+    fromTransaction: Transaction,
+    toAccount: IAccountId
   ) {
-    fromTransaction.account = {
-      accountId: fromAccount.id,
-      accountName: fromAccount.name
-    };
-    fromTransaction.accountDisplayName = fromTransaction.account.accountName;
-    fromTransaction.categories[fromCategory.id] = {
-      categoryName: fromCategory.name,
-      in: 0,
-      out: fromTransaction.transferAmount
-    };
-    fromTransaction.payee = toAccount.name;
-    fromTransaction.categoryDisplayName = 'Transfer to ' + toAccount.name;
-    fromTransaction.amount = 0 - fromTransaction.transferAmount;
-    fromTransaction.out = 0 - fromTransaction.transferAmount;
+    fromTransaction.payee = 'Transfer to ' + toAccount.name;
+    fromTransaction.type = TransactionTypes.EXPENSE;
+    fromTransaction.cleared = false;
     return this.transactionService.createTransaction(
       fromTransaction,
       this.activeBudget.id
@@ -327,26 +299,17 @@ export class TransactionComponent implements OnInit, OnDestroy {
   }
 
   create(form: FormGroup) {
-    const transaction = new TransactionClass(form.value);
-    transaction.account = {
-      accountId: form.value.account.id,
-      accountName: form.value.account.name
-    };
-    transaction.accountDisplayName = transaction.account.accountName;
-    // transaction.calculateAmount;
+    const transaction = {...form.value};
 
-    if (form.value.categories.length > 1) {
-      transaction.categoryDisplayName = 'Split';
-    } else {
-      transaction.categoryDisplayName = form.value.categories[0].category.name;
-    }
-
+    console.log('SFG: TransactionComponent -> create -> transaction', transaction);
     // calculate the amount and set the in or out values
     transaction.amount = this.transactionService.calculateAmount(transaction);
     if (transaction.amount > 0) {
       transaction.in = transaction.amount;
+      transaction.type = TransactionTypes.INCOME;
     } else {
       transaction.out = Math.abs(transaction.amount);
+      transaction.type = TransactionTypes.EXPENSE;
     }
 
     this.transactionService

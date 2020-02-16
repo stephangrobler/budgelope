@@ -25,6 +25,7 @@ export class AccountService extends EntityCollectionServiceBase<IAccountId> {
       take(1),
       switchMap(account => {
         const newBalance = account.clearedBalance + clearedAmount;
+        console.log('SFG: AccountService -> newBalance', newBalance);
         return this.update({ ...account, clearedBalance: newBalance });
       })
     );
