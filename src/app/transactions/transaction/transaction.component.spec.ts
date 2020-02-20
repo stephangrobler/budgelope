@@ -229,49 +229,7 @@ describe('TransactionComponent', () => {
     });
   });
 
-  it('should call the transfer function with a from Transaction of values', () => {
-    categoryServiceStub.getWithQuery.and.returnValue(
-      of([
-        { id: 'cat1', name: 'Transfer In', type: 'system' },
-        { id: 'cat2', name: 'Transfer Out', type: 'system' }
-      ])
-    );
-
-    const fixture = TestBed.createComponent(TransactionComponent);
-    fixture.detectChanges();
-    const comp = fixture.debugElement.componentInstance;
-    const form = fixture.componentInstance.transactionForm;
-    form.get('account').setValue({ id: 'acc1', name: 'acc1Name' });
-    form
-      .get('transferAccount')
-      .setValue({ id: 'acc2', name: 'Test Account 2' });
-    form.get('transferAmount').setValue(500);
-    form.get('transfer').setValue(true);
-
-    const transaction = new TransactionClass(form.value);
-    transaction.account = {
-      id: 'acc1',
-      name: 'acc1Name'
-    };
-    transaction.amount = -500;
-
-    comp.transfer(form);
-
-    expect(transactionServiceStub.createTransaction).toHaveBeenCalledWith(
-      jasmine.objectContaining({
-        payee: 'Transfer to acc1Name'
-      }),
-      '54321'
-    );
-  });
-
   it('should call the transfer function with a to Transaction of values', (done: DoneFn) => {
-    categoryServiceStub.getWithQuery.and.returnValue(
-      of([
-        { id: 'cat1', name: 'Transfer In', type: 'system' },
-        { id: 'cat2', name: 'Transfer Out', type: 'system' }
-      ])
-    );
 
     const fixture = TestBed.createComponent(TransactionComponent);
     fixture.detectChanges();
@@ -283,23 +241,39 @@ describe('TransactionComponent', () => {
       .setValue({ id: 'acc2', name: 'Test Account 2' });
     form.get('transferAmount').setValue(500);
     form.get('transfer').setValue(true);
-
-    const transaction = new TransactionClass(form.value);
-    transaction.account = {
-      id: 'acc2',
-      name: 'Test Account 2'
-    };
-    transaction.transferAccount = {
-      id: 'acc1',
-      name: 'acc1Name'
-    };
-
-    transaction.amount = 500;
 
     comp.transfer(form).then(() => {
       expect(transactionServiceStub.createTransaction).toHaveBeenCalledWith(
         jasmine.objectContaining({
-          payee: 'Transfer from acc1Name'
+          account: { id: 'acc2', name: 'Test Account 2' },
+          payee: 'Transfer from acc1Name',
+          amount: 500
+        }),
+        '54321'
+      );
+      done();
+    });
+  });
+
+  it('should call the transfer function with a from Transaction of values', (done: DoneFn) => {
+    const fixture = TestBed.createComponent(TransactionComponent);
+    fixture.detectChanges();
+    const comp = fixture.debugElement.componentInstance;
+    const form = fixture.componentInstance.transactionForm;
+    form.get('account').setValue({ id: 'acc1', name: 'acc1Name' });
+    form
+      .get('transferAccount')
+      .setValue({ id: 'acc2', name: 'Test Account 2' });
+    form.get('transferAmount').setValue(500);
+    form.get('transfer').setValue(true);
+
+
+    comp.transfer(form).then(() => {
+      expect(transactionServiceStub.createTransaction).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          account: { id: 'acc1', name: 'acc1Name' },
+          payee: 'Transfer to Test Account 2',
+          amount: -500
         }),
         '54321'
       );

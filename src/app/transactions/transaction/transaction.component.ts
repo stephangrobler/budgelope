@@ -249,43 +249,58 @@ export class TransactionComponent implements OnInit, OnDestroy {
    * @param form FormGroup
    */
   async transfer(form: FormGroup) {
-    const fromTransaction = { ...form.value } as Transaction;
-    const toTransaction = { ...form.value } as Transaction;
+    const transaction = { ...form.value } as Transaction;
+    transaction.amount = form.get('transferAmount').value;
+    delete(transaction['transferAccount']);
+    delete(transaction['transferAmount']);
+    delete(transaction['categories']);
+
     const fromAccount = form.get('account').value;
     const toAccount = form.get('transferAccount').value;
 
     // first the from account transaction
-    const from = await this.fromTransaction(fromTransaction, fromAccount);
+    const from = await this.fromTransaction(transaction, fromAccount, toAccount.name);
 
     // switch accounts to let the correct things get updated
-    const to = await this.toTransaction(toTransaction, toAccount, fromAccount);
+    const to = await this.toTransaction(transaction, toAccount, fromAccount.name);
     this.openSnackBar('Transfer Successfull.');
-    console.log('SFG: TransactionComponent -> transfer -> from, to', from, to);
   }
 
   private toTransaction(
-    toTransaction: Transaction,
-    toAccount: any,
-    fromAccount: any
+    transaction: Transaction,
+    toAccount: IAccountId,
+    fromAccountName: string
   ) {
-    toTransaction.transferAccount = {
-      id: fromAccount.id,
-      name: fromAccount.name
-    };
-    toTransaction.categories = {};
-    toTransaction.payee = 'Transfer from ' + fromAccount.name;
-    toTransaction.type = TransactionTypes.INCOME;
-    toTransaction.cleared = false;
+    const toTransaction = {
+      ...transaction,
+      account: {
+        id: toAccount.id,
+        name: toAccount.name
+      },
+      categories: {},
+      amount: Math.abs(transaction.amount),
+      payee: 'Transfer from ' + fromAccountName,
+      type: TransactionTypes.INCOME,
+      cleared: false
+    }
     return this.transactionService.createTransaction(
       toTransaction,
       this.activeBudget.id
     );
   }
 
-  private fromTransaction(fromTransaction: Transaction, toAccount: IAccountId) {
-    fromTransaction.payee = 'Transfer to ' + toAccount.name;
-    fromTransaction.type = TransactionTypes.EXPENSE;
-    fromTransaction.cleared = false;
+  private fromTransaction(transaction: Transaction, fromAccount: IAccountId, toAccountName: string) {
+    const fromTransaction = {
+      ...transaction,
+      account: {
+        id: fromAccount.id,
+        name: fromAccount.name
+      },
+      amount: -Math.abs(transaction.amount),
+      payee: 'Transfer to ' + toAccountName,
+      type: TransactionTypes.EXPENSE,
+      cleared: false,
+    };
     return this.transactionService.createTransaction(
       fromTransaction,
       this.activeBudget.id
@@ -304,10 +319,6 @@ export class TransactionComponent implements OnInit, OnDestroy {
         return map;
       },
       {}
-    );
-    console.log(
-      'SFG: TransactionComponent -> create -> transaction',
-      transaction
     );
     // calculate the amount and set the in or out values
     transaction.amount = this.transactionService.calculateAmount(transaction);
