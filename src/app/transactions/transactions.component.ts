@@ -14,7 +14,6 @@ import { AccountComponent } from 'app/accounts/account/account.component';
 import { TransactionComponent } from './transaction/transaction.component';
 import { AccountService } from 'app/accounts/account.service';
 import { QueryParams } from '@ngrx/data';
-import { TransactionDataService } from 'app/store/entity/transaction-data-service';
 import { CategoryId } from 'app/categories/category/category.component';
 
 @Component({
@@ -46,7 +45,6 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     public dialog: MatDialog,
     public accountService: AccountService,
-    public transData: TransactionDataService
   ) {
     this.loading$ = this.transService.loading$;
   }

@@ -17,10 +17,13 @@ describe('TransactionsComponent', () => {
   let activatedRouteStub;
 
   const TransactionServiceStub = jasmine.createSpyObj('TransactionService', [
+    'getAll',
     'getWithQuery',
     'getByKey',
-    'setFilter'
+    'setFilter',
+    'clearCache'
   ]);
+  TransactionServiceStub.getAll.and.returnValue(of([]));
   TransactionServiceStub.getWithQuery.and.returnValue(of([]));
   TransactionServiceStub.filteredEntities$ = of([]);
 
@@ -99,6 +102,6 @@ describe('TransactionsComponent', () => {
     const fixture = TestBed.createComponent(TransactionsComponent);
     fixture.detectChanges();
     const compiled = fixture.debugElement.nativeElement;
-    expect(compiled.querySelector('h1').textContent).toContain('Transactions');
+    expect(compiled.querySelector('h3').textContent).toContain('Transactions');
   }));
 });

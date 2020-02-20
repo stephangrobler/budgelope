@@ -5,7 +5,7 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { Account } from '../shared/account';
 import { Category } from '../shared/category';
 import { Budget } from '../shared/budget';
-import { TransactionID, TransactionTypes } from '../shared/transaction';
+import { Transaction, TransactionTypes } from '../shared/transaction';
 import { Observable, of } from 'rxjs';
 import { AccountService } from '../accounts/account.service';
 import { resolve } from 'path';
@@ -29,9 +29,9 @@ describe('Transaction Service', () => {
 
   beforeEach(() => {
     account = new Account();
-    category = new Category();
+    category = {} as Category;
     budget = new Budget();
-    transaction = {} as TransactionID;
+    transaction = {} as Transaction;
 
     dbMock = jasmine.createSpyObj('AngularFirestore', [
       'collection',
@@ -127,19 +127,18 @@ describe('Transaction Service', () => {
 
   it('should create a transaction with the correct income transaction', (done: DoneFn) => {
     transaction.account = {
-      accountId: 'acc1',
-      accountName: 'test'
+      id: 'acc1',
+      name: 'test'
     };
 
     transaction.categories = [
       {
-        category: category,
+        category: {name: 'income'},
         in: 0,
         out: 100
       }
     ];
     transaction.amount = 500;
-    transaction.in = 500;
     transaction.date = new Date('2018-01-01');
 
     budget.allocations = {};
@@ -169,19 +168,18 @@ describe('Transaction Service', () => {
 
   it('should create a transaction with the correct expense transaction', (done: DoneFn) => {
     transaction.account = {
-      accountId: 'acc1',
-      accountName: 'test'
+      id: 'acc1',
+      name: 'test'
     };
 
     transaction.categories = [
       {
-        category: category,
+        category: {name: 'Groceries'},
         in: 0,
         out: 500
       }
     ];
     transaction.amount = -500;
-    transaction.out = 500;
     transaction.date = new Date('2018-01-01');
 
     service.createTransaction(transaction, 'CurrentBudget').then(
@@ -208,7 +206,7 @@ describe('Transaction Service', () => {
     // arrange
     spyOn(service, 'getByKey').and.returnValue(
       of({
-        account: { accountId: 'TEST_ACC' },
+        account: { id: 'TEST_ACC' },
         categories: { TEST_CAT: { in: 0, out: 500 } },
         amount: -500,
         date: '2018-12-01'
@@ -280,31 +278,27 @@ describe('Transaction Service', () => {
 
       const day = new Date('2019-03-04');
 
-      const currentTransactions: TransactionID[] = [
+      const currentTransactions: Transaction[] = [
         {
           id: '001',
           date: day,
           amount: -50.33,
-          accountDisplayName: 'Test',
-          categoryDisplayName: '',
-          in: 0,
-          out: -50.33,
           account: {
-            accountId: 'ACC001',
-            accountName: 'TESTACCOUNT'
+            id: 'ACC001',
+            name: 'TESTACCOUNT'
           },
           cleared: false,
           type: TransactionTypes.EXPENSE,
           categories: {
             TESTID001: {
-              categoryName: 'TEST',
+              name: 'TEST',
               in: 0,
               out: -50.33
             }
           },
           memo: '',
           payee: ''
-        } as TransactionID
+        } as Transaction
       ];
 
       // action
@@ -322,9 +316,9 @@ describe('Transaction Service', () => {
     it('should create a batched update of the matched transactions', () => {
       // arrange
       const transactions = [
-        <TransactionID>{ id: 'TEST001' },
-        <TransactionID>{ id: 'TEST002' },
-        <TransactionID>{ id: 'TEST003' }
+        <Transaction>{ id: 'TEST001' },
+        <Transaction>{ id: 'TEST002' },
+        <Transaction>{ id: 'TEST003' }
       ];
 
       // action
@@ -446,33 +440,33 @@ describe('Transaction Service', () => {
       newTransaction = {
         id: 'TESTTRANSACTION',
         account: {
-          accountId: 'ACC001',
-          accountName: 'TestAccount'
+          id: 'ACC001',
+          name: 'TestAccount'
         },
         amount: -500,
         categories: {
-          TEST_CAT: { in: 0, out: 500, categoryName: 'TEST_CAT' }
+          TEST_CAT: { in: 0, out: 500, name: 'TEST_CAT' }
         },
         cleared: false,
         payee: 'Test',
         type: TransactionTypes.EXPENSE,
         date
-      } as TransactionID;
+      } as Transaction;
       currentTransaction = {
         id: 'TESTTRANSACTION',
         account: {
-          accountId: 'ACC001',
-          accountName: 'TestAccount'
+          id: 'ACC001',
+          name: 'TestAccount'
         },
         amount: -500,
         categories: {
-          TEST001: { in: 0, out: 500, categoryName: 'TEST001' }
+          TEST001: { in: 0, out: 500, name: 'TEST001' }
         },
         cleared: false,
         payee: 'Someone',
         type: TransactionTypes.EXPENSE,
         date
-      } as TransactionID;
+      } as Transaction;
 
       ecsebMock = {
         add: () => of({}),
@@ -522,8 +516,8 @@ describe('Transaction Service', () => {
     it('should update the account balance if account changed and is expense type', (done: DoneFn) => {
       // arrange
       newTransaction.account = {
-        accountId: 'ACC002',
-        accountName: 'TestAccount002'
+        id: 'ACC002',
+        name: 'TestAccount002'
       };
       newTransaction.amount = -500;
       spyOn(service, 'getByKey').and.returnValue(of(currentTransaction));
@@ -542,8 +536,8 @@ describe('Transaction Service', () => {
     it('should update the account balance if amount changed', (done: DoneFn) => {
       // arrange
       newTransaction.account = {
-        accountId: 'ACC001',
-        accountName: 'TestAccount'
+        id: 'ACC001',
+        name: 'TestAccount'
       };
       newTransaction.amount = 500;
       spyOn(service, 'getByKey').and.returnValue(of(currentTransaction));
@@ -562,7 +556,7 @@ describe('Transaction Service', () => {
     it('should update the categories if the amount has changed', (done: DoneFn) => {
       // arrange
       newTransaction.categories = {
-        TEST001: { categoryName: 'TestCat', in: 0, out: 400 }
+        TEST001: { name: 'TestCat', in: 0, out: 400 }
       };
       newTransaction.amount = 400;
       spyOn(service, 'getByKey').and.returnValue(of(currentTransaction));
@@ -581,7 +575,7 @@ describe('Transaction Service', () => {
     it('should update a transaction if category changed', (done: DoneFn) => {
       // arrange
       newTransaction.categories = {
-        TEST: { categoryName: 'TestCat', in: 0, out: 500 }
+        TEST: { name: 'TestCat', in: 0, out: 500 }
       };
       spyOn(service, 'getByKey').and.returnValue(of(currentTransaction));
       spyOn(service, 'update').and.returnValue(of(currentTransaction));
@@ -612,7 +606,7 @@ describe('Transaction Service', () => {
     it('should not update categories if category ids have not changed', (done: DoneFn) => {
       // arrange
       newTransaction.categories = {
-        TEST001: { categoryName: 'TEST001', in: 0, out: 500 }
+        TEST001: { name: 'TEST001', in: 0, out: 500 }
       };
       spyOn(service, 'getByKey').and.returnValue(of(currentTransaction));
       spyOn(service, 'update').and.returnValue(of(currentTransaction));

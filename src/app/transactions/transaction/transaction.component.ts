@@ -249,16 +249,13 @@ export class TransactionComponent implements OnInit, OnDestroy {
    * @param form FormGroup
    */
   async transfer(form: FormGroup) {
-    const fromTransaction = {...form.value} as Transaction;
-    const toTransaction = {...form.value} as Transaction;
+    const fromTransaction = { ...form.value } as Transaction;
+    const toTransaction = { ...form.value } as Transaction;
     const fromAccount = form.get('account').value;
     const toAccount = form.get('transferAccount').value;
 
     // first the from account transaction
-    const from = await this.fromTransaction(
-      fromTransaction,
-      fromAccount
-    );
+    const from = await this.fromTransaction(fromTransaction, fromAccount);
 
     // switch accounts to let the correct things get updated
     const to = await this.toTransaction(toTransaction, toAccount, fromAccount);
@@ -276,7 +273,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
       name: fromAccount.name
     };
     toTransaction.categories = {};
-    toTransaction.payee = fromAccount.name;
+    toTransaction.payee = 'Transfer from ' + fromAccount.name;
     toTransaction.type = TransactionTypes.INCOME;
     toTransaction.cleared = false;
     return this.transactionService.createTransaction(
@@ -285,10 +282,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
     );
   }
 
-  private fromTransaction(
-    fromTransaction: Transaction,
-    toAccount: IAccountId
-  ) {
+  private fromTransaction(fromTransaction: Transaction, toAccount: IAccountId) {
     fromTransaction.payee = 'Transfer to ' + toAccount.name;
     fromTransaction.type = TransactionTypes.EXPENSE;
     fromTransaction.cleared = false;
@@ -299,24 +293,34 @@ export class TransactionComponent implements OnInit, OnDestroy {
   }
 
   create(form: FormGroup) {
-    const transaction = {...form.value};
-
-    console.log('SFG: TransactionComponent -> create -> transaction', transaction);
+    const transaction = { ...form.value };
+    transaction.categories = (<FormArray>form.get('categories')).value.reduce(
+      (map, curval) => {
+        map[curval.category.id] = {
+          name: curval.category.name,
+          in: curval.in,
+          out: curval.out
+        };
+        return map;
+      },
+      {}
+    );
+    console.log(
+      'SFG: TransactionComponent -> create -> transaction',
+      transaction
+    );
     // calculate the amount and set the in or out values
     transaction.amount = this.transactionService.calculateAmount(transaction);
     if (transaction.amount > 0) {
-      transaction.in = transaction.amount;
       transaction.type = TransactionTypes.INCOME;
     } else {
-      transaction.out = Math.abs(transaction.amount);
       transaction.type = TransactionTypes.EXPENSE;
     }
 
     this.transactionService
       .createTransaction(transaction, this.activeBudget.id)
-      .then(response => {
+      .then(() => {
         const date = transaction.date;
-
         this.transactionForm.reset();
         // set the date again and last used account
         this.transactionForm.get('date').setValue(date);

@@ -30,7 +30,7 @@ import { CategoryService } from '../../categories/category.service';
 
 import { ActivatedRouteStub } from '../../../testing/activate-route-stub';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { Category, CategoryId } from '../../shared/category';
+import { Category } from '../../shared/category';
 import { Budget } from '../../shared/budget';
 import { TransactionClass } from '../../shared/transaction';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -72,12 +72,14 @@ describe('TransactionComponent', () => {
       id: '201805'
     });
     transactionServiceStub = jasmine.createSpyObj('TransactionService', [
+      'getAll',
       'getWithQuery',
       'getByKey',
       'createTransaction',
       'removeTransaction',
       'calculateAmount'
     ]);
+    transactionServiceStub.getAll.and.returnValue(of([]));
     transactionServiceStub.getWithQuery.and.returnValue(of([]));
     transactionServiceStub.createTransaction.and.returnValue(Promise.resolve());
     transactionServiceStub.removeTransaction.and.returnValue({
@@ -248,23 +250,16 @@ describe('TransactionComponent', () => {
 
     const transaction = new TransactionClass(form.value);
     transaction.account = {
-      accountId: 'acc1',
-      accountName: 'acc1Name'
-    };
-    transaction.accountDisplayName = transaction.account.accountName;
-    transaction.categories['cat2'] = {
-      categoryName: 'Transfer Out',
-      in: 0,
-      out: 500
+      id: 'acc1',
+      name: 'acc1Name'
     };
     transaction.amount = -500;
-    transaction.out = -500;
 
     comp.transfer(form);
 
     expect(transactionServiceStub.createTransaction).toHaveBeenCalledWith(
       jasmine.objectContaining({
-        categoryDisplayName: 'Transfer to Test Account 2'
+        payee: 'Transfer to acc1Name'
       }),
       '54321'
     );
@@ -291,27 +286,20 @@ describe('TransactionComponent', () => {
 
     const transaction = new TransactionClass(form.value);
     transaction.account = {
-      accountId: 'acc2',
-      accountName: 'Test Account 2'
+      id: 'acc2',
+      name: 'Test Account 2'
     };
     transaction.transferAccount = {
-      accountId: 'acc1',
-      accountName: 'acc1Name'
-    };
-    transaction.accountDisplayName = transaction.account.accountName;
-    transaction.categories['cat1'] = {
-      categoryName: 'Transfer In',
-      in: 500,
-      out: 0
+      id: 'acc1',
+      name: 'acc1Name'
     };
 
     transaction.amount = 500;
-    transaction.in = 500;
 
     comp.transfer(form).then(() => {
       expect(transactionServiceStub.createTransaction).toHaveBeenCalledWith(
         jasmine.objectContaining({
-          categoryDisplayName: 'Transfer from acc1Name'
+          payee: 'Transfer from acc1Name'
         }),
         '54321'
       );
@@ -339,7 +327,7 @@ describe('TransactionComponent', () => {
 
     // assert
     expect(transactionServiceStub.createTransaction).toHaveBeenCalledWith(
-      jasmine.objectContaining({ amount: 500, in: 500 }),
+      jasmine.objectContaining({ amount: 500 }),
       jasmine.any(String)
     );
   });

@@ -70,7 +70,6 @@ export class TransactionDataService extends DefaultDataService<Transaction> {
   }
 
   getWithQuery(params: any): Observable<Transaction[]> {
-    console.log('SFG: TransactionDataService -> params', params);
     const transRef = '/budgets/' + this.activeBudgetID + '/transactions';
     // should not display cleared transactions by default
     const collection = this.db.collection<Transaction>(transRef, ref => {
@@ -106,7 +105,6 @@ export class TransactionDataService extends DefaultDataService<Transaction> {
           return { ...data, id };
         })
       ),
-      tap(transactions => console.log('Transactions: ', transactions))
     );
   }
 
