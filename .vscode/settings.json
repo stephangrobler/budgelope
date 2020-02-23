@@ -1,0 +1,8 @@
+{
+  "editor.formatOnPaste": true,
+  "javascript.preferences.quoteStyle": "single",
+  "typescript.preferences.quoteStyle": "single",
+  "turboConsoleLog.quote": "'",
+  "prettier.useEditorConfig": false,
+  "prettier.singleQuote": true
+}

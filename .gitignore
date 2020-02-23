@@ -10,6 +10,7 @@
 /node_modules
 /functions/node_modules
 /angular_material_schematics-yxl7mR
+/bazel-out
 
 # IDEs and editors
 /.idea

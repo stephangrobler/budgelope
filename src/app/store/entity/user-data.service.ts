@@ -3,7 +3,7 @@ import { DefaultDataService, HttpUrlGenerator, Logger } from '@ngrx/data';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { HttpClient } from '@angular/common/http';
 import { UserService } from 'app/shared/user.service';
-import { Profile } from 'app/shared/profile';
+import { IProfile } from 'app/shared/profile';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Update } from '@ngrx/entity';
@@ -11,7 +11,7 @@ import { Update } from '@ngrx/entity';
 @Injectable({
   providedIn: 'root'
 })
-export class UserDataService extends DefaultDataService<Profile> {
+export class UserDataService extends DefaultDataService<IProfile> {
   activeBudgetID: string;
 
   constructor(
@@ -22,24 +22,24 @@ export class UserDataService extends DefaultDataService<Profile> {
     private userService: UserService
   ) {
     super('Profile', http, httpUrlGenerator);
-    this.userService.getProfile$().subscribe(profile => {
+    this.userService.getProfile().subscribe(profile => {
       this.activeBudgetID = profile.activeBudget;
       logger.log('ProfileDataService -> this.activeBudgetID:', this.activeBudgetID);
     });
   }
 
-  getAll(): Observable<Profile[]> {
-    return of([] as Profile[]);
+  getAll(): Observable<IProfile[]> {
+    return of([] as IProfile[]);
   }
 
-  getWithQuery(params: any): Observable<Profile[]> {
+  getWithQuery(params: any): Observable<IProfile[]> {
     return this.db
-      .collection<Profile>('users/' + this.activeBudgetID, ref => ref.orderBy(params.orderBy))
+      .collection<IProfile>('users/' + this.activeBudgetID, ref => ref.orderBy(params.orderBy))
       .snapshotChanges()
       .pipe(
         map(actions => {
           return actions.map(a => {
-            const data = a.payload.doc.data() as Profile;
+            const data = a.payload.doc.data() as IProfile;
             const id = a.payload.doc.id;
             return { id, ...data };
           });
@@ -47,9 +47,9 @@ export class UserDataService extends DefaultDataService<Profile> {
       );
   }
 
-  update(profile: Update<Profile>): Observable<Profile> {
+  update(profile: Update<IProfile>): Observable<IProfile> {
     const docRef = 'users/' + this.activeBudgetID;
     this.db.doc(docRef).update(profile.changes);
-    return of(profile.changes as Profile);
+    return of(profile.changes as IProfile);
   }
 }

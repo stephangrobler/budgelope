@@ -49,11 +49,13 @@ describe('BudgetviewComponent', () => {
     dragulaServiceStub.dropModel = of({});
 
     budgetServiceStub = jasmine.createSpyObj('BudgetService', ['getActiveBudget$', 'getByKey']);
-    budgetServiceStub.getByKey.and.returnValue(of({
-      id: '67890',
-      name: 'test budget',
-      allocations: {}
-    }));
+    budgetServiceStub.getByKey.and.returnValue(
+      of({
+        id: '67890',
+        name: 'test budget',
+        allocations: {}
+      })
+    );
     userServiceStub = {};
     categoryServiceStub = jasmine.createSpyObj('CategoryService', ['getWithQuery']);
     categoryServiceStub.getWithQuery.and.returnValue(of([]));
@@ -136,14 +138,11 @@ describe('BudgetviewComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load the available budgets in an array of objects', () => {
-
-    expect(component.budgetList.length).toBe(3);
-    expect(component.budgetList[0]).toEqual({id: 'testBudget', name: 'TestBudget1'}, 'should equal the correct budget name');
-  });
-
   it('should load the categories for the active budget', () => {
-    expect(categoryServiceStub.getWithQuery).toHaveBeenCalledWith({budgetId: '67890', orderBy: 'sortingOrder'});
+    expect(categoryServiceStub.getWithQuery).toHaveBeenCalledWith({
+      budgetId: '67890',
+      orderBy: 'sortingOrder'
+    });
   });
 
   it('should load the active budget details and allocations', () => {
@@ -151,7 +150,7 @@ describe('BudgetviewComponent', () => {
   });
 
   it('should get the display month from the month param', () => {
-    const displayMonth = moment('20180501').format('MMMM YYYY')
+    const displayMonth = moment('20180501').format('MMMM YYYY');
     expect(component.displayMonth).toEqual(displayMonth);
-  })
+  });
 });

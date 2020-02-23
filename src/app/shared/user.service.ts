@@ -1,29 +1,36 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import {
+  CanActivate,
+  Router,
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot
+} from '@angular/router';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 
-import { Profile } from '../shared/profile';
+import { IProfile } from '../shared/profile';
 import { BudgetService } from '../budgets/budget.service';
 
 @Injectable()
 export class UserService implements CanActivate {
   authenticated = false;
-  profile$: Observable<Profile>;
+  profile$: Observable<IProfile>;
 
   constructor(
     private router: Router,
     private afAuth: AngularFireAuth,
-    private db: AngularFirestore,
-    private budgetService: BudgetService
+    private db: AngularFirestore
   ) {
-    this.getProfile$();
+    this.getProfile();
     this.verifyUser();
   }
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+  canActivate(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): boolean {
     const url: string = state.url;
     return this.verifyLogin(url);
   }
@@ -53,10 +60,11 @@ export class UserService implements CanActivate {
   }
 
   login(loginEmail: string, loginPassword: string) {
-    return this.afAuth.auth.signInWithEmailAndPassword(loginEmail, loginPassword).then((user) => {
-
-      this.getProfile$();
-    });
+    return this.afAuth.auth
+      .signInWithEmailAndPassword(loginEmail, loginPassword)
+      .then(user => {
+        this.getProfile();
+      });
   }
 
   logout() {
@@ -71,10 +79,10 @@ export class UserService implements CanActivate {
     );
   }
 
-  getProfile$(): Observable<Profile> {
+  getProfile(): Observable<IProfile> {
     return this.afAuth.authState.pipe(
       mergeMap(user => {
-        return this.db.doc<Profile>('users/' + user.uid).valueChanges();
+        return this.db.doc<IProfile>('users/' + user.uid).valueChanges();
       })
     );
   }
@@ -101,7 +109,7 @@ export class UserService implements CanActivate {
       .set(userDoc)
       .then(docRef => {
         // create a dummy budget to start with
-        this.budgetService.freshStart('default', user.uid);
+        // this.budgetService.freshStart('default', user.uid);
       });
   }
 }

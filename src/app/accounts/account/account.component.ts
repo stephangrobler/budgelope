@@ -2,10 +2,14 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 
 import { AccountService } from '../account.service';
-import { Account } from '../../shared/account';
+import { Account, IAccount, IAccountId } from '../../shared/account';
 import { TransactionService } from 'app/transactions/transaction.service';
 import { AuthService } from 'app/shared/auth.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { UserService } from 'app/shared/user.service';
+import { AccountDataService } from 'app/store/entity/account-data.service';
+import { Observable, of } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 @Component({
   templateUrl: 'account.component.html'
@@ -16,69 +20,63 @@ export class AccountComponent implements OnInit {
   accName: string;
   accStartingBalance: number;
 
-  account: Account;
+  account: Observable<IAccountId>;
   accountId: any;
   accountType: string;
   budgetId: string;
 
   constructor(
+    @Inject(MAT_DIALOG_DATA) public data: any,
     private accountService: AccountService,
     public dialogRef: MatDialogRef<AccountComponent>,
-    private db: AngularFirestore,
-    private transactionService: TransactionService,
-    private auth: AuthService,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    public userService: UserService,
+    private transactionService: TransactionService
   ) {}
 
   ngOnInit() {
-    this.db
-      .doc<any>('users/' + this.auth.currentUserId)
-      .valueChanges()
-      .subscribe(profile => {
-        this.budgetId = profile.activeBudget;
-
-        if (this.data.accountId !== 'add') {
-          const accRef = 'budgets/' + this.data.budgetId + '/accounts/' + this.data.accountId;
-          this.db
-            .doc<Account>(accRef)
-            .valueChanges()
-            .subscribe(account => {
-              this.account = account;
-              this.accStartingBalance = account.balance;
-            });
-        } else {
-          this.account = new Account();
-        }
-      });
+    this.userService.getProfile().subscribe(profile => {
+      this.budgetId = profile.activeBudget;
+      if (this.data.accountId !== 'add') {
+        this.account = this.accountService.getByKey(this.data.accountId);
+      } else {
+        this.account = of({} as IAccount);
+      }
+    });
   }
 
   onSaveAccount() {
-    if (this.accountId !== 'add') {
-      this.editAccount();
+    this.account.pipe(take(1)).subscribe(account => {
+      if (this.data.accountId !== 'add') {
+        this.editAccount(account);
+      } else {
+        this.createAccount(account);
+      }
+    });
+  }
+
+  editAccount(account) {
+    if (account.balance !== this.accStartingBalance) {
+      this.transactionService.createStartingBalance(
+        this.data.accountId,
+        this.budgetId,
+        account.balance
+      );
     } else {
-      this.createAccount();
+      this.accountService.update(account);
     }
   }
 
-  editAccount() {
-    const accountRef = 'budgets/' + this.budgetId + '/accounts/' + this.data.accountId;
-
-    // starting balance was changed create a starting balance
-    if (this.account.balance !== this.accStartingBalance) {
-      // console.log(this.account, this.accStartingBalance);
-      this.transactionService.createStartingBalance(this.data.accountId, this.budgetId, this.account.balance);
-    } else {
-      this.db.doc<Account>(accountRef).update(this.account);
-    }
-  }
-
-  createAccount() {
-    this.accountService.createAccount(this.budgetId, this.account).then(docRef => {
-      this.transactionService.createStartingBalance(docRef.id, this.budgetId, this.account.balance);
+  createAccount(account: IAccount) {
+    this.accountService.add(account).subscribe(savedAccount => {
+      this.transactionService.createStartingBalance(
+        savedAccount.id,
+        this.budgetId,
+        savedAccount.balance
+      );
     });
   }
 
   onCancel() {
-    this.dialogRef.close('Pizza!');
+    this.dialogRef.close('Account Dialog Closed.');
   }
 }

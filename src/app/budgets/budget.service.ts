@@ -11,7 +11,7 @@ import { FirebaseApp } from '@angular/fire';
 import { EntityCollectionServiceBase, EntityCollectionServiceElementsFactory } from '@ngrx/data';
 
 @Injectable()
-export class BudgetService extends EntityCollectionServiceBase<Budget>{
+export class BudgetService extends EntityCollectionServiceBase<Budget> {
   activeBudget$: Observable<Budget>;
 
   constructor(
@@ -22,10 +22,10 @@ export class BudgetService extends EntityCollectionServiceBase<Budget>{
     private fb: FirebaseApp,
     serviceElementsFactory: EntityCollectionServiceElementsFactory
   ) {
-    super('Budget', serviceElementsFactory );
+    super('Budget', serviceElementsFactory);
   }
 
-  getActiveBudget$(): Observable<Budget> {
+  getActiveBudget(): Observable<Budget> {
     const returnable = this.afAuth.authState.pipe(
       mergeMap(currentUser => {
         // get the activebudget from the user object
@@ -46,17 +46,19 @@ export class BudgetService extends EntityCollectionServiceBase<Budget>{
   }
 
   createBudget(budget: Budget, userId: string) {
-
     budget.balance = 0;
     budget.userId = userId;
     budget.allocations = {};
     budget.start = new Date();
 
-    this.db.collection('budgets').add(JSON.parse(JSON.stringify(budget))).then(budgetDocument => {
-      this.db.doc<any>('users/' + userId).update({activeBudget: budgetDocument.id});
-      // copy categories
-      this.categoryService.copyCategories('default', budgetDocument.id);
-    });
+    this.db
+      .collection('budgets')
+      .add(JSON.parse(JSON.stringify(budget)))
+      .then(budgetDocument => {
+        this.db.doc<any>('users/' + userId).update({ activeBudget: budgetDocument.id });
+        // copy categories
+        this.categoryService.copyCategories('default', budgetDocument.id);
+      });
   }
 
   /**
@@ -66,10 +68,10 @@ export class BudgetService extends EntityCollectionServiceBase<Budget>{
    * @param date The date of the transaction
    * @param amount The amount of the transaction
    */
-  updateBudgetBalance(budgetId: string, date: Date, amount: number) {
+  updateBudgetBalance(budgetId: string, date: Date, amount: number): Promise<any> {
     const docRef = this.db.doc('budgets/' + budgetId).ref;
 
-    this.fb.firestore().runTransaction(transaction => {
+    return this.fb.firestore().runTransaction(transaction => {
       return transaction.get(docRef).then(
         budgetRaw => {
           const shortDate = moment(date).format('YYYYMM');
@@ -89,13 +91,10 @@ export class BudgetService extends EntityCollectionServiceBase<Budget>{
           } else {
             budget.allocations[shortDate].expense += Math.abs(amount);
           }
-          transaction.update(docRef, budget);
+          return transaction.update(docRef, budget);
         },
         error => {
-          console.log(
-            'There was an error updating the budget: ' + budgetId + ' - ' + date + ' - ' + amount,
-            error
-          );
+          throw Error(error);
         }
       );
     });

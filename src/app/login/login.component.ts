@@ -15,21 +15,21 @@ export class LoginComponent implements OnInit {
   user: Observable<firebase.User>;
 
   constructor(
-    private userSVC: UserService,
+    private userService: UserService,
     private router: Router,
     public afAuth: AngularFireAuth,
     private budgetService: BudgetService
   ) {}
 
   ngOnInit() {
-    if (this.userSVC.authenticated) {
+    if (this.userService.authenticated) {
       this.router.navigate(['/app/budget']);
     }
   }
 
   onLogin(loginEmail: string, loginPassword: string) {
     const router = this.router;
-    this.userSVC
+    this.userService
       .login(this.email, this.password1)
       .then(function(user) {
         router.navigate(['/app/budget']);
@@ -41,8 +41,7 @@ export class LoginComponent implements OnInit {
 
   googleLogin() {
     this.afAuth.auth.signInWithPopup(new auth.GoogleAuthProvider()).then(user => {
-      
-      this.userSVC.getProfile$().subscribe(thing => console.log(thing));
+      this.userService.getProfile().subscribe(thing => console.log(thing));
       // check if the user has a profile
       this.router.navigate(['/app/budget']);
     });

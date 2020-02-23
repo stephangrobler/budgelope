@@ -9,8 +9,11 @@ export interface IAccount {
   name: string;
   type: AccountType;
 }
+export interface IAccountId extends IAccount {
+  id?: string;
+}
 
-export class Account implements IAccount {
+export class Account implements IAccountId {
   id?: any;
   name: string;
   balance: number;

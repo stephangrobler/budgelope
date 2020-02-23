@@ -217,8 +217,6 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
             a += alloc.planned;
           }
         }
-        // GVierllH2PW82OTBhfKX
-
         return a;
       }, 0);
       console.log('PlannedTotal:', plannedTotal);

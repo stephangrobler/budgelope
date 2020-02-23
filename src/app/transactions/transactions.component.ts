@@ -1,21 +1,20 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
-import { AngularFireAuth } from '@angular/fire/auth';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { DataSource } from '@angular/cdk/collections';
-import { Transaction, ITransactionID } from '../shared/transaction';
-import { TransactionService, IFilter } from './transaction.service';
-import { BudgetService } from '../budgets/budget.service';
+import { Transaction } from '../shared/transaction';
+import { TransactionService } from './transaction.service';
 import { UserService } from '../shared/user.service';
 import { BehaviorSubject, Subject, Observable } from 'rxjs';
-import { IAccount } from 'app/shared/account';
+import { IAccount, IAccountId } from 'app/shared/account';
 import { ImportComponent } from './import/import.component';
-import { AuthService } from 'app/shared/auth.service';
-import { takeUntil, take } from 'rxjs/operators';
+import { takeUntil, take, tap } from 'rxjs/operators';
 import { AccountComponent } from 'app/accounts/account/account.component';
 import { TransactionComponent } from './transaction/transaction.component';
+import { AccountService } from 'app/accounts/account.service';
+import { QueryParams } from '@ngrx/data';
+import { CategoryId } from 'app/categories/category/category.component';
 
 @Component({
   templateUrl: 'transactions.component.html',
@@ -28,9 +27,9 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   userId: string;
   budgetId: string;
   accountId: string;
-  account: IAccount;
+  account: IAccountId;
   categoryId: string;
-  displayedColumns = ['date', 'account', 'payee', 'category', 'out', 'in', 'cleared', 'matched'];
+  displayedColumns = ['date', 'payee', 'category', 'out', 'in', 'cleared'];
   dataSource: TransactionDataSource;
   newTransaction: Transaction;
   showCleared = false;
@@ -41,44 +40,50 @@ export class TransactionsComponent implements OnInit, OnDestroy {
 
   constructor(
     private transService: TransactionService,
-    private authService: AuthService,
+    private userService: UserService,
     private router: Router,
     private route: ActivatedRoute,
-    private db: AngularFirestore,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    public accountService: AccountService,
   ) {
     this.loading$ = this.transService.loading$;
   }
 
   ngOnInit() {
-
-    this.db
-      .doc<any>('users/' + this.authService.currentUserId)
-      .valueChanges()
+    this.userService
+      .getProfile()
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(profileRead => {
         this.budgetId = profileRead.activeBudget;
         this.accountId = null;
-        this.dataSource = new TransactionDataSource(this.transService, profileRead.activeBudget);
-        this.route.paramMap.pipe(takeUntil(this.unsubscribe)).subscribe(params => {
-          if (params.get('accountId')) {
-            this.accountId = params.get('accountId');
-            this.db
-              .doc<IAccount>('budgets/' + this.budgetId + '/accounts/' + this.accountId)
-              .valueChanges()
-              .pipe(takeUntil(this.unsubscribe))
-              .subscribe(account => {
-                this.account = account;
+        this.renameTransactions();
+        this.dataSource = new TransactionDataSource(
+          this.transService,
+          profileRead.activeBudget
+        );
+        this.route.paramMap
+          .pipe(takeUntil(this.unsubscribe))
+          .subscribe(params => {
+            if (params.get('accountId')) {
+              this.accountId = params.get('accountId');
+              this.accountService.collection$.subscribe(collection => {
+                if (collection.entities[this.accountId]) {
+                  this.account = collection.entities[this.accountId];
+                }
               });
-          }
-          if (params.get('categoryId')) {
-            this.categoryId = params.get('categoryId');
-          }
-          if (params.get('id')) {
-            this.showTransaction = true;
-          }
-          this.dataSource.loadTransactions(this.accountId, this.showCleared, this.categoryId);
-        });
+            }
+            if (params.get('categoryId')) {
+              this.categoryId = params.get('categoryId');
+            }
+            if (params.get('id')) {
+              this.showTransaction = true;
+            }
+            this.dataSource.loadTransactions(
+              this.accountId,
+              '' + this.showCleared,
+              this.categoryId
+            );
+          });
       });
   }
 
@@ -87,19 +92,31 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     this.unsubscribe.complete();
   }
 
+  renameTransactions() {
+    this.transService.getAll().pipe(take(1)).subscribe(async transactions => {
+      // this.transService.batchUpdateInterface(transactions, this.budgetId);
+    })
+  }
+
   openTransactionModal() {
-    const dialogRef = this.dialog.open(TransactionComponent, {
+    const dialogConfig = {
+      width: '80vw',
       data: { accountId: this.accountId, budgetId: this.budgetId }
-    });
+    } as MatDialogConfig;
+    const dialogRef = this.dialog.open(TransactionComponent, dialogConfig);
 
     dialogRef.afterClosed().subscribe(result => {
       console.log('Transaction Result', result);
     });
   }
 
-  openDialog() {
+  openImportDialog() {
     const dialogRef = this.dialog.open(ImportComponent, {
-      data: { accountId: this.accountId, budgetId: this.budgetId, accountName: this.account.name }
+      data: {
+        accountId: this.accountId,
+        budgetId: this.budgetId,
+        accountName: this.account
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -109,7 +126,11 @@ export class TransactionsComponent implements OnInit, OnDestroy {
 
   openAccountDialog() {
     const dialogRef = this.dialog.open(AccountComponent, {
-      data: { accountId: this.accountId, budgetId: this.budgetId, accountName: this.account.name }
+      data: {
+        accountId: this.accountId,
+        budgetId: this.budgetId,
+        accountName: this.account
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -122,10 +143,10 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   }
 
   onFilterClearedToggle() {
-    this.dataSource.loadTransactions(this.accountId, this.showCleared);
+    this.dataSource.loadTransactions(this.accountId, '' + this.showCleared);
   }
 
-  toggleCleared(transaction: ITransactionID) {
+  toggleCleared(transaction: Transaction) {
     transaction.cleared = !transaction.cleared;
     this.transService.updateClearedStatus(this.budgetId, transaction);
   }
@@ -134,35 +155,76 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     this.selectedTransaction = row;
     this.router.navigate(['/app/transactions', row.id]);
   }
+
+  displayCategories(categories: { [categoryId: string]: Partial<CategoryId>}) {
+    const keys = Object.keys(categories);
+    if (keys.length > 1) {
+      return 'Split';
+    } else if (!categories[keys[0]]) {
+      return 'No Category Specified';
+    } else {
+      return categories[keys[0]].name;
+    }
+  }
 }
 
 export class TransactionDataSource extends DataSource<any> {
   private transactionsSubject = new BehaviorSubject<any>([]);
+  private transactions: Observable<Transaction[]>;
+  private loading: Observable<boolean>;
+  private unsubscribe = new Subject<boolean>();
 
-  constructor(private transService: TransactionService, private budgetId: string) {
+  constructor(
+    private transService: TransactionService,
+    private budgetId: string
+  ) {
     super();
+    this.transactions = this.transService.filteredEntities$.pipe(
+      tap(this.calculateTotal)
+    );
+    this.loading = this.transService.loading$;
   }
 
+  calculateTotal = (transactions: Transaction[]) => {
+    if (transactions.length > 0) {
+      const total = transactions.reduce((acc, curVal) => {
+        acc += curVal.amount;
+        return acc;
+      }, 0);
+      const totalCleared = transactions.reduce((acc, curVal) => {
+        acc += curVal.cleared ? curVal.amount : 0;
+        return acc;
+      }, 0);
+      console.log('Total: ', total);
+      console.log('Total Cleared: ', totalCleared);
+    }
+  };
+
   connect() {
-    return this.transactionsSubject.asObservable();
+    return this.transactions;
   }
 
   disconnect() {
-    this.transactionsSubject.complete();
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
   }
 
-  loadTransactions(accountId: string, showCleared: boolean, categoryId?: string) {
-    const filter: any = {
+  loadTransactions(
+    accountId: string,
+    showCleared: string,
+    categoryId?: string
+  ) {
+    const filter: QueryParams = {
       accountId: accountId,
       categoryId: categoryId,
       cleared: showCleared,
       budgetId: this.budgetId
     };
     if (categoryId) {
-      filter.cleared = true;
+      filter.cleared = 'true';
     }
-    this.transService.getWithQuery(filter).subscribe(transactions => {
-      this.transactionsSubject.next(transactions);
-    });
+    this.transService.setFilter(filter);
+    this.transService.clearCache();
+    this.transService.getWithQuery(filter).pipe(takeUntil(this.unsubscribe));
   }
 }

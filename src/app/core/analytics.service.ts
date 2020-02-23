@@ -16,12 +16,10 @@ export class AnalyticsService {
         ga('require', 'outboundLinkTracker');
         ga('require', 'urlChangeTracker');
     }
-    
+
     pageView(url: string) {
         ga('set', 'page', url);
         ga('send', 'pageview');
     }
-    //to track clicks on html attributes
-    //ga-on="click"
 
 }

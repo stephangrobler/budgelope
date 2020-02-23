@@ -11,49 +11,51 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { Observable, of } from 'rxjs';
 import { ActivatedRouteStub } from 'testing/activate-route-stub';
+import { AccountService } from 'app/accounts/account.service';
 
 describe('TransactionsComponent', () => {
   let activatedRouteStub;
 
-  const TransactionServiceStub = jasmine.createSpyObj('TransactionService', ['getWithQuery', 'getByKey']);
+  const TransactionServiceStub = jasmine.createSpyObj('TransactionService', [
+    'getAll',
+    'getWithQuery',
+    'getByKey',
+    'setFilter',
+    'clearCache'
+  ]);
+  TransactionServiceStub.getAll.and.returnValue(of([]));
   TransactionServiceStub.getWithQuery.and.returnValue(of([]));
+  TransactionServiceStub.filteredEntities$ = of([]);
 
-  const BudgetServiceStub = jasmine.createSpyObj('BudgetService', ['getTransactions']);
-  const UserServiceStub = jasmine.createSpyObj('UserService', ['getUser']);
+  const BudgetServiceStub = jasmine.createSpyObj('BudgetService', [
+    'getTransactions'
+  ]);
+  const UserServiceStub = jasmine.createSpyObj('UserService', [
+    'getUser',
+    'getProfile'
+  ]);
+  UserServiceStub.getProfile.and.returnValue(of({ activeBudget: '0123456' }));
   const RouterStub = jasmine.createSpyObj('Router', ['navigate']);
 
-  const angularFireAuthServiceStub = jasmine.createSpyObj('AngularFireAuth', ['authenticate']);
-  angularFireAuthServiceStub.authState = of([]);
+  const accountStub = jasmine.createSpyObj('AccountService', ['noop']);
 
-  const angularFirestoreServiceStub = jasmine.createSpyObj('AngularFirestore', ['doc', 'collection']);
-  angularFirestoreServiceStub.doc.and.returnValue({
-    'valueChanges': function () {
-      return of({})
-    }
-  });
+  const matDialogStub = jasmine.createSpyObj('MatDialog', [
+    'open',
+    'afterClosed'
+  ]);
 
-  const matDialogStub = jasmine.createSpyObj('MatDialog', ['open', 'afterClosed']);
-  
-
-  beforeEach(async (() => {
+  beforeEach(async(() => {
     activatedRouteStub = new ActivatedRouteStub();
     activatedRouteStub.setParamMap({});
 
     TestBed.configureTestingModule({
-      declarations: [
-        TransactionsComponent
-      ],
-      imports: [
-        MatTableModule
-      ],
+      declarations: [TransactionsComponent],
+      imports: [MatTableModule],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
-      providers: [{
-          provide: AngularFirestore,
-          useValue: angularFirestoreServiceStub
-        },
+      providers: [
         {
-          provide: AngularFireAuth,
-          useValue: angularFireAuthServiceStub
+          provide: AccountService,
+          useValue: accountStub
         },
         {
           provide: TransactionService,
@@ -83,23 +85,23 @@ describe('TransactionsComponent', () => {
     }).compileComponents();
   }));
 
-  it('should create the app', async (() => {
+  it('should create the app', async(() => {
     const fixture = TestBed.createComponent(TransactionsComponent);
     const app = fixture.debugElement.componentInstance;
     expect(app).toBeTruthy();
   }));
 
-  it(`should have as title 'Transactions'`, async (() => {
+  it(`should have as title 'Transactions'`, async(() => {
     const fixture = TestBed.createComponent(TransactionsComponent);
     const app = fixture.debugElement.componentInstance;
 
     expect(app.title).toEqual('Transactions');
   }));
 
-  it('should render title in a h1 tag', async (() => {
+  it('should render title in a h1 tag', async(() => {
     const fixture = TestBed.createComponent(TransactionsComponent);
     fixture.detectChanges();
     const compiled = fixture.debugElement.nativeElement;
-    expect(compiled.querySelector('h1').textContent).toContain('Transactions');
+    expect(compiled.querySelector('h3').textContent).toContain('Transactions');
   }));
 });
