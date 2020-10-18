@@ -62,6 +62,23 @@ export class CategoryDataService extends DefaultDataService<Category> {
       );
   }
 
+  getAll(): Observable<Category[]> {
+    return this.db
+      .collection<Category>(
+        'budgets/' + this.activeBudgetID + '/categories'
+      )
+      .snapshotChanges()
+      .pipe(
+        map((actions) => {
+          return actions.map((a) => {
+            const data = a.payload.doc.data() as Category;
+            const id = a.payload.doc.id;
+            return { id, ...data };
+          });
+        })
+      );
+  }
+
   update(category: Update<Category>): Observable<Category> {
     const docRef =
       'budgets/' + this.activeBudgetID + '/categories/' + category.id;

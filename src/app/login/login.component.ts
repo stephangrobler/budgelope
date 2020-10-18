@@ -5,6 +5,7 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { auth } from 'firebase/app';
 import { UserService } from '../shared/user.service';
 import { BudgetService } from '../budgets/budget.service';
+import { AuthService } from 'app/shared/auth.service';
 
 @Component({
   templateUrl: 'login.component.html'
@@ -15,33 +16,29 @@ export class LoginComponent implements OnInit {
   user: Observable<firebase.User>;
 
   constructor(
-    private userService: UserService,
     private router: Router,
     public afAuth: AngularFireAuth,
-    private budgetService: BudgetService
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
-    if (this.userService.authenticated) {
+    if (this.authService.authenticated) {
       this.router.navigate(['/app/budget']);
     }
   }
 
-  onLogin(loginEmail: string, loginPassword: string) {
-    const router = this.router;
-    this.userService
-      .login(this.email, this.password1)
-      .then(function(user) {
-        router.navigate(['/app/budget']);
-      })
-      .catch(function(error) {
+  onLogin(loginEmail: string, loginPassword: string): void {
+    this.afAuth.auth
+      .signInWithEmailAndPassword(loginEmail, loginPassword)
+      .then((user) => {
+        this.router.navigate(['/app/budget']);        
+      }).catch(error => {
         alert(`${error.message} Unable to login. Try again.`);
       });
   }
 
   googleLogin() {
     this.afAuth.auth.signInWithPopup(new auth.GoogleAuthProvider()).then(user => {
-      this.userService.getProfile().subscribe(thing => console.log(thing));
       // check if the user has a profile
       this.router.navigate(['/app/budget']);
     });

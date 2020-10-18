@@ -31,11 +31,12 @@ export class BudgetComponent implements OnInit {
         });
   }
 
-  saveBudget() {
+  async saveBudget() {
     const budget = new Budget();
     budget.name = this.budgetName;
 
-    this.budgetService.createBudget(budget, this.userId);
+    const createdBudget = await this.budgetService.createBudget(budget, this.userId);
+    console.log('success:', createdBudget);
   }
 
   cancel() {

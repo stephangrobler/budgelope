@@ -45,20 +45,20 @@ export class BudgetService extends EntityCollectionServiceBase<Budget> {
     return returnable;
   }
 
-  createBudget(budget: Budget, userId: string) {
+  async createBudget(budget: Budget, userId: string) {
     budget.balance = 0;
     budget.userId = userId;
     budget.allocations = {};
     budget.start = new Date();
-
-    this.db
+    
+    const budgetDocument = await this.db
       .collection('budgets')
       .add(JSON.parse(JSON.stringify(budget)))
-      .then(budgetDocument => {
-        this.db.doc<any>('users/' + userId).update({ activeBudget: budgetDocument.id });
-        // copy categories
-        this.categoryService.copyCategories('default', budgetDocument.id);
-      });
+      
+    await this.db.doc<any>('users/' + userId).update({ activeBudget: budgetDocument.id });
+    // copy categories
+    await this.categoryService.copyCategories('default', budgetDocument.id); 
+    return budgetDocument;   
   }
 
   /**

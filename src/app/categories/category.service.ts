@@ -2,12 +2,17 @@ import { Injectable } from '@angular/core';
 import { Category } from '../shared/category';
 import {
   EntityCollectionServiceBase,
-  EntityCollectionServiceElementsFactory
+  EntityCollectionServiceElementsFactory,
 } from '@ngrx/data';
+import { AngularFirestore } from '@angular/fire/firestore';
+import { map } from 'rxjs/operators';
 
 @Injectable()
 export class CategoryService extends EntityCollectionServiceBase<Category> {
-  constructor(serviceElementsFactory: EntityCollectionServiceElementsFactory) {
+  constructor(
+    serviceElementsFactory: EntityCollectionServiceElementsFactory,
+    private db: AngularFirestore
+  ) {
     super('Category', serviceElementsFactory);
   }
 
@@ -27,7 +32,7 @@ export class CategoryService extends EntityCollectionServiceBase<Category> {
     if (!category['allocations'][shortDate]) {
       category['allocations'][shortDate] = {
         actual: 0,
-        planned: 0
+        planned: 0,
       };
     }
     category['allocations'][shortDate].actual += amount;
@@ -37,11 +42,28 @@ export class CategoryService extends EntityCollectionServiceBase<Category> {
   async copyCategories(fromBudgetId: string, toBudgetId: string) {
     const fromStore = 'budgets/' + fromBudgetId + '/categories',
       toStore = 'budgets/' + toBudgetId + '/categories';
-    const categories = await this.getAll().toPromise();
-    // categories.forEach(item => {
-    //   const doc = this.db.collection(toStore).doc(item.id);
-    //   delete item.id;
-    //   doc.set(item);
-    // }, this);
+    try {
+      this.db
+        .collection(fromStore)
+        .snapshotChanges()
+        .pipe(
+          map((actions) => {
+            return actions.map((a) => {
+              const data = a.payload.doc.data() as Category;
+              const id = a.payload.doc.id;
+              return { id, ...data };
+            });
+          })
+        ).subscribe(categories => {
+          categories.forEach((item) => {
+            const doc = this.db.collection(toStore).doc(item.id);
+            delete item.id;
+            doc.set(item);
+          }, this);
+        });
+      
+    } catch (err) {
+      console.log(err);
+    }
   }
 }

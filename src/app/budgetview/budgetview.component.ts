@@ -4,11 +4,11 @@ import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { Subscription, forkJoin, of, combineLatest } from 'rxjs';
 import * as moment from 'moment';
 
-import { Category } from '../../shared/category';
-import { Budget } from '../../shared/budget';
-import { BudgetService } from '../budget.service';
-import { UserService } from '../../shared/user.service';
-import { CategoryService } from '../../categories/category.service';
+import { Category } from '../shared/category';
+import { Budget } from '../shared/budget';
+import { BudgetService } from '../budgets/budget.service';
+import { UserService } from '../shared/user.service';
+import { CategoryService } from '../categories/category.service';
 import { AuthService } from 'app/shared/auth.service';
 import { TransactionTypes } from 'app/shared/transaction';
 
