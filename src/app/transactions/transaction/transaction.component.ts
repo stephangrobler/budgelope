@@ -4,8 +4,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { AngularFirestoreDocument } from '@angular/fire/firestore';
 
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Subscription } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { Subject, Subscription } from 'rxjs';
+import { take, takeUntil } from 'rxjs/operators';
 import { Transaction, TransactionTypes } from '../../shared/transaction';
 import { Account, IAccountId } from '../../shared/account';
 import { Budget } from '../../shared/budget';
@@ -37,6 +37,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
   selectedAccount: Account;
   transferBox = false;
   savingInProgress = false;
+  unsubscribe = new Subject<boolean>();
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -54,8 +55,9 @@ export class TransactionComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.initForm();
 
-    const profileSubscription = this.userService
+    this.userService
       .getProfile()
+      .pipe(takeUntil(this.unsubscribe))
       .subscribe(profile => {
         const budgetSubscription = this.budgetService
           .getActiveBudget()
@@ -96,11 +98,11 @@ export class TransactionComponent implements OnInit, OnDestroy {
           });
         this.subscriptions.add(categorySubscription);
       });
-    this.subscriptions.add(profileSubscription);
   }
 
   ngOnDestroy() {
-    this.subscriptions.unsubscribe();
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
   }
 
   private initForm() {

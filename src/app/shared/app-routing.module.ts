@@ -8,7 +8,7 @@ import { SignUpComponent } from '../signup/signup.component';
 import { AccountComponent } from '../accounts/account/account.component';
 import { AuthGuardService } from './auth-guard.service';
 
-import { BudgetviewComponent } from '../budgets/budgetview/budgetview.component';
+import { BudgetviewComponent } from '../budgetview/budgetview.component';
 import { TransactionsComponent } from '../transactions/transactions.component';
 import { CategoriesComponent } from '../categories/categories.component';
 import { CategoryComponent } from '../categories/category/category.component';

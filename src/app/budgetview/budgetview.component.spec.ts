@@ -5,14 +5,14 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BudgetviewComponent } from './budgetview.component';
-import { BudgetService } from '../budget.service';
-import { UserService } from '../../shared/user.service';
+import { BudgetService } from '../budgets/budget.service';
+import { UserService } from '../shared/user.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import * as moment from 'moment';
 
-import { ActivatedRouteStub } from '../../../testing/activate-route-stub';
-import { CategoryService } from '../../categories/category.service';
+import { ActivatedRouteStub } from '../../testing/activate-route-stub';
+import { CategoryService } from '../categories/category.service';
 
 describe('BudgetviewComponent', () => {
   let component: BudgetviewComponent;

@@ -20,7 +20,7 @@ export class AccountComponent implements OnInit {
   accName: string;
   accStartingBalance: number;
 
-  account: Observable<IAccountId>;
+  account: IAccount;
   accountId: any;
   accountType: string;
   budgetId: string;
@@ -34,24 +34,22 @@ export class AccountComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.userService.getProfile().subscribe(profile => {
+    this.userService.getProfile().subscribe(async profile => {
       this.budgetId = profile.activeBudget;
       if (this.data.accountId !== 'add') {
-        this.account = this.accountService.getByKey(this.data.accountId);
+        this.account = await this.accountService.getByKey(this.data.accountId).toPromise();
       } else {
-        this.account = of({} as IAccount);
+        this.account = {} as IAccount;
       }
     });
   }
 
   onSaveAccount() {
-    this.account.pipe(take(1)).subscribe(account => {
-      if (this.data.accountId !== 'add') {
-        this.editAccount(account);
-      } else {
-        this.createAccount(account);
-      }
-    });
+    if (this.data.accountId !== 'add') {
+      this.editAccount(this.account);
+    } else {
+      this.createAccount(this.account);
+    }
   }
 
   editAccount(account) {
@@ -67,6 +65,7 @@ export class AccountComponent implements OnInit {
   }
 
   createAccount(account: IAccount) {
+    console.log(account);
     this.accountService.add(account).subscribe(savedAccount => {
       this.transactionService.createStartingBalance(
         savedAccount.id,

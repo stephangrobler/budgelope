@@ -9,9 +9,7 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-
 import { IProfile } from '../shared/profile';
-import { BudgetService } from '../budgets/budget.service';
 
 @Injectable()
 export class UserService implements CanActivate {

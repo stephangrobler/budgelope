@@ -432,9 +432,11 @@ export class TransactionService extends EntityCollectionServiceBase<
 
         if (amount > 0) {
           inAmount = Math.abs(amount);
+          outAmount = 0;
           type = TransactionTypes.INCOME;
         } else {
           outAmount = Math.abs(amount);
+          inAmount = 0;
           type = TransactionTypes.EXPENSE;
         }
         transaction.categories = {
