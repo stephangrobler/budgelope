@@ -23,7 +23,7 @@
     "@angular/fire": "^5.2.1",
     "@angular/flex-layout": "^8.0.0-beta.26",
     "@angular/forms": "9.1.12",
-    "@angular/material": "^8.1.2",
+    "@angular/material": "^9.2.4",
     "@angular/platform-browser": "9.1.12",
     "@angular/platform-browser-dynamic": "9.1.12",
     "@angular/platform-server": "9.1.12",
