@@ -109,10 +109,9 @@ export class BudgetService extends EntityCollectionServiceBase<Budget> {
    */
   freshStart(currentBudgetId: string, userId: string) {
     // get current budget and store id
-    const budgetStore = this.db.collection('budgets'),
-      userStore = this.db.collection('users'),
-      newBudget: Budget = new Budget();
-
+    const budgetStore = this.db.collection('budgets');
+    const userStore = this.db.collection('users');
+    
     budgetStore
       .doc<Budget>(currentBudgetId)
       .valueChanges()
