@@ -41,7 +41,7 @@ describe('CategoryDataService', () => {
   });
 
   it('should be created', () => {
-    const service: CategoryDataService = TestBed.get(CategoryDataService);
+    const service: CategoryDataService = TestBed.inject(CategoryDataService);
     expect(service).toBeTruthy();
   });
 });

@@ -41,7 +41,7 @@ describe('BudgetDataService', () => {
   });
 
   it('should be created', () => {
-    const service: BudgetDataService = TestBed.get(BudgetDataService);
+    const service: BudgetDataService = TestBed.inject(BudgetDataService);
     expect(service).toBeTruthy();
   });
 });

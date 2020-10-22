@@ -108,7 +108,7 @@ describe('Budget service', () => {
       ]
     });
     // Inject both the service-to-test and its (spy) dependency
-    budgetService = TestBed.get(BudgetService);
+    budgetService = TestBed.inject(BudgetService);
   });
 
   it('should have a getActiveBudget$ method', async () => {
