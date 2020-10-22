@@ -30,7 +30,7 @@ describe('Transaction Service', () => {
   beforeEach(() => {
     account = new Account();
     category = {} as Category;
-    budget = new Budget();
+    budget = {} as Budget;
     transaction = {} as Transaction;
 
     dbMock = jasmine.createSpyObj('AngularFirestore', [

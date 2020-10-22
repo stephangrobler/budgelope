@@ -18,7 +18,7 @@ describe('AppComponent', () => {
         RouterOutletStubComponent
       ],
       providers: [
-        {provide: UserService, userValue: userMockService}
+        {provide: UserService, useValue: userMockService}
       ]
     }).compileComponents();
   }));
