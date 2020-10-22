@@ -41,7 +41,7 @@ describe('AccountDataService', () => {
   });
 
   it('should be created', () => {
-    const service: AccountDataService = TestBed.get(AccountDataService);
+    const service: AccountDataService = TestBed.inject(AccountDataService);
     expect(service).toBeTruthy();
   });
 });
