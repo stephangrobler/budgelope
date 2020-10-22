@@ -32,7 +32,7 @@ export class BudgetComponent implements OnInit {
   }
 
   async saveBudget() {
-    const budget = new Budget();
+    const budget: Budget = {} as Budget;
     budget.name = this.budgetName;
 
     const createdBudget = await this.budgetService.createBudget(budget, this.userId);

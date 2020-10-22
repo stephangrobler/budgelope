@@ -104,6 +104,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
   loadActiveBudget(budgetId: string): void {
     const subscription = this.budgetService.getByKey(budgetId).subscribe(
       budget => {
+      console.log('BudgetviewComponent -> loadActiveBudget -> budget', budget)
         // set the current allocation for the selected month if there is none
         if (!budget.allocations[this.selectedMonth]) {
           budget.allocations[this.selectedMonth] = {
@@ -113,8 +114,8 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
         }
 
         this.loadCategories(budgetId);
-        this.activeBudget = budget;
-        this.activeBudget.id = budgetId;
+        this.activeBudget = {id: budgetId, ...budget};
+        // this.activeBudget.id = budgetId;
       },
       error => {
         this.router.navigate(['app/budget-create']);
@@ -131,7 +132,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     const subscription = this.categoryService.getWithQuery({budgetId: budgetId, orderBy: 'sortingOrder'}).subscribe(list => {
       // filter list
       list = list.filter(category => category.type === TransactionTypes.EXPENSE);
-      this.checkAllocations(list, this.selectedMonth);
+      list = this.checkAllocations(list, this.selectedMonth);
       this.sortList = list;
     });
     this.subscriptions.add(subscription);
@@ -237,21 +238,22 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     }, this);
   }
 
-  checkAllocations(categories: Category[], month: string) {
-    categories.forEach(category => {
+  checkAllocations(categories: Category[], month: string): Category[] {
+    return categories.map(category => {
       if (!category.allocations) {
-        category.allocations = {};
-        category.allocations[month] = {
-          planned: 0,
-          actual: 0
-        };
-      } else if (category.allocations && !category.allocations[month]) {
-        category.allocations[month] = {
-          planned: 0,
-          actual: 0
-        };
+        category = {...category, allocations: {}};
+      } 
+      
+      if (category.allocations && !category.allocations[month]) {
+        // category.allocations[month] = {
+        //   planned: 0,
+        //   actual: 0
+        // };
+        const allocations = { ...category.allocations, [month]: {planned: 0, actual: 0}};
+        return category = {...category, allocations};
       }
     });
+    
   }
 
   onNextMonth() {
