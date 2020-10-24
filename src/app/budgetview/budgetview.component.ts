@@ -1,12 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
-import {
-  Subscription,
-  combineLatest,
-  Observable,
-  Subject,
-} from 'rxjs';
+import { Subscription, combineLatest, Observable, Subject } from 'rxjs';
 import * as moment from 'moment';
 
 import { Category } from '../shared/category';
@@ -16,7 +11,7 @@ import { UserService } from '../shared/user.service';
 import { CategoryService } from '../categories/category.service';
 import { AuthService } from 'app/shared/auth.service';
 import { TransactionTypes } from 'app/shared/transaction';
-import { map } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-budgetview',
@@ -63,27 +58,28 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.userId = this.auth.currentUserId;
-    // get active budget TODO: move to service :P
-    const subscription = this.db
-      .doc<any>('users/' + this.auth.currentUserId)
-      .valueChanges()
-      .subscribe((profile) => {
-        this.loadAvailableBudgets(profile);
-        this.loadActiveBudget(profile.activeBudget);
-      });
-    this.subscriptions.add(subscription);
-
     // if the month is specified, use that, else use the current month
     this.route.paramMap.subscribe((params) => {
       this.checkMonthParam(params.get('month'));
-      
+      this.userId = this.auth.currentUserId;
+      // get active budget TODO: move to service :P
+      this.db
+        .doc<any>('users/' + this.auth.currentUserId)
+        .valueChanges()
+        .pipe(takeUntil(this.unsubscribe))
+        .subscribe((profile) => {
+          this.loadAvailableBudgets(profile);
+          this.loadActiveBudget(profile.activeBudget);
+        });
+
       this.categories$ = this.categoryService.entities$.pipe(
         map((categories) => {
-          return this.checkAllocations(categories, this.selectedMonth).filter((category) => category.type === TransactionTypes.EXPENSE);
+          return this.checkAllocations(categories, this.selectedMonth).filter(
+            (category) => category.type === TransactionTypes.EXPENSE
+          );
         })
       );
-      this.loading$ = this.categoryService.loading$;      
+      this.loading$ = this.categoryService.loading$;
       if (
         this.activeBudget &&
         !this.activeBudget.allocations[this.selectedMonth]
@@ -121,12 +117,8 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
    * on the component
    */
   loadActiveBudget(budgetId: string): void {
-    const subscription = this.budgetService.getByKey(budgetId).subscribe(
+    const subscription = this.budgetService.getByKey(budgetId).pipe(takeUntil(this.unsubscribe)).subscribe(
       (budget) => {
-        console.log(
-          'BudgetviewComponent -> loadActiveBudget -> budget',
-          budget
-        );
         // set the current allocation for the selected month if there is none
         if (!budget.allocations[this.selectedMonth]) {
           budget.allocations[this.selectedMonth] = {

@@ -3,7 +3,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTableModule } from '@angular/material/table';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BudgetviewComponent } from './budgetview.component';
 import { BudgetService } from '../budgets/budget.service';
 import { UserService } from '../shared/user.service';
@@ -20,14 +20,14 @@ describe('BudgetviewComponent', () => {
 
   let budgetServiceStub;
   let userServiceStub: Partial<UserService>;
-  let dragulaServiceStub, categoryServiceStub;
+  let categoryServiceStub;
   let activatedRouteStub: ActivatedRouteStub;
   let angularFirestoreServiceStub;
   let angularFireAuthServiceStub;
 
   const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     activatedRouteStub = new ActivatedRouteStub();
     activatedRouteStub.setParamMap({
       month: '201805'
@@ -45,9 +45,6 @@ describe('BudgetviewComponent', () => {
       }
     });
 
-    dragulaServiceStub = jasmine.createSpyObj('DragulaService', ['setOptions', 'find']);
-    dragulaServiceStub.dropModel = of({});
-
     budgetServiceStub = jasmine.createSpyObj('BudgetService', ['getActiveBudget$', 'getByKey']);
     budgetServiceStub.getByKey.and.returnValue(
       of({
@@ -59,6 +56,7 @@ describe('BudgetviewComponent', () => {
     userServiceStub = {};
     categoryServiceStub = jasmine.createSpyObj('CategoryService', ['getWithQuery']);
     categoryServiceStub.getWithQuery.and.returnValue(of([]));
+    categoryServiceStub.entities$ = of([]);
 
     TestBed.configureTestingModule({
       imports: [MatMenuModule],
@@ -150,6 +148,7 @@ describe('BudgetviewComponent', () => {
   });
 
   it('should get the display month from the month param', () => {
+    
     const displayMonth = moment('20180501').format('MMMM YYYY');
     expect(component.displayMonth).toEqual(displayMonth);
   });
