@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
-import { Subscription, forkJoin, of, combineLatest } from 'rxjs';
+import { Subscription, combineLatest, Observable, Subject } from 'rxjs';
 import * as moment from 'moment';
 
 import { Category } from '../shared/category';
@@ -11,11 +11,12 @@ import { UserService } from '../shared/user.service';
 import { CategoryService } from '../categories/category.service';
 import { AuthService } from 'app/shared/auth.service';
 import { TransactionTypes } from 'app/shared/transaction';
+import { map, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-budgetview',
   templateUrl: './budgetview.component.html',
-  styleUrls: ['./budgetview.component.scss']
+  styleUrls: ['./budgetview.component.scss'],
 })
 export class BudgetviewComponent implements OnInit, OnDestroy {
   subscriptions = new Subscription();
@@ -29,6 +30,9 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
   prevMonth: any = moment().subtract(1, 'months');
   monthDisplay: Date;
   originalValue: number;
+  currentCategory: Category;
+
+  categories$: Observable<Category[]>;
 
   sortList: any;
 
@@ -40,6 +44,8 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
   totalAvailable = 0;
 
   budgetList: any[];
+  unsubscribe = new Subject<boolean>();
+  loading$: any;
 
   constructor(
     private db: AngularFirestore,
@@ -52,30 +58,39 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.userId = this.auth.currentUserId;
-    // get active budget TODO: move to service :P
-    const subscription = this.db
-      .doc<any>('users/' + this.auth.currentUserId)
-      .valueChanges()
-      .subscribe(profile => {
-        this.loadAvailableBudgets(profile);
-        this.loadActiveBudget(profile.activeBudget);
-      });
-    this.subscriptions.add(subscription);
-
     // if the month is specified, use that, else use the current month
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.subscribe((params) => {
       this.checkMonthParam(params.get('month'));
+      this.userId = this.auth.currentUserId;
+      // get active budget TODO: move to service :P
+      this.db
+        .doc<any>('users/' + this.auth.currentUserId)
+        .valueChanges()
+        .pipe(takeUntil(this.unsubscribe))
+        .subscribe((profile) => {
+          this.loadAvailableBudgets(profile);
+          this.loadActiveBudget(profile.activeBudget);
+        });
 
-      if (this.sortList) {
-        this.checkAllocations(this.sortList, this.selectedMonth);
-      }
-
-      if (this.activeBudget && !this.activeBudget.allocations[this.selectedMonth]) {
-        this.activeBudget.allocations[this.selectedMonth] = {
-          income: 0,
-          expense: 0
+      this.categories$ = this.categoryService.entities$.pipe(
+        map((categories) => {
+          return this.checkAllocations(categories, this.selectedMonth).filter(
+            (category) => category.type === TransactionTypes.EXPENSE
+          );
+        })
+      );
+      this.loading$ = this.categoryService.loading$;
+      if (
+        this.activeBudget &&
+        !this.activeBudget.allocations[this.selectedMonth]
+      ) {
+        const allocations = {
+          [this.selectedMonth]: {
+            income: 0,
+            expense: 0,
+          },
         };
+        this.activeBudget = { ...this.activeBudget, allocations };
       }
     });
   }
@@ -90,7 +105,7 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
       if (profile.availableBudgets.hasOwnProperty(i)) {
         const budget = {
           id: i,
-          name: profile.availableBudgets[i].name
+          name: profile.availableBudgets[i].name,
         };
         this.budgetList.push(budget);
       }
@@ -102,22 +117,21 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
    * on the component
    */
   loadActiveBudget(budgetId: string): void {
-    const subscription = this.budgetService.getByKey(budgetId).subscribe(
-      budget => {
-      console.log('BudgetviewComponent -> loadActiveBudget -> budget', budget)
+    const subscription = this.budgetService.getByKey(budgetId).pipe(takeUntil(this.unsubscribe)).subscribe(
+      (budget) => {
         // set the current allocation for the selected month if there is none
         if (!budget.allocations[this.selectedMonth]) {
           budget.allocations[this.selectedMonth] = {
             income: 0,
-            expense: 0
+            expense: 0,
           };
         }
 
         this.loadCategories(budgetId);
-        this.activeBudget = {id: budgetId, ...budget};
+        this.activeBudget = { id: budgetId, ...budget };
         // this.activeBudget.id = budgetId;
       },
-      error => {
+      (error) => {
         this.router.navigate(['app/budget-create']);
       }
     );
@@ -129,12 +143,16 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
    * @param budgetId string
    */
   loadCategories(budgetId: string): void {
-    const subscription = this.categoryService.getWithQuery({budgetId: budgetId, orderBy: 'sortingOrder'}).subscribe(list => {
-      // filter list
-      list = list.filter(category => category.type === TransactionTypes.EXPENSE);
-      list = this.checkAllocations(list, this.selectedMonth);
-      this.sortList = list;
-    });
+    const subscription = this.categoryService
+      .getWithQuery({ budgetId: budgetId, orderBy: 'sortingOrder' })
+      .subscribe((list) => {
+        // filter list
+        list = list.filter(
+          (category) => category.type === TransactionTypes.EXPENSE
+        );
+        list = this.checkAllocations(list, this.selectedMonth);
+        // this.sortList = [...list];
+      });
     this.subscriptions.add(subscription);
   }
 
@@ -181,54 +199,80 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     console.log('recalculating...');
 
     const data = combineLatest([
-      this.db.collection('budgets/' + this.activeBudget.id + '/transactions').valueChanges(),
-      this.db.collection('budgets/' + this.activeBudget.id + '/categories').valueChanges()
+      this.db
+        .collection('budgets/' + this.activeBudget.id + '/transactions')
+        .valueChanges(),
+      this.db
+        .collection('budgets/' + this.activeBudget.id + '/categories')
+        .valueChanges(),
     ]);
 
-    data.subscribe(records => {
-      console.log('Records: ', records);
-      const transactions = records[0];
-      const categories = records[1];
+    data.subscribe(
+      (records) => {
+        console.log('Records: ', records);
+        const transactions = records[0];
+        const categories = records[1];
 
-      const NetValue = transactions.reduce((a: number, b: { amount: number }) => {
-        a += Number(b.amount);
-        return a;
-      }, 0);
-      const totalBudget = transactions.reduce(
-        (a: { inc: number; exp: number }, b: { amount: number; transfer: boolean }) : { inc: number, exp: number } => {
-          if (b.transfer) {
+        const NetValue = transactions.reduce(
+          (a: number, b: { amount: number }) => {
+            a += Number(b.amount);
             return a;
-          }
-          const amount = Number(b.amount);
-          if (amount > 0) {
-            a.inc += amount;
-          } else {
-            a.exp += amount;
-          }
-          return a;
-        },
-        { inc: 0, exp: 0 }
-      );
-      console.log('TotalBudget: ', totalBudget, ' -- ', 'Calculated Nett: ', NetValue);
+          },
+          0
+        );
+        const totalBudget = transactions.reduce(
+          (
+            a: { inc: number; exp: number },
+            b: { amount: number; transfer: boolean }
+          ): { inc: number; exp: number } => {
+            if (b.transfer) {
+              return a;
+            }
+            const amount = Number(b.amount);
+            if (amount > 0) {
+              a.inc += amount;
+            } else {
+              a.exp += amount;
+            }
+            return a;
+          },
+          { inc: 0, exp: 0 }
+        );
+        console.log(
+          'TotalBudget: ',
+          totalBudget,
+          ' -- ',
+          'Calculated Nett: ',
+          NetValue
+        );
 
-      const plannedTotal: any = categories.reduce((a: number, b: { allocations: any }) => {
-        for (const key in b.allocations) {
-          if (b.allocations.hasOwnProperty(key)) {
-            const alloc = b.allocations[key];
-            a += alloc.planned;
-          }
-        }
-        return a;
-      }, 0);
-      console.log('PlannedTotal:', plannedTotal);
-      console.log('Current: ', totalBudget['inc'] - totalBudget['exp']);
-      console.log('Actual Available Budget: ', totalBudget['inc'] - plannedTotal);
-    }, err => console.log('Err:', err), () => console.log('Completed!'));
+        const plannedTotal: any = categories.reduce(
+          (a: number, b: { allocations: any }) => {
+            for (const key in b.allocations) {
+              if (b.allocations.hasOwnProperty(key)) {
+                const alloc = b.allocations[key];
+                a += alloc.planned;
+              }
+            }
+            return a;
+          },
+          0
+        );
+        console.log('PlannedTotal:', plannedTotal);
+        console.log('Current: ', totalBudget['inc'] - totalBudget['exp']);
+        console.log(
+          'Actual Available Budget: ',
+          totalBudget['inc'] - plannedTotal
+        );
+      },
+      (err) => console.log('Err:', err),
+      () => console.log('Completed!')
+    );
   }
 
   updateCategoryOrder(categories: Category[], budgetId: string): void {
     const ref = 'budgets/' + budgetId + '/categories/';
-    categories.forEach(function(category, index) {
+    categories.forEach(function (category, index) {
       const newOrder = ('000' + (index + 1).toString()).slice(-3);
       // check to see if it is neccessary to update the category
       if (category.sortingOrder !== newOrder) {
@@ -239,21 +283,20 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
   }
 
   checkAllocations(categories: Category[], month: string): Category[] {
-    return categories.map(category => {
+    return categories.map((category) => {
       if (!category.allocations) {
-        category = {...category, allocations: {}};
-      } 
-      
-      if (category.allocations && !category.allocations[month]) {
-        // category.allocations[month] = {
-        //   planned: 0,
-        //   actual: 0
-        // };
-        const allocations = { ...category.allocations, [month]: {planned: 0, actual: 0}};
-        return category = {...category, allocations};
+        category = { ...category, allocations: {} };
       }
+
+      if (category.allocations && !category.allocations[month]) {
+        const allocations = {
+          ...category.allocations,
+          [month]: { planned: 0, actual: 0 },
+        };
+        category = { ...category, allocations };
+      }
+      return category;
     });
-    
   }
 
   onNextMonth() {
@@ -276,26 +319,47 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     return category ? category.id : undefined;
   }
 
-  focus(item) {
-    this.originalValue = item.allocations[this.selectedMonth].planned;
+  focus(category) {
+    this.originalValue = category.allocations[this.selectedMonth].planned;
+    this.currentCategory = category;
   }
 
-  blur(item) {
-    const planned: number = +item.allocations[this.selectedMonth].planned;
+  update(category, $event) {
+    const currentAllocation = category.allocations[this.selectedMonth];
+    const newAllocation = { ...currentAllocation, planned: $event };
+    const allocations = {
+      ...category.allocations,
+      [this.selectedMonth]: newAllocation,
+    };
+    this.currentCategory = { ...category, allocations };
+  }
 
-    if (typeof this.originalValue !== 'undefined' && planned !== +this.originalValue) {
-      if (isNaN(item.balance)) {
-        item.balance = 0;
+  blur(category) {
+    const currentPlanned = +category.allocations[this.selectedMonth].planned;
+    const previousPlanned = +this.currentCategory.allocations[
+      this.selectedMonth
+    ].planned;
+
+    if (
+      typeof currentPlanned !== 'undefined' &&
+      previousPlanned !== currentPlanned
+    ) {
+      let itemBalance = 0;
+      if (isNaN(category.balance)) {
+        category = { ...category, balance: 0 };
       }
-      item.balance = item.balance - +this.originalValue + planned;
+      itemBalance = category.balance - currentPlanned + previousPlanned;
+      category = { ...this.currentCategory, balance: itemBalance };
 
       // update the budget available balance
       if (isNaN(this.activeBudget.balance)) {
-        this.activeBudget.balance = 0;
+        this.activeBudget = { ...this.activeBudget, balance: 0 };
       }
-      this.activeBudget.balance = +this.activeBudget.balance - planned + +this.originalValue;
-      if (!isNaN(item.balance) && !isNaN(this.activeBudget.balance)) {
-        this.categoryService.update(item);
+      let budgetBalance =
+        +this.activeBudget.balance - previousPlanned + currentPlanned;
+      this.activeBudget = { ...this.activeBudget, balance: budgetBalance };
+      if (!isNaN(category.balance) && !isNaN(this.activeBudget.balance)) {
+        this.categoryService.update(category);
         this.budgetService.update(this.activeBudget);
       }
     }
