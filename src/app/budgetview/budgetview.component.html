@@ -62,7 +62,7 @@
       <mat-icon>add</mat-icon>
     </a>
   </div>
-  <mat-card *ngIf="!sortList">
+  <mat-card *ngIf="loading$ | async">
     <mat-card-content>
       <mat-progress-spinner
         class="example-margin"
@@ -73,7 +73,7 @@
       </mat-progress-spinner>
     </mat-card-content>
   </mat-card>
-  <mat-card class="budget-view" *ngIf="sortList">
+  <mat-card class="budget-view" *ngIf="categories$ | async as sortList">
     <mat-card-content>
       <mat-list>
           <div *ngFor="let item of sortList; trackBy: trackCategory">
@@ -97,7 +97,8 @@
                       type="number"
                       name="planned"
                       class="text-right"
-                      [(ngModel)]="item.allocations[selectedMonth].planned"
+                      [ngModel]="item.allocations[selectedMonth].planned"
+                      (ngModelChange)="update(item, $event)"
                       (blur)="blur(item)"
                       (focus)="focus(item)"
                       tabindex=""
