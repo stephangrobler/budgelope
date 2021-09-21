@@ -5,7 +5,7 @@ import { AngularFireModule } from '@angular/fire';
 import { AngularFireStorageModule } from '@angular/fire/storage';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AngularFireDatabaseModule } from '@angular/fire/database';
-import { AngularFireFunctionsModule, FunctionsRegionToken } from '@angular/fire/functions';
+import { AngularFireFunctionsModule } from '@angular/fire/functions';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { environment } from '../environments/environment';
 
@@ -28,19 +28,14 @@ import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { HttpClientModule } from '@angular/common/http';
-import { StoreModule  } from '@ngrx/store';
+import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { EntityDataModule } from '@ngrx/data';
 import { entityConfig } from './store/entity-metadata';
 import { EntityStoreModule } from './store/entity-store.module';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    ErrorComponent,
-    LoginComponent,
-    SignUpComponent
-  ],
+  declarations: [AppComponent, ErrorComponent, LoginComponent, SignUpComponent],
   imports: [
     BrowserModule,
     FormsModule,
@@ -59,7 +54,9 @@ import { EntityStoreModule } from './store/entity-store.module';
     BudgetsModule,
     TransactionModule,
     CoreModule,
-    ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production }),
+    ServiceWorkerModule.register('/ngsw-worker.js', {
+      enabled: environment.production,
+    }),
     LayoutModule,
     MatToolbarModule,
     MatButtonModule,
@@ -69,11 +66,9 @@ import { EntityStoreModule } from './store/entity-store.module';
     StoreModule.forRoot({}),
     EffectsModule.forRoot([]),
     EntityDataModule.forRoot(entityConfig),
-    EntityStoreModule
+    EntityStoreModule,
   ],
-  providers: [
-    { provide: FunctionsRegionToken, useValue: 'us-central1' }
-  ],
-  bootstrap: [AppComponent]
+  providers: [],
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
