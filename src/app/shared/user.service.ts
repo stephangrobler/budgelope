@@ -3,7 +3,7 @@ import {
   CanActivate,
   Router,
   ActivatedRouteSnapshot,
-  RouterStateSnapshot
+  RouterStateSnapshot,
 } from '@angular/router';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
@@ -43,12 +43,12 @@ export class UserService implements CanActivate {
   }
 
   register(email: string, password: string) {
-    this.afAuth.auth
+    this.afAuth
       .createUserWithEmailAndPassword(email, password)
-      .then(user => {
+      .then((user) => {
         this.setupProfile(user);
       })
-      .catch(function(error) {
+      .catch(function (error) {
         alert(`${error.message} Please try again!`);
       });
   }
@@ -58,20 +58,20 @@ export class UserService implements CanActivate {
   }
 
   login(loginEmail: string, loginPassword: string) {
-    return this.afAuth.auth
+    return this.afAuth
       .signInWithEmailAndPassword(loginEmail, loginPassword)
-      .then(user => {
+      .then((user) => {
         this.getProfile();
       });
   }
 
   logout() {
     this.authenticated = false;
-    this.afAuth.auth.signOut().then(
-      function() {
+    this.afAuth.signOut().then(
+      function () {
         alert(`Logged out!`);
       },
-      function(error) {
+      function (error) {
         alert(`${error.message} Unable to logout. Try again!`);
       }
     );
@@ -79,7 +79,7 @@ export class UserService implements CanActivate {
 
   getProfile(): Observable<IProfile> {
     return this.afAuth.authState.pipe(
-      mergeMap(user => {
+      mergeMap((user) => {
         return this.db.doc<IProfile>('users/' + user.uid).valueChanges();
       })
     );
@@ -99,13 +99,13 @@ export class UserService implements CanActivate {
     const userDoc = {
       name: user.displayName,
       availableBudgets: [],
-      activeBudget: ''
+      activeBudget: '',
     };
 
     userStore
       .doc(user.uid)
-      .set(userDoc)
-      .then(docRef => {
+      .set(userDoc as any)
+      .then((docRef) => {
         // create a dummy budget to start with
         // this.budgetService.freshStart('default', user.uid);
       });

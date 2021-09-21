@@ -11,7 +11,7 @@ import { FirebaseApp } from '@angular/fire';
 import { IImportedTransaction } from './import/importedTransaction';
 import {
   EntityCollectionServiceBase,
-  EntityCollectionServiceElementsFactory
+  EntityCollectionServiceElementsFactory,
 } from '@ngrx/data';
 
 export interface IFilter {
@@ -23,14 +23,14 @@ export interface IFilter {
 export function TransactionFilter(entities: Transaction[], pattern: any) {
   if (pattern.accountId) {
     entities = entities.filter(
-      entity => entity.account.id === pattern.accountId
+      (entity) => entity.account.id === pattern.accountId
     );
   }
   if (pattern.cleared === 'false') {
-    entities = entities.filter(entity => entity.cleared === false);
+    entities = entities.filter((entity) => entity.cleared === false);
   }
   if (pattern.categoryId) {
-    entities = entities.filter(entity => {
+    entities = entities.filter((entity) => {
       return entity.categories[pattern.categoryId];
     });
   }
@@ -38,9 +38,7 @@ export function TransactionFilter(entities: Transaction[], pattern: any) {
 }
 
 @Injectable({ providedIn: 'root' })
-export class TransactionService extends EntityCollectionServiceBase<
-  Transaction
-> {
+export class TransactionService extends EntityCollectionServiceBase<Transaction> {
   transactions: Transaction[];
 
   constructor(
@@ -99,14 +97,16 @@ export class TransactionService extends EntityCollectionServiceBase<
 
   batchUpdateMatched(transactions: Transaction[], budgetId: string) {
     const batch = this.db.firestore.batch();
-    transactions.forEach(transaction => {
+    transactions.forEach((transaction) => {
       const ref = this.db.doc(
         '/budgets/' + budgetId + '/transactions/' + transaction.id
       ).ref;
       batch.update(ref, { matched: transaction.matched });
     });
 
-    batch.commit().then(response => console.log('Batch Committed:', response));
+    batch
+      .commit()
+      .then((response) => console.log('Batch Committed:', response));
   }
 
   batchCreateTransactions(
@@ -121,10 +121,11 @@ export class TransactionService extends EntityCollectionServiceBase<
       categoryAmount = 0;
     let shortDate = '',
       transDate;
-    transactions.forEach(transaction => {
+    transactions.forEach((transaction) => {
       const id = this.db.createId();
-      const ref = this.db.doc('/budgets/' + budgetId + '/transactions/' + id)
-        .ref;
+      const ref = this.db.doc(
+        '/budgets/' + budgetId + '/transactions/' + id
+      ).ref;
       // create transaction to write
       const transRec = <Transaction>{ account: {} };
       transRec.account.id = accountId;
@@ -148,8 +149,8 @@ export class TransactionService extends EntityCollectionServiceBase<
         UNCATEGORIZED: {
           name: 'Uncategorized',
           in: inAmount,
-          out: outAmount
-        }
+          out: outAmount,
+        },
       };
       batch.set(ref, transRec);
       // count amount of account
@@ -162,7 +163,7 @@ export class TransactionService extends EntityCollectionServiceBase<
       transDate = moment(transaction.dtposted).toDate();
       // update all the things
     });
-    return batch.commit().then(async response => {
+    return batch.commit().then(async (response) => {
       await this.accountService
         .updateAccountBalance(accountId, accAmount)
         .toPromise();
@@ -187,13 +188,13 @@ export class TransactionService extends EntityCollectionServiceBase<
   ) {
     const transRef = 'budgets/' + budgetId + '/transactions';
     this.db
-      .collection(transRef, ref =>
+      .collection(transRef, (ref) =>
         ref.where('account.accountId', '==', accountId)
       )
       .snapshotChanges()
       .pipe(
-        map(actions => {
-          return actions.map(a => {
+        map((actions) => {
+          return actions.map((a) => {
             // a.payload.doc.metadata.fromCache
             if (a.payload.doc.metadata.fromCache) {
               return false;
@@ -256,7 +257,7 @@ export class TransactionService extends EntityCollectionServiceBase<
           );
 
           await this.delete(transaction).toPromise();
-          resolve();
+          resolve(null);
         });
     });
   }
@@ -343,10 +344,10 @@ export class TransactionService extends EntityCollectionServiceBase<
     const currentCategories = Object.keys(currentTransaction.categories);
     const newCategories = Object.keys(newTransaction.categories);
     const diffA = currentCategories.filter(
-      t => newCategories.indexOf(t) === -1
+      (t) => newCategories.indexOf(t) === -1
     );
     const diffB = newCategories.filter(
-      t => currentCategories.indexOf(t) === -1
+      (t) => currentCategories.indexOf(t) === -1
     );
     const shortDate = moment(newTransaction.date).format('YYYYMM');
     // there is a difference, we revert all previous categories and apply the
@@ -426,7 +427,7 @@ export class TransactionService extends EntityCollectionServiceBase<
     this.accountService
       .getByKey(accountId)
       .pipe(take(1))
-      .subscribe(account => {
+      .subscribe((account) => {
         const transaction = {} as Transaction;
         let inAmount, outAmount, type: string;
 
@@ -443,12 +444,12 @@ export class TransactionService extends EntityCollectionServiceBase<
           STARTING_BALANCE: {
             name: 'Starting balance',
             in: inAmount,
-            out: outAmount
-          }
+            out: outAmount,
+          },
         };
         transaction.account = {
           id: accountId,
-          name: account.name
+          name: account.name,
         };
         transaction.date = new Date();
         transaction.amount = amount;

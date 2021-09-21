@@ -8,7 +8,10 @@ import { Budget } from '../shared/budget';
 import { CategoryService } from '../categories/category.service';
 import { AccountService } from '../accounts/account.service';
 import { FirebaseApp } from '@angular/fire';
-import { EntityCollectionServiceBase, EntityCollectionServiceElementsFactory } from '@ngrx/data';
+import {
+  EntityCollectionServiceBase,
+  EntityCollectionServiceElementsFactory,
+} from '@ngrx/data';
 
 @Injectable()
 export class BudgetService extends EntityCollectionServiceBase<Budget> {
@@ -27,17 +30,19 @@ export class BudgetService extends EntityCollectionServiceBase<Budget> {
 
   getActiveBudget(): Observable<Budget> {
     const returnable = this.afAuth.authState.pipe(
-      mergeMap(currentUser => {
+      mergeMap((currentUser) => {
         // get the activebudget from the user object
         return this.db
           .doc<any>('users/' + currentUser.uid)
           .valueChanges()
           .pipe(
-            mergeMap(user => {
+            mergeMap((user) => {
               if (user.activeBudget === '') {
                 throw new Error('There is no active budget set.');
               }
-              return this.db.doc<Budget>('budgets/' + user.activeBudget).valueChanges();
+              return this.db
+                .doc<Budget>('budgets/' + user.activeBudget)
+                .valueChanges();
             })
           );
       })
@@ -50,15 +55,17 @@ export class BudgetService extends EntityCollectionServiceBase<Budget> {
     budget.userId = userId;
     budget.allocations = {};
     budget.start = new Date();
-    
+
     const budgetDocument = await this.db
       .collection('budgets')
-      .add(JSON.parse(JSON.stringify(budget)))
-      
-    await this.db.doc<any>('users/' + userId).update({ activeBudget: budgetDocument.id });
+      .add(JSON.parse(JSON.stringify(budget)));
+
+    await this.db
+      .doc<any>('users/' + userId)
+      .update({ activeBudget: budgetDocument.id });
     // copy categories
-    await this.categoryService.copyCategories('default', budgetDocument.id); 
-    return budgetDocument;   
+    await this.categoryService.copyCategories('default', budgetDocument.id);
+    return budgetDocument;
   }
 
   /**
@@ -68,19 +75,23 @@ export class BudgetService extends EntityCollectionServiceBase<Budget> {
    * @param date The date of the transaction
    * @param amount The amount of the transaction
    */
-  updateBudgetBalance(budgetId: string, date: Date, amount: number): Promise<any> {
+  updateBudgetBalance(
+    budgetId: string,
+    date: Date,
+    amount: number
+  ): Promise<any> {
     const docRef = this.db.doc('budgets/' + budgetId).ref;
 
-    return this.fb.firestore().runTransaction(transaction => {
+    return this.fb.firestore().runTransaction((transaction) => {
       return transaction.get(docRef).then(
-        budgetRaw => {
+        (budgetRaw) => {
           const shortDate = moment(date).format('YYYYMM');
-          const budget = budgetRaw.data();
+          const budget = budgetRaw.data() as Budget;
 
           if (!budget.allocations[shortDate]) {
             budget.allocations[shortDate] = {
               expense: 0,
-              income: 0
+              income: 0,
             };
           }
 
@@ -93,7 +104,7 @@ export class BudgetService extends EntityCollectionServiceBase<Budget> {
           }
           return transaction.update(docRef, budget);
         },
-        error => {
+        (error) => {
           throw Error(error);
         }
       );
@@ -111,12 +122,12 @@ export class BudgetService extends EntityCollectionServiceBase<Budget> {
     // get current budget and store id
     const budgetStore = this.db.collection('budgets');
     const userStore = this.db.collection('users');
-    
+
     budgetStore
       .doc<Budget>(currentBudgetId)
       .valueChanges()
       .pipe(take(1))
-      .subscribe(cBudget => {
+      .subscribe((cBudget) => {
         const categoryService = this.categoryService,
           accountService = this.accountService;
 
@@ -124,14 +135,17 @@ export class BudgetService extends EntityCollectionServiceBase<Budget> {
         cBudget.allocations = {};
         cBudget.allocations[moment().format('YYYYMM')] = {
           income: 0,
-          expense: 0
+          expense: 0,
         };
         cBudget.balance = 0;
         delete cBudget.id;
 
-        budgetStore.add(cBudget).then(function(docRef) {
+        budgetStore.add(cBudget).then(function (docRef) {
           // rename old budget if not default
-          const newName = cBudget.name + ' - FRESH START ' + moment().format('YYYY-MM-DD hh:mm:ss');
+          const newName =
+            cBudget.name +
+            ' - FRESH START ' +
+            moment().format('YYYY-MM-DD hh:mm:ss');
           if (currentBudgetId !== 'default') {
             budgetStore.doc(currentBudgetId).update({ name: newName });
             accountService.copyAccounts(currentBudgetId, docRef.id);
@@ -141,7 +155,7 @@ export class BudgetService extends EntityCollectionServiceBase<Budget> {
           userStore
             .doc<any>(userId)
             .valueChanges()
-            .subscribe(user => {
+            .subscribe((user) => {
               user.activeBudget = docRef.id;
               if (!user.availableBudgets) {
                 user.availableBudgets = {};
