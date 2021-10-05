@@ -1,16 +1,18 @@
 <div *ngIf="!account">Loading...</div>
 <div *ngIf="account">
+  <form (ngSubmit)="onSubmit()" [formGroup]="form">
   <h1 mat-dialog-title>Account: {{ data.accountName }}</h1>
   <div mat-dialog-content fxLayout="row">
+    
     <div>
       <mat-form-field>
         <input
           matInput
           type="text"
           placeholder="Account Name"
-          [(ngModel)]="account.name"
+          formControlName="name"
           name="accName"
-          #accTitle="ngModel"
+          
         />
       </mat-form-field>
     </div>
@@ -20,9 +22,9 @@
           matInput
           type="number"
           placeholder="Starting Balance"
-          [(ngModel)]="account.balance"
+          formControlName="balance"
           name="accStartingBalance"
-          #accCurrent="ngModel"
+          
         />
       </mat-form-field>
     </div>
@@ -31,11 +33,10 @@
     <button mat-raised-button color="warn" (click)="onCancel()">Cancel</button>
     <button
       mat-raised-button
-      (click)="onSaveAccount()"
+      type="submit"
       [mat-dialog-close]="data.animal"
       cdkFocusInitial
-    >
-      Ok
-    </button>
+    > Ok </button>
   </div>
+</form>
 </div>

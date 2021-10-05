@@ -1,18 +1,14 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/firestore';
-
 import { AccountService } from '../account.service';
-import { Account, IAccount, IAccountId } from '../../shared/account';
+import { AccountType, IAccount } from '../../shared/account';
 import { TransactionService } from 'app/transactions/transaction.service';
 import { AuthService } from 'app/shared/auth.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { UserService } from 'app/shared/user.service';
-import { AccountDataService } from 'app/store/entity/account-data.service';
-import { Observable, of } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
-  templateUrl: 'account.component.html'
+  templateUrl: 'account.component.html',
 })
 export class AccountComponent implements OnInit {
   thisUser: string;
@@ -25,26 +21,35 @@ export class AccountComponent implements OnInit {
   accountType: string;
   budgetId: string;
 
+  form: FormGroup = this.fb.group({
+    name: ['', Validators.required],
+    balance: [0, Validators.required],
+  });
+
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     private accountService: AccountService,
     public dialogRef: MatDialogRef<AccountComponent>,
-    public userService: UserService,
-    private transactionService: TransactionService
+    private auth: AuthService,
+    private transactionService: TransactionService,
+    private fb: FormBuilder
   ) {}
 
-  ngOnInit() {
-    this.userService.getProfile().subscribe(async profile => {
-      this.budgetId = profile.activeBudget;
+  async ngOnInit() {
+    this.auth.currentUser.subscribe(async (user) => {
+      if (!user) return;
+      this.budgetId = user.active_budget_id;
       if (this.data.accountId !== 'add') {
-        this.account = await this.accountService.getByKey(this.data.accountId).toPromise();
+        this.account = await this.accountService
+          .getByKey(this.data.accountId)
+          .toPromise();
       } else {
         this.account = {} as IAccount;
       }
     });
   }
 
-  onSaveAccount() {
+  onSubmit() {
     if (this.data.accountId !== 'add') {
       this.editAccount(this.account);
     } else {
@@ -65,10 +70,20 @@ export class AccountComponent implements OnInit {
   }
 
   createAccount(account: IAccount) {
-    console.log(account);
-    this.accountService.add(account).subscribe(savedAccount => {
+    account = {
+      ...account,
+      ...this.form.value,
+      budget_id: this.budgetId,
+      cleared_balance: 0,
+      type: AccountType.CHEQUE,
+    };
+    console.log(
+      '🚀 ~ file: account.component.ts ~ line 67 ~ AccountComponent ~ this.accountService.add ~ savedAccount',
+      account
+    );
+    this.accountService.add(account).subscribe((savedAccount) => {
       this.transactionService.createStartingBalance(
-        savedAccount.id,
+        savedAccount._id,
         this.budgetId,
         savedAccount.balance
       );

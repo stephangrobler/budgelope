@@ -86,14 +86,14 @@
         <ng-container matColumnDef="payee">
           <mat-header-cell *matHeaderCellDef>Payee</mat-header-cell>
           <mat-cell *matCellDef="let transaction" class="payee">{{
-            transaction.payee
+            transaction.payee?.name
           }}</mat-cell>
         </ng-container>
         <ng-container matColumnDef="category">
           <mat-header-cell *matHeaderCellDef>Category</mat-header-cell>
           <mat-cell *matCellDef="let transaction">
-            <span *ngIf="transaction.categories">
-              {{ displayCategories(transaction.categories) }}
+            <span *ngIf="transaction.category">
+              {{ transaction.category.name }}
             </span>
             
           </mat-cell>

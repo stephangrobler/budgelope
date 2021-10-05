@@ -29,14 +29,17 @@
       </mat-form-field>
 
       <mat-form-field *ngIf="!transferBox" fxFlex="1 0">
-        <input
-          matInput
+        <input type="text"
           placeholder="Payee"
-          value=""
-          type="text"
-          name="payee"
+          aria-label="Number"
+          matInput
           formControlName="payee"
-        />
+          [matAutocomplete]="auto2">
+        <mat-autocomplete #auto2="matAutocomplete" (optionSelected)="payeeOption($event.option)"  [displayWith]="displayFn" >
+          <mat-option *ngFor="let payee of payeesOptions | async" [value]="payee">
+            {{payee.name}}
+          </mat-option>
+        </mat-autocomplete>
       </mat-form-field>
       <!-- transfer fields -->
       <mat-form-field *ngIf="transferBox">
@@ -73,12 +76,17 @@
         [formGroupName]="i"
       >
         <mat-form-field fxFlex="2 0 30%">
-          <mat-select placeholder="Category" formControlName="category">
-            <mat-option>--</mat-option>
-            <mat-option *ngFor="let category of categories" [value]="category">
+          <input type="text"
+            placeholder="Category"
+            aria-label="Number"
+            matInput
+            formControlName="category"
+            [matAutocomplete]="auto">
+          <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+            <mat-option *ngFor="let category of categoryOptions | async" [value]="category">
               {{ category.name }}
             </mat-option>
-          </mat-select>
+          </mat-autocomplete>
         </mat-form-field>
 
         <mat-form-field fxFlex="1 0 25%">

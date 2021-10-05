@@ -1,115 +1,64 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AngularFirestore } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { AngularFireAuth } from '@angular/fire/auth';
 import { Category } from '../../shared/category';
-import { UserService } from '../../shared/user.service';
-
-export interface CategoryId extends Category {
-  id: string;
-}
+import { CategoryService } from '../category.service';
+import { AuthService } from 'app/shared/auth.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   templateUrl: 'category.component.html',
-  styleUrls: ['./category.component.scss']
+  styleUrls: ['./category.component.scss'],
 })
 export class CategoryComponent implements OnInit {
   title = 'Category';
-  name: string;
-  parent: CategoryId;
-  categories: Observable<CategoryId[]>;
-  childCounts: any;
-  theUserId: string;
-  activeBudget: string;
+  categories: Observable<Category[]>;
+
   categoryId: string;
-  category = {} as Category;
-  profile: any;
+  budget_id: string;
+  form: FormGroup = this.fb.group({
+    name: ['', Validators.required],
+    parent: [''],
+    type: ['expense', Validators.required],
+  });
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private userService: UserService,
-    private auth: AngularFireAuth,
-    private db: AngularFirestore
+    private categoryService: CategoryService,
+    private auth: AuthService,
+    private fb: FormBuilder
   ) {}
 
   ngOnInit() {
-    // get the category id from the route
-    this.route.paramMap.subscribe(params => {
-      this.categoryId = params.get('id');
+    this.auth.currentUser.subscribe((user) => {
+      if (!user) return;
+      this.budget_id = user.active_budget_id;
+      this.categories = this.categoryService.filteredEntities$;
+      // get the category id from the route
+      this.route.paramMap.subscribe((params) => {
+        this.categoryId = params.get('id');
+      });
     });
-
-    this.userService.getProfile().subscribe(profile => {
-      this.activeBudget = profile.activeBudget;
-      this.loadParentCategories(profile.activeBudget);
-      if (this.categoryId !== 'add') {
-        this.db
-          .doc<any>('categories/' + profile.activeBudget + '/' + this.categoryId)
-          .valueChanges()
-          .subscribe(cat => {
-            this.category = cat;
-          });
-      }
-    });
-  }
-
-  loadParentCategories(budgetId: string) {
-    const ref = 'budgets/' + budgetId + '/categories';
-    const parentCategories = this.db.collection<Category>(ref, ls => ls.where('parent', '==', ''));
-
-    // get all the categories so that we can have counts to do the correct
-    // saving and counts :P
-    this.categories = parentCategories.snapshotChanges().pipe(
-      map(catSnap => {
-        return catSnap.map(cs => {
-          const data = cs.payload.doc.data() as Category;
-          const id = cs.payload.doc.id;
-          return { id, ...data };
-        });
-      })
-    );
   }
 
   onSubmit() {
-    let ref = 'budgets/' + this.activeBudget + '/categories';
+    const category = this.form.value;
+    category.budget_id = this.budget_id;
+    category.balance = 0;
+    category.actual = 0;
+    category.planned = 0;
 
-    if (this.parent && this.parent.name !== '') {
-      this.category.parent = this.parent.name;
-      this.category.parentId = this.parent.id;
+    if (category.parent && category.parent.name !== '') {
+      category.parent_id = category.parent._id;
     } else {
-      this.category.parent = '';
-      this.category.parentId = '';
+      category.parent_id = '';
     }
-    this.category.type = this.category.type;
+    category.type = category.type;
 
     if (this.categoryId === 'add') {
-      this.db
-        .collection<Category>(ref)
-        .add({
-          name: this.category.name,
-          parent: this.category.parent,
-          parentId: this.category.parentId,
-          type: this.category.type,
-          sortingOrder: '000',
-          balance: 0
-        })
-        .then(() => console.log('Add Successfull.'));
-      // this.categoryService.createCategory(this.activeBudget, this.category);
+      this.categoryService.add(category);
     } else {
-      ref += '/' + this.categoryId;
-      this.db
-        .doc(ref)
-        .update({
-          name: this.category.name,
-          parent: this.category.parent,
-          parentId: this.category.parentId,
-          type: this.category.type
-        })
-        .then(() => console.log('Update Successfull.'));
-
-      // this.categoryService.updateCategory(this.activeBudget, this.category);
     }
   }
 

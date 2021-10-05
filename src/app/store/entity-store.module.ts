@@ -1,27 +1,18 @@
 import { NgModule } from '@angular/core';
-import { EntityDataService } from '@ngrx/data'; // <-- import the NgRx Data data service registry
-import { TransactionDataService } from './entity/transaction-data-service';
-import { CategoryDataService } from './entity/category-data.service';
-import { BudgetDataService } from './entity/budget-data.service';
-import { AccountDataService } from './entity/account-data.service';
+import { DefaultDataServiceConfig, EntityDataService } from '@ngrx/data'; // <-- import the NgRx Data data service registry
 
+const defaultDataServiceConfig: DefaultDataServiceConfig = {
+  root: 'http://localhost:5005',
+  timeout: 3000, // request timeout
+};
 @NgModule({
   imports: [],
-  providers: [TransactionDataService] // <-- provide the data service
+  providers: [
+    { provide: DefaultDataServiceConfig, useValue: defaultDataServiceConfig },
+  ], // <-- provide the data service
 })
 export class EntityStoreModule {
-  constructor(
-    entityDataService: EntityDataService,
-    transactionDataService: TransactionDataService,
-    categoryDataService: CategoryDataService,
-    budgetDataService: BudgetDataService,
-    accountDataService: AccountDataService
-  ) {
-    entityDataService.registerServices({
-      Transaction: transactionDataService,
-      Category: categoryDataService,
-      Budget: budgetDataService,
-      Account: accountDataService
-    }); // <-- register it
+  constructor(entityDataService: EntityDataService) {
+    entityDataService.registerServices({}); // <-- register it
   }
 }
