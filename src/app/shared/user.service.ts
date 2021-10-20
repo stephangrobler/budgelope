@@ -1,37 +1,16 @@
 import { Injectable } from '@angular/core';
-import {
-  CanActivate,
-  Router,
-  ActivatedRouteSnapshot,
-  RouterStateSnapshot,
-} from '@angular/router';
-import { AngularFireAuth } from '@angular/fire/auth';
-import { AngularFirestore } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
+import { Router } from '@angular/router';
+import { Observable, of } from 'rxjs';
 import { IProfile } from '../shared/profile';
 
-@Injectable()
-export class UserService implements CanActivate {
+@Injectable({
+  providedIn: 'root',
+})
+export class UserService {
   authenticated = false;
   profile$: Observable<IProfile>;
 
-  constructor(
-    private router: Router,
-    private afAuth: AngularFireAuth,
-    private db: AngularFirestore
-  ) {
-    this.getProfile();
-    this.verifyUser();
-  }
-
-  canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): boolean {
-    const url: string = state.url;
-    return this.verifyLogin(url);
-  }
+  constructor(private router: Router) {}
 
   verifyLogin(url: string): boolean {
     if (this.authenticated) {
@@ -40,49 +19,6 @@ export class UserService implements CanActivate {
 
     this.router.navigate(['/login']);
     return false;
-  }
-
-  register(email: string, password: string) {
-    this.afAuth
-      .createUserWithEmailAndPassword(email, password)
-      .then((user) => {
-        this.setupProfile(user);
-      })
-      .catch(function (error) {
-        alert(`${error.message} Please try again!`);
-      });
-  }
-
-  verifyUser() {
-    return this.afAuth.authState;
-  }
-
-  login(loginEmail: string, loginPassword: string) {
-    return this.afAuth
-      .signInWithEmailAndPassword(loginEmail, loginPassword)
-      .then((user) => {
-        this.getProfile();
-      });
-  }
-
-  logout() {
-    this.authenticated = false;
-    this.afAuth.signOut().then(
-      function () {
-        alert(`Logged out!`);
-      },
-      function (error) {
-        alert(`${error.message} Unable to logout. Try again!`);
-      }
-    );
-  }
-
-  getProfile(): Observable<IProfile> {
-    return this.afAuth.authState.pipe(
-      mergeMap((user) => {
-        return this.db.doc<IProfile>('users/' + user.uid).valueChanges();
-      })
-    );
   }
 
   /**
@@ -94,20 +30,10 @@ export class UserService implements CanActivate {
     if (!user) {
       return;
     }
-    const userStore = this.db.collection<any[]>('users');
-    // create a new user document to store
-    const userDoc = {
-      name: user.displayName,
-      availableBudgets: [],
+  }
+  getProfile() {
+    return of({
       activeBudget: '',
-    };
-
-    userStore
-      .doc(user.uid)
-      .set(userDoc as any)
-      .then((docRef) => {
-        // create a dummy budget to start with
-        // this.budgetService.freshStart('default', user.uid);
-      });
+    });
   }
 }

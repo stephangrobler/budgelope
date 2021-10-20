@@ -1,5 +1,7 @@
 export interface IPayee {
   name: string;
-  budgetId: string;
-  created_at: Date;
+  budget_id?: string;
+  date?: Date;
+  deleted?: boolean;
+  hidden?: boolean;
 }

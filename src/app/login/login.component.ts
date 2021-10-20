@@ -15,34 +15,18 @@ export class LoginComponent implements OnInit {
   password1: string;
   user: Observable<firebase.User>;
 
-  constructor(
-    private router: Router,
-    public afAuth: AngularFireAuth,
-    private authService: AuthService
-  ) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
-  ngOnInit() {
-    if (this.authService.authenticated) {
-      this.router.navigate(['/app/budget']);
-    }
-  }
+  ngOnInit() {}
 
   onLogin(loginEmail: string, loginPassword: string): void {
-    this.afAuth
-      .signInWithEmailAndPassword(loginEmail, loginPassword)
-      .then((user) => {
-        this.router.navigate(['/app/budget']);
-      })
-      .catch((error) => {
-        alert(`${error.message} Unable to login. Try again.`);
-      });
-  }
-
-  googleLogin() {
-    this.afAuth.signInWithPopup(new auth.GoogleAuthProvider()).then((user) => {
-      // check if the user has a profile
-      this.router.navigate(['/app/budget']);
-    });
+    this.authService.login(loginEmail, loginPassword).subscribe(
+      (res) => {
+        this.user;
+        this.router.navigate(['/app/budget/202109']);
+      },
+      (err) => console.log(err)
+    );
   }
 
   signUp() {

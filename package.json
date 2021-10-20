@@ -40,6 +40,7 @@
     "ajv-keywords": "^2.1.1",
     "autotrack": "^2.3.2",
     "core-js": "^2.5.7",
+    "dayjs": "^1.10.7",
     "firebase": "7",
     "moment": "^2.22.2",
     "rxjs": "6.6.3",

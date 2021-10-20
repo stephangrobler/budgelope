@@ -12,7 +12,7 @@ export class SignUpComponent implements OnInit {
   password2: string;
   passwordFail = false;
 
-  constructor(private userService: UserService, private router: Router) {  }
+  constructor(private router: Router) {}
 
   ngOnInit() {}
 
@@ -21,8 +21,6 @@ export class SignUpComponent implements OnInit {
       this.passwordFail = true;
     } else {
       this.passwordFail = false;
-      this.userService.register(this.email, this.password1);
-      this.userService.verifyUser();
     }
   }
 

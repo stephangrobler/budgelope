@@ -26,7 +26,7 @@
       <mat-nav-list dense>
         <a
           mat-list-item
-          (click)="navigateTo(account.id)"
+          (click)="navigateTo(account._id)"
           *ngFor="let account of accounts | async"
           routerLinkActive="active"
         >

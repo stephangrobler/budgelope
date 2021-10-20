@@ -8,18 +8,29 @@ export function sortDate(a: { date: string }, b: { date: string }) {
 const entityMetadata: EntityMetadataMap = {
   Transaction: {
     filterFn: TransactionFilter,
-    sortComparer: sortDate
+    sortComparer: sortDate,
+    selectId: (transaction) => transaction._id,
   },
-  Account: {},
-  Category: {},
-  Budget: {}
+  Account: {
+    selectId: (account) => account._id,
+  },
+  Category: {
+    selectId: (category) => category._id,
+  },
+  Budget: {
+    selectId: (budget) => budget._id,
+  },
+  Payee: {
+    selectId: (payee) => payee._id,
+  },
 };
 
 const pluralNames = {
-  Category: 'Categories'
+  Category: 'Categories',
+  Budget: 'Budgets',
 };
 
 export const entityConfig = {
   entityMetadata,
-  pluralNames
+  pluralNames,
 };

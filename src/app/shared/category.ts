@@ -1,14 +1,13 @@
-
 export interface Category {
-  id?: string;
+  _id?: string;
   name: string;
-  parent: string;
   parentId: string;
+  parent?: Category;
   sortingOrder: string;
   balance: number;
-  children?: any;
+  planned: number;
+  actual: number;
   type?: string;
-  allocations?: { [s: string]: { actual: number, planned: number} };
 }
 
 export interface TransactionCategory {
@@ -16,4 +15,3 @@ export interface TransactionCategory {
   in: number;
   out: number;
 }
-

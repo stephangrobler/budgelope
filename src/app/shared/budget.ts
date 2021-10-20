@@ -1,10 +1,20 @@
+import { Category } from './category';
+
 export interface Budget {
   name: string;
   start: Date;
   active: boolean;
   balance: number;
-  allocations?: { [yearMonth: string]: { income: number; expense: number } };
+  allocations?: Allocations[];
   sharedWith: string[];
-  userId?: string;
-  id?: string;  
+  user_id?: string;
+  _id?: string;
+}
+
+export interface Allocations {
+  month: string;
+  income: number;
+  expense: number;
+  budgeted: number;
+  categories: Category[];
 }

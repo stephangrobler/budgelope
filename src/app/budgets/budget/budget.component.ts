@@ -5,6 +5,7 @@ import { Budget } from '../../shared/budget';
 import { BudgetService } from '../budget.service';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { AuthService } from 'app/shared/auth.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-budget-form',
@@ -14,32 +15,29 @@ export class BudgetComponent implements OnInit {
   budgetName: string;
   userId: string;
 
+  form: FormGroup = this.fb.group({
+    name: ['', Validators.required],
+  });
+
   constructor(
     private router: Router,
     private budgetService: BudgetService,
     private auth: AuthService,
-    private db: AngularFirestore
-  ) {  }
+    private fb: FormBuilder
+  ) {}
 
   ngOnInit() {
-      this.userId = this.auth.currentUserId;
-      // get active budget TODO: move to service :P
-      const subscription = this.db
-        .doc<any>('users/' + this.auth.currentUserId)
-        .valueChanges()
-        .subscribe(profile => {
-        });
+    this.userId = this.auth.currentUserId;
   }
 
-  async saveBudget() {
+  async onSubmit() {
     const budget: Budget = {} as Budget;
     budget.name = this.budgetName;
-
-    const createdBudget = await this.budgetService.createBudget(budget, this.userId);
-    console.log('success:', createdBudget);
+    budget.user_id = this.auth.currentUserId;
+    this.budgetService.add(budget);
   }
 
-  cancel() {
+  onCancel() {
     this.router.navigate(['/budgets']);
   }
 }
