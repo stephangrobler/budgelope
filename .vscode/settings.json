@@ -4,5 +4,8 @@
   "typescript.preferences.quoteStyle": "single",
   "turboConsoleLog.quote": "'",
   "prettier.useEditorConfig": false,
-  "prettier.singleQuote": true
+  "prettier.singleQuote": true,
+  "files.associations": {
+    "*.yaml": "home-assistant"
+  }
 }
