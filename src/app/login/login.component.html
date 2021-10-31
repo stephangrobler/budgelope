@@ -4,23 +4,16 @@
   <div fxFlex="33" fxFlex.xs="100" style="padding:10px">
     <div fxLayout="column">
       <div fxFlex="33" fxFlex.xs="100" fxFlexOffset="10px">
-        <h1>Login</h1>
-        <div style="margin-bottom: 50px;">
-          <button mat-raised-button color="primary" (click)="googleLogin()" style="width:100%">
-            Login with Google
-          </button>
-        </div>
-        <hr />
-        <form class="">
+        <h1>Login</h1>        
+        <form [formGroup]="form" (ngSubmit)="onLogin()">
           <mat-form-field style="width:100%">
             <input
               matInput
               type="text"
               id="email"
               placeholder="Email Address"
-              [(ngModel)]="email"
+              formControlName="email"
               name="email"
-              #em="ngModel"
             />
           </mat-form-field>
 
@@ -31,19 +24,18 @@
               class="form-control"
               id="password"
               placeholder="Password"
-              [(ngModel)]="password1"
-              name="password1"
-              #pwd1="ngModel"
+              formControlName="password"
+              name="password"
             />
           </mat-form-field>
           <div fxLayout="row" fxLayout.xs="column" fxLayoutGap="10px">
             <div fxFlex="33" fxFlex.xs="100">
               <button
-                type="button"
+                type="submit"
                 mat-raised-button
                 color="primary"
-                (click)="onLogin(email, password1)"
                 style="width:100%"
+                [disabled]="form.invalid"
               >
                 Login
               </button>
