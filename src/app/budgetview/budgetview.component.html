@@ -3,7 +3,15 @@
     <mat-card-title> </mat-card-title>
     <mat-card-content class="budget-info" fxLayout="row" fxLayout.xs="column">
       <div class="month" fxFlex="50">
-        {{ this.displayMonth }}
+        <button fxFlex="10" mat-raised-button color="primary" type="button" (click)="onPrevMonth()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <div fxFlex="80" fxFlexAlign="center" style="text-align: center;">
+          {{ this.displayMonth }}
+        </div>
+        <button fxFlex="10" mat-raised-button color="primary" type="button" (click)="onNextMonth()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
       </div>
       <div class="" fxFlex="40" fxFlex.xs="100">
         <div
@@ -46,12 +54,7 @@
       </div>
     </mat-card-content>
     <mat-card-actions>
-      <button mat-raised-button color="basic" type="button" (click)="onPrevMonth()">
-        Previous Month
-      </button>
-      <button mat-raised-button color="basic" type="button" (click)="onNextMonth()">
-        Next Month
-      </button>
+      
       <button mat-raised-button color="basic" type="button" (click)="onRecalculate()">
         Re-Calculate
       </button>
@@ -87,8 +90,11 @@
               <div fxLayout="row" fxLayoutGap="10px" fxFlexFill fxLayoutAlign="center center">
                 <div fxFlex="65" fxFlex.xs="70" fxLayout="row" fxFlexAlign="center">
                   <mat-icon color="primary" class="handle" fxHide.xs>drag_indicator</mat-icon>
+                  <a [routerLink]="['/app/category/'+category._id]">
+                    <mat-icon color="primary" class="handle" fxHide.xs>edit</mat-icon>
+                  </a>
                   <a
-                    [routerLink]="['/app/transactions', { categoryId: category.id }]"
+                    [routerLink]="['/app/transactions', { categoryId: category._id }]"
                     class="routerLink"
                     >{{ category.name }}</a
                   >

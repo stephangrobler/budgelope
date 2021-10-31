@@ -28,6 +28,7 @@ export class AuthService {
   logout() {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('expiresAt');
+    localStorage.removeItem('loggedInUser');
   }
 
   private setSession(authResponse): void {
@@ -52,7 +53,10 @@ export class AuthService {
     if (this.currentUser.value === null) {
       this.httpClient
         .get(`${environment.apiUrl}users/me`)
-        .subscribe((user) => this.currentUser.next(user));
+        .subscribe((user) => {
+          localStorage.setItem('loggedInUser', JSON.stringify(user));
+          this.currentUser.next(user);
+        });
     }
   }
 
