@@ -20,7 +20,9 @@ export class CategoryComponent implements OnInit {
     name: ['', Validators.required],
     parent: [''],
     type: ['expense', Validators.required],
+    _id: ['']
   });
+  category: Category;
 
   constructor(
     private router: Router,
@@ -38,6 +40,12 @@ export class CategoryComponent implements OnInit {
       // get the category id from the route
       this.route.paramMap.subscribe((params) => {
         this.categoryId = params.get('id');
+        if (this.categoryId !== 'add') {
+          this.categoryService.getByKey(this.categoryId).subscribe(category => {
+            this.category = category;
+            this.form.patchValue(category);
+          });
+        }
       });
     });
   }
@@ -57,8 +65,9 @@ export class CategoryComponent implements OnInit {
     category.type = category.type;
 
     if (this.categoryId === 'add') {
-      this.categoryService.add(category);
+      this.categoryService.add(category).subscribe(() => this.router.navigate(['/app/budget']));
     } else {
+      this.categoryService.update(category).subscribe(() => this.router.navigate(['/app/budget']));
     }
   }
 

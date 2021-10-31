@@ -10,7 +10,7 @@
     <mat-toolbar color="primary">
       <mat-icon>menu</mat-icon>
       <a mat-button (click)="gotoBudget()">Budgalope</a>
-      <div *ngIf="theUser">
+      <div *ngIf="theUser && (isHandset | async)">
         <a mat-button href (click)="onLogout()">{{ theUser.email }}</a>
       </div>
     </mat-toolbar>
@@ -53,7 +53,7 @@
   </mat-sidenav>
 
   <mat-sidenav-content>
-    <mat-toolbar color="primary">
+    <mat-toolbar color="primary" fxLayout="column" fxLayoutAlign="center" style="text-align: right;">
       <div *ngIf="isHandset | async">
         <button mat-button color="secondary" (click)="drawer.toggle()">
           <mat-icon>menu</mat-icon>
@@ -61,7 +61,7 @@
 
         <a mat-button (click)="gotoBudget()">Budgalope</a>
       </div>
-      <div *ngIf="theUser">
+      <div *ngIf="theUser && !(isHandset | async)">
         <a mat-button href (click)="onLogout()">{{ theUser.email }}</a>
       </div>
     </mat-toolbar>

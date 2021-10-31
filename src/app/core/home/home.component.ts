@@ -1,19 +1,17 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AnalyticsService } from '../analytics.service';
-import { Observable, Subscription, of, Subject } from 'rxjs';
-import * as moment from 'moment';
-// import { ObservableMedia, MediaChange } from '@angular/flex-layout';
+import { Observable, Subscription, Subject } from 'rxjs';
 import { AccountService } from '../../accounts/account.service';
 import { IAccount } from '../../shared/account';
-import { takeUntil, map } from 'rxjs/operators';
-import { UserService } from 'app/shared/user.service';
+import { map } from 'rxjs/operators';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { MatDialog } from '@angular/material/dialog';
 import { AccountComponent } from '../../accounts/account/account.component';
 import { AuthService } from 'app/shared/auth.service';
 import { CategoryService } from 'app/categories/category.service';
 import { PayeeService } from 'app/payees/payee.service';
+import dayjs from 'dayjs';
 
 @Component({
   templateUrl: 'home.component.html',
@@ -50,7 +48,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this._analytics.pageView('/');
-    this.currentMonth = moment().format('YYYYMM');
+    this.currentMonth = dayjs().format('YYYYMM');
     this.auth.currentUser.subscribe((user) => {
       if (!user) return;
       this.theUser = user;
