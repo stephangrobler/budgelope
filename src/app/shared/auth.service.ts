@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import dayjs from 'dayjs';
+import { environment } from 'environments/environment';
 import { BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -17,11 +18,16 @@ export class AuthService {
 
   login(email: string, password: string) {
     return this.httpClient
-      .post('http://localhost:5005/login', {
+      .post(`${environment.apiUrl}login`, {
         email,
         password,
       })
       .pipe(tap((response) => this.setSession(response)));
+  }
+
+  logout() {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('expiresAt');
   }
 
   private setSession(authResponse): void {
@@ -45,7 +51,7 @@ export class AuthService {
   loadUser(): void {
     if (this.currentUser.value === null) {
       this.httpClient
-        .get('http://localhost:5005/users/me')
+        .get(`${environment.apiUrl}users/me`)
         .subscribe((user) => this.currentUser.next(user));
     }
   }

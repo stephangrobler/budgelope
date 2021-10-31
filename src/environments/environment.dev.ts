@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
+  apiUrl: 'http://localhost:5005/',
   apiKey: 'AIzaSyAJnyoZbx_6KPUiW6vaOzcmVHY1KoTtYoA',
   authDomain: 'yrab-6c2b5.firebaseapp.com',
   databaseURL: 'https://yrab-6c2b5.firebaseio.com',

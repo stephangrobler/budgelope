@@ -11,7 +11,7 @@
       <mat-icon>menu</mat-icon>
       <a mat-button (click)="gotoBudget()">Budgalope</a>
       <div *ngIf="theUser">
-        <a mat-button href (click)="logout()">{{ theUser.email }}</a>
+        <a mat-button href (click)="onLogout()">{{ theUser.email }}</a>
       </div>
     </mat-toolbar>
     <mat-nav-list>
@@ -62,7 +62,7 @@
         <a mat-button (click)="gotoBudget()">Budgalope</a>
       </div>
       <div *ngIf="theUser">
-        <a mat-button href (click)="logout()">{{ theUser.email }}</a>
+        <a mat-button href (click)="onLogout()">{{ theUser.email }}</a>
       </div>
     </mat-toolbar>
     <button

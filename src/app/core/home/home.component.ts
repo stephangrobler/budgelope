@@ -53,7 +53,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.currentMonth = moment().format('YYYYMM');
     this.auth.currentUser.subscribe((user) => {
       if (!user) return;
-
+      this.theUser = user;
       this.accountService.getWithQuery({
         budget_id: user.active_budget_id,
       });
@@ -86,5 +86,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe((result) => {
       console.log('Account Dialog Result', result);
     });
+  }
+
+  onLogout() {
+    this.auth.logout();
   }
 }
