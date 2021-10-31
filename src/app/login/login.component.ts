@@ -26,6 +26,7 @@ export class LoginComponent implements OnInit {
         this.user;
         this.router.navigate(['/app/budget/202109']);
       },
+
       (err) => {
         console.log(err);
         this.errorMsg = err.message;
