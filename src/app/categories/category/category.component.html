@@ -12,8 +12,8 @@
           </mat-form-field>
         </section>
         <section>
-          <mat-select placeholder="Parent Category" formControlName="parent" name="parent">            
-            <mat-option *ngFor="let category of categories | async" [value]="category">
+          <mat-select placeholder="Category Group" formControlName="categoryGroup" name="categoryGroup">            
+            <mat-option *ngFor="let category of categoryGroups | async" [value]="category">
               {{category.name}}
             </mat-option>
           </mat-select>
@@ -24,6 +24,7 @@
             <mat-radio-button [value]="'income'">Earn</mat-radio-button>
           </mat-radio-group>
         </section>
+        <mat-checkbox formControlName="is_group">Is Group?</mat-checkbox>
       </mat-card-content>
       <mat-card-actions>
         <button type="submit" mat-raised-button color="primary" [disabled]="form.invalid">

@@ -84,7 +84,7 @@ export class TransactionComponent implements OnInit, OnDestroy {
             (category) => category.type === 'system'
           );
           this.categories = categories.filter((category) => {
-            return category.parentId !== '' && category.type !== 'system';
+            return category.category_group_id !== '' && category.type !== 'system';
           });
           this.route.paramMap.subscribe((params) => {
             if (!params.get('id')) {
