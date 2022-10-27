@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  budgelope_server:
+    build:
+      context: .
+    ports:
+      - 5005:5005
+      - 9229:9229
+    environment:
+      - SERVER_PORT=5005
+      - DATABASE_CONNECTIONSTRING=mongodb://mongo:27017/notes
+    volumes:
+      - .:/code
+    command: npm run start:nodemon
