@@ -42,7 +42,7 @@ export class AccountComponent implements OnInit {
       if (this.data.accountId !== 'add') {
         this.account = await this.accountService
           .getByKey(this.data.accountId)
-          .toPromise();
+          .toPromise();          
       } else {
         this.account = {} as IAccount;
       }
@@ -77,10 +77,6 @@ export class AccountComponent implements OnInit {
       cleared_balance: 0,
       type: AccountType.CHEQUE,
     };
-    console.log(
-      '🚀 ~ file: account.component.ts ~ line 67 ~ AccountComponent ~ this.accountService.add ~ savedAccount',
-      account
-    );
     this.accountService.add(account).subscribe((savedAccount) => {
       this.transactionService.createStartingBalance(
         savedAccount._id,

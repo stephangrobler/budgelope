@@ -1,8 +1,11 @@
+import { CategoryGroup } from './category_group';
+
 export interface Category {
   _id?: string;
+  budget_id: string;
   name: string;
-  parentId: string;
-  parent?: Category;
+  category_group_id: string;
+  categoryGroup?: CategoryGroup;
   sortingOrder: string;
   balance: number;
   planned: number;

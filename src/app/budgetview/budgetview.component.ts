@@ -12,6 +12,7 @@ import { CategoryService } from '../categories/category.service';
 import { AuthService } from 'app/shared/auth.service';
 import { TransactionTypes } from 'app/shared/transaction';
 import { map, takeUntil, tap } from 'rxjs/operators';
+import dayjs, { Dayjs } from 'dayjs';
 
 @Component({
   selector: 'app-budgetview',
@@ -24,10 +25,10 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
   userId: string;
   activeBudget: Budget;
 
-  selectedMonth: any = moment();
+  selectedMonth: string = '';
   displayMonth: any;
-  nextMonth: any = moment().add(1, 'months');
-  prevMonth: any = moment().subtract(1, 'months');
+  nextMonth: Dayjs = dayjs().add(1, 'months');
+  prevMonth: Dayjs = dayjs().subtract(1, 'months');
   monthDisplay: Date;
   originalValue: number;
   currentCategory: Category;
@@ -59,23 +60,32 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.auth.currentUser.subscribe((user) => {
       if (!user) return;
+      // get active budget TODO: move to service :P
+
+      this.loadAvailableBudgets(user._id).subscribe((budgets) => {
+        if (!this.activeBudget) {
+          this.loadActiveBudget(user.active_budget_id).subscribe(
+            (budget) => {
+              this.activeBudget = budget;
+              this.month = this.loadMonthAllocation(this.selectedMonth, this.activeBudget);
+            }
+          );
+        }
+      });
+      this.categories$ = this.categoryService.entities$.pipe(
+        map((categories: Category[]) => categories)
+      );
+      this.categories$.subscribe(
+        (categories) => (this.categories = categories)
+      );
+      this.loading$ = this.categoryService.loading$;
       // if the month is specified, use that, else use the current month
       this.route.paramMap.subscribe((params) => {
         this.checkMonthParam(params.get('month'));
-
-        // get active budget TODO: move to service :P
-
-        this.loadAvailableBudgets(user._id).subscribe((budgets) => {
-          this.loadActiveBudget(user.active_budget_id);
-        });
-
-        this.categories$ = this.categoryService.entities$.pipe(
-          map((categories: Category[]) => categories)
-        );
-        this.categories$.subscribe(
-          (categories) => (this.categories = categories)
-        );
-        this.loading$ = this.categoryService.loading$;
+        if (this.activeBudget) {
+          this.month = this.loadMonthAllocation(params.get('month'), this.activeBudget);
+          this.addMonth(this.month);
+        }
       });
     });
   }
@@ -89,59 +99,96 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     return this.budgetService.getWithQuery({ userId });
   }
 
+  addMonth(month: Allocations): void {
+    const hasMonth = this.activeBudget.allocations.find(allocation => allocation.month === month.month);
+    if (!hasMonth){
+      const allocations = [...this.activeBudget.allocations, month];
+      this.activeBudget = {...this.activeBudget, allocations};
+    }
+  }
+
   /**
    * Loads the active budget from the budget service and sets the property
    * on the component
    */
-  loadActiveBudget(budgetId: string): void {
-    this.budgetService
-      .getByKey(budgetId)
-      .pipe(takeUntil(this.unsubscribe))
-      .subscribe(
-        (budget) => {
-          this.month = budget.allocations.find(
-            (month) => month.month == this.selectedMonth
-          );
+  loadActiveBudget(budgetId: string): Observable<Budget> {
+    return this.budgetService.getByKey(budgetId).pipe(
+      map((budget) => {
+        return this.makeBudgetToUse(budget, budgetId);
+      }),
+      takeUntil(this.unsubscribe)
+    );
+  }
 
-          if (!this.month) {
-            this.month = {
-              month: this.selectedMonth,
-              income: 0,
-              expense: 0,
-              budgeted: 0,
-              categories: [],
-            };
-            const allocations = [...budget.allocations, this.month];
-            budget = {
-              ...budget,
-              allocations,
-            };
-          }
-          this.month = this.loadCategories(this.month);
+  loadMonthAllocation(monthParam: string, budget: Budget) {
+    const previousMonth = budget.allocations.find(
+      (allocation) => allocation.month === this.prevMonth.format('YYYYMM')
+    );
+    let currentMonth = budget.allocations.find(
+      (month) => month.month == monthParam
+    );
+    if (!currentMonth) {
+      currentMonth = {
+        month: monthParam,
+        income: 0,
+        expense: 0,
+        budgeted: 0,
+        categories: [],
+      };
+    }
+    currentMonth = this.loadCategories(currentMonth, previousMonth);
+    return currentMonth;
+  }
 
-          this.activeBudget = { _id: budgetId, ...budget };
-          // this.activeBudget.id = budgetId;
-        },
-        (error) => {
-          // this.router.navigate(['app/budget-create']);
-        }
-      );
+  makeBudgetToUse(budget: Budget, budgetId: string) {
+    const allocation = this.loadMonthAllocation(this.selectedMonth, budget);
+    const allocations = [...budget.allocations, allocation];
+    return { _id: budgetId, ...budget, allocations };
   }
 
   /**
    * Loads the categories to be used ond sets it as property on the component
    * @param budgetId string
    */
-  loadCategories(originalMonth: Allocations): Allocations {
+  loadCategories(
+    originalMonth: Allocations,
+    previousMonth: Allocations
+  ): Allocations {
     const month = { ...originalMonth };
-    month.categories = this.categories.map((category) => {
-      const loc = month.categories.findIndex((cat) => cat._id === category._id);
-      if (loc === -1) {
-        return category;
-      } else {
-        return month.categories[loc];
-      }
-    });
+
+    month.categories = this.categories
+      .filter((category) => category.type !== 'income')
+      .map((category) => {
+        const currentAllocationIndex = month.categories.findIndex(
+          (cat) => cat._id === category._id
+        );
+        let previousMonthCategoryName = '';
+        let previousMonthCategoryBalance = 0;
+        if (previousMonth) {
+          const previousMonthCategory = previousMonth.categories.find(
+            (cat) => cat._id === category._id
+          );
+          previousMonthCategoryBalance = previousMonthCategory.balance;
+        }
+        category = {...category, balance: 0, actual: 0, planned:0};
+        const returnCategory =
+          currentAllocationIndex === -1
+            ? category
+            : month.categories[currentAllocationIndex];
+
+        let balance = 0;
+        
+        if (previousMonthCategoryBalance > 0 || previousMonth) {
+          balance =
+            returnCategory.planned -
+            returnCategory.actual +
+            previousMonthCategoryBalance;
+        } else {
+          balance = returnCategory.planned - returnCategory.actual;
+        }
+
+        return { ...returnCategory, name: category.name, balance };
+      });
     return month;
   }
 
@@ -156,19 +203,19 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
       const month = +monthParam.substr(-2, 2);
       const year = +monthParam.substr(0, 4);
 
-      this.selectedMonth = monthParam;
-      this.nextMonth = moment()
+      this.selectedMonth = dayjs(monthParam).format('YYYYMM');
+      this.nextMonth = dayjs()
         .year(year)
         .month(month - 1)
         .add(1, 'months');
-      this.prevMonth = moment()
+      this.prevMonth = dayjs()
         .year(year)
         .month(month - 1)
         .subtract(1, 'months');
-      this.displayMonth = moment(this.selectedMonth + '01').format('MMMM YYYY');
+      this.displayMonth = dayjs(this.selectedMonth + '01').format('MMMM YYYY');
     } else {
-      this.selectedMonth = moment().format('YYYYMM');
-      this.displayMonth = moment(this.selectedMonth + '01').format('MMMM YYYY');
+      this.selectedMonth = dayjs().format('YYYYMM');
+      this.displayMonth = dayjs(this.selectedMonth + '01').format('MMMM YYYY');
     }
   }
 
@@ -299,7 +346,11 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     arr[index] = category;
 
     const monthBudgeted = arr.reduce((acc, cat) => (acc += cat.planned), 0);
-    this.month = { ...this.month, budgeted: monthBudgeted, categories: arr };
+    this.month = {
+      ...this.month,
+      budgeted: monthBudgeted,
+      categories: arr,
+    };
     return planned;
   }
 

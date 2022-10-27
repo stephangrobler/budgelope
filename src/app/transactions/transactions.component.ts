@@ -188,8 +188,6 @@ export class TransactionDataSource extends DataSource<any> {
         acc += curVal.cleared ? curVal.amount : 0;
         return acc;
       }, 0);
-      console.log('Total: ', total);
-      console.log('Total Cleared: ', totalCleared);
     }
   };
 

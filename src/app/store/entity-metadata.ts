@@ -17,6 +17,9 @@ const entityMetadata: EntityMetadataMap = {
   Category: {
     selectId: (category) => category._id,
   },
+  CategoryGroup: {
+    selectId: (categoryGroup) => categoryGroup._id
+  },
   Budget: {
     selectId: (budget) => budget._id,
   },
