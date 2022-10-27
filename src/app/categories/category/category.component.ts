@@ -28,6 +28,7 @@ export class CategoryComponent implements OnInit {
   category: Category;
   categoryGroups: Observable<CategoryGroup[]>;
 
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -89,6 +90,7 @@ export class CategoryComponent implements OnInit {
     category.category_group_id = category.categoryGroup._id;
    
     category.type = category.type;
+
 
     if (this.categoryId === 'add') {  
       delete(category._id);    
