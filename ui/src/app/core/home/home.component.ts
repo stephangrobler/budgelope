@@ -54,6 +54,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.theUser = user;
       this.accountService.getWithQuery({
         budget_id: user.active_budget_id,
+        status: "open"
       });
       this.categoryService.getWithQuery({ budget_id: user.active_budget_id });
       this.payeeService.getWithQuery({ budget_id: user.active_budget_id });

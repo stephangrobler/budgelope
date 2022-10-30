@@ -10,6 +10,7 @@ class AccountService implements CRUD {
     name: String,
     balance: Number,
     budget_id: String,
+    status: String,
   });
 
   Account = mongooseService.getMongoose().model("accounts", this.accountSchema);
