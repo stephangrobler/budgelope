@@ -86,6 +86,14 @@ export class AccountComponent implements OnInit {
     });
   }
 
+  onCloseAccount(account: IAccount) {
+    account = {...account, status: "closed"};
+    console.log(account);
+    this.accountService.update(account).subscribe(savedAccount => {
+      console.log(savedAccount);
+    });
+  }
+
   onCancel() {
     this.dialogRef.close('Account Dialog Closed.');
   }

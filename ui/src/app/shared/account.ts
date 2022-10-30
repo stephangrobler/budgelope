@@ -9,4 +9,5 @@ export interface IAccount {
   clearedBalance: number;
   name: string;
   type: AccountType;
+  status: string;
 }

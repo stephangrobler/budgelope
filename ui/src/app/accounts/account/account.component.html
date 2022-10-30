@@ -1,42 +1,33 @@
 <div *ngIf="!account">Loading...</div>
 <div *ngIf="account">
-  <form (ngSubmit)="onSubmit()" [formGroup]="form">
-  <h1 mat-dialog-title>Account: {{ account.name }}</h1>
-  <div mat-dialog-content fxLayout="row">
-    
-    <div>
-      <mat-form-field>
-        <input
-          matInput
-          type="text"
-          placeholder="Account Name"
-          formControlName="name"
-          name="accName"
-          
-        />
-      </mat-form-field>
-    </div>
-    <div>
-      <mat-form-field>
-        <input
-          matInput
-          type="number"
-          placeholder="Starting Balance"
-          formControlName="balance"
-          name="accStartingBalance"
-          
-        />
-      </mat-form-field>
-    </div>
-  </div>
-  <div mat-dialog-actions>
-    <button mat-raised-button color="warn" (click)="onCancel()">Cancel</button>
-    <button
-      mat-raised-button
-      type="submit"
-      [mat-dialog-close]="data.animal"
-      cdkFocusInitial
-    > Ok </button>
-  </div>
-</form>
+    <form (ngSubmit)="onSubmit()" [formGroup]="form">
+        <h1 mat-dialog-title>Account: {{ account.name }}</h1>
+        <div mat-dialog-content>
+            <div fxLayout="row">
+                <div>
+                    <mat-form-field>
+                        <input matInput type="text" placeholder="Account Name" formControlName="name" name="accName" />
+                    </mat-form-field>
+                </div>
+                <div>
+                    <mat-form-field>
+                        <input
+                            matInput
+                            type="number"
+                            placeholder="Starting Balance"
+                            formControlName="balance"
+                            name="accStartingBalance"
+                        />
+                    </mat-form-field>
+                </div>
+            </div>
+            <div fxLayout="row">
+                <button mat-raised-button color="warn" type="button" (click)="onCloseAccount(account)">Close Account</button>
+            </div>
+        </div>
+        <div mat-dialog-actions>
+            <button mat-raised-button color="warn" (click)="onCancel()">Cancel</button>
+            <button mat-raised-button type="submit" [mat-dialog-close]="data.animal" cdkFocusInitial>Ok</button>
+        </div>
+    </form>
 </div>
