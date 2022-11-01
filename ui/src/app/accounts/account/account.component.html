@@ -4,7 +4,7 @@
         <h1 mat-dialog-title>Account: {{ account.name }}</h1>
         <div mat-dialog-content>
             <div fxLayout="row">
-                <div>
+                <div style="padding-right: 1rem;">
                     <mat-form-field>
                         <input matInput type="text" placeholder="Account Name" formControlName="name" name="accName" />
                     </mat-form-field>
@@ -21,12 +21,13 @@
                     </mat-form-field>
                 </div>
             </div>
+            
             <div fxLayout="row">
                 <button mat-raised-button color="warn" type="button" (click)="onCloseAccount(account)">Close Account</button>
             </div>
         </div>
         <div mat-dialog-actions>
-            <button mat-raised-button color="warn" (click)="onCancel()">Cancel</button>
+            <button mat-raised-button type="button" color="warn" (click)="onCancel()">Cancel</button>
             <button mat-raised-button type="submit" [mat-dialog-close]="data.animal" cdkFocusInitial>Ok</button>
         </div>
     </form>

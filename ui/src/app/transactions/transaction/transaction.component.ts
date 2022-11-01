@@ -4,14 +4,13 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { AngularFirestoreDocument } from '@angular/fire/firestore';
 
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Observable, of, Subject, Subscription } from 'rxjs';
-import { filter, map, startWith, take, takeUntil, tap } from 'rxjs/operators';
+import { Observable, Subject, Subscription } from 'rxjs';
+import { map, startWith, take, takeUntil, tap } from 'rxjs/operators';
 import { Transaction, TransactionTypes } from '../../shared/transaction';
 import { IAccount } from '../../shared/account';
 import { Budget } from '../../shared/budget';
 import { Category } from '../../shared/category';
 import { BudgetService } from '../../budgets/budget.service';
-import { UserService } from '../../shared/user.service';
 import { TransactionService } from '../transaction.service';
 import { AccountService } from '../../accounts/account.service';
 import { CategoryService } from '../../categories/category.service';

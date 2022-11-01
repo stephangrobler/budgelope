@@ -58,15 +58,8 @@ export class AccountComponent implements OnInit {
   }
 
   editAccount(account) {
-    if (account.balance !== this.accStartingBalance) {
-      this.transactionService.createStartingBalance(
-        this.data.accountId,
-        this.budgetId,
-        account.balance
-      );
-    } else {
-      this.accountService.update(account);
-    }
+    const formValue = this.form.value;
+    this.accountService.update({...account, name: formValue.name});    
   }
 
   createAccount(account: IAccount) {
