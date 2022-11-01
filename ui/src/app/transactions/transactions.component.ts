@@ -6,10 +6,10 @@ import { DataSource } from '@angular/cdk/collections';
 import { Transaction } from '../shared/transaction';
 import { TransactionService } from './transaction.service';
 import { UserService } from '../shared/user.service';
-import { BehaviorSubject, Subject, Observable } from 'rxjs';
+import { BehaviorSubject, Subject, Observable, of } from 'rxjs';
 import { IAccount } from 'app/shared/account';
 import { ImportComponent } from './import/import.component';
-import { takeUntil, take, tap } from 'rxjs/operators';
+import { takeUntil, take, tap, map } from 'rxjs/operators';
 import { AccountComponent } from 'app/accounts/account/account.component';
 import { TransactionComponent } from './transaction/transaction.component';
 import { AccountService } from 'app/accounts/account.service';
@@ -41,7 +41,6 @@ export class TransactionsComponent implements OnInit, OnDestroy {
 
   constructor(
     private transService: TransactionService,
-    private router: Router,
     private route: ActivatedRoute,
     public dialog: MatDialog,
     public accountService: AccountService,
@@ -55,8 +54,8 @@ export class TransactionsComponent implements OnInit, OnDestroy {
       if (!user) return;
       this.budgetId = user.active_budget_id;
       this.accountId = null;
-      this.renameTransactions();
       this.dataSource = new TransactionDataSource(this.transService);
+      
       this.route.paramMap
         .pipe(takeUntil(this.unsubscribe))
         .subscribe((params) => {
@@ -86,15 +85,6 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.unsubscribe.next();
     this.unsubscribe.complete();
-  }
-
-  renameTransactions() {
-    // this.transService
-    //   .getAll()
-    //   .pipe(take(1))
-    //   .subscribe(async (transactions) => {
-    //     // this.transService.batchUpdateInterface(transactions, this.budgetId);
-    //   });
   }
 
   openTransactionModal() {
@@ -152,7 +142,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
 
   selectedRow(row) {
     this.selectedTransaction = row;
-    this.router.navigate(['/app/transactions', row.id]);
+    
   }
 
   displayCategories(categories: { [categoryId: string]: Partial<Category> }) {
@@ -188,7 +178,9 @@ export class TransactionDataSource extends DataSource<any> {
         acc += curVal.cleared ? curVal.amount : 0;
         return acc;
       }, 0);
+      
     }
+    return transactions;
   };
 
   connect() {
@@ -206,9 +198,13 @@ export class TransactionDataSource extends DataSource<any> {
     categoryId?: string
   ) {
     const filter: QueryParams = {
-      account_id: accountId,
-      cleared: showCleared,
+      account_id: accountId      
     };
+
+    if (!showCleared || showCleared == "false") {
+      filter.cleared = "false"
+    }
+
     if (categoryId) {
       filter.category_id = categoryId;
       filter.cleared = 'true';

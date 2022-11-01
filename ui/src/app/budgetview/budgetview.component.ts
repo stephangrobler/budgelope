@@ -223,7 +223,9 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     // this.db.doc<any>('users/' + this.userId).update({ activeBudget: id });
   }
 
-  onFreshStart() {}
+  onFreshStart() {
+
+  }
 
   onNewBudget() {
     this.router.navigate(['/app/budget-create']);
@@ -340,16 +342,16 @@ export class BudgetviewComponent implements OnInit, OnDestroy {
     const balance = $event - category.actual;
     const planned = category.planned;
     category = { ...category, planned: $event, balance };
-    let arr = this.month.categories.slice(0);
-    const index = arr.findIndex((cat) => cat._id == category._id);
+    let categoryArray = this.month.categories.slice(0); // immutable - copy array
+    const categoryIndex = categoryArray.findIndex((cat) => cat._id == category._id);
 
-    arr[index] = category;
+    categoryArray[categoryIndex] = category;
 
-    const monthBudgeted = arr.reduce((acc, cat) => (acc += cat.planned), 0);
+    const monthBudgeted = categoryArray.reduce((acc, cat) => (acc += cat.planned), 0);
     this.month = {
       ...this.month,
       budgeted: monthBudgeted,
-      categories: arr,
+      categories: categoryArray,
     };
     return planned;
   }
