@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import debug from "debug";
-
+import environment from './../../config/environment';
 const log: debug.IDebugger = debug("app:mongoose-service");
 
 class MongooseService {
-  private MONGO_URI = "mongodb://192.168.8.13:27017/budgelope";
+  
   private count = 0;
   private mongooseOptions = {
     useNewUrlParser: true,
@@ -23,7 +23,7 @@ class MongooseService {
   connectWithRetry = () => {
     log("Attempting MongoDB connection (will retry if needed)");
     mongoose
-      .connect(this.MONGO_URI, this.mongooseOptions)
+      .connect(environment.MONGO_URI, this.mongooseOptions)
       .then(() => {
         log("MongoDB is connected");
       })

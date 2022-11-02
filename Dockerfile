@@ -1,12 +1,23 @@
-FROM node:12.18.3
+FROM node:16.13.0 AS ui-build
+
+WORKDIR /code/ui
+COPY ui/. /code/ui
+RUN cd /code/ui && npm install && npm run build
+
+
+
+FROM node:16.13.0 AS server-build
 
 WORKDIR /code
 
-COPY package.json /code/package.json
-COPY package-lock.json /code/package-lock.json
+COPY server/package.json /code/package.json
+COPY server/package-lock.json /code/package-lock.json
+COPY --from=ui-build code/ui/dist /code/web/dist
 
 RUN npm install
 
-COPY . /code 
+COPY server/. /code
 
-CMD [ "node", "server/server.js" ]
+EXPOSE 5005
+
+CMD [ "npm", "run", "start" ]

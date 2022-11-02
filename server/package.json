@@ -8,8 +8,8 @@
   "scripts": {
     "start-dev": "nodemon -L server/server.js",
     "start": "tsc && node --unhandled-rejections=strict ./dist/app.js",
-    "debug": "export DEBUG=* && npm run start",
-    "start:nodemon": "./node_modules/nodemon/bin/nodemon.js -L"
+    "debug": "set DEBUG=* && npm run start",
+    "start:nodemon": "node node_modules/nodemon/bin/nodemon.js -L"
   },
   "dependencies": {
     "@types/bcryptjs": "^2.4.2",

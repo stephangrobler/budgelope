@@ -1,0 +1,19 @@
+version: "3.8" # specify docker-compose version
+
+services:
+  express: #name of the second service
+    build: # specify the directory of the Dockerfile
+      context: .
+      dockerfile: Dockerfile
+    container_name: budgelope
+    ports:
+      - "3000:5005" #specify ports forewarding
+      # Below database enviornment variable for api is helpful when you have to use database as managed service
+    environment:
+      - SECRET=Thisismysecret
+      - MONGO_DB_USERNAME=budgelope
+      - MONGO_DB_PASSWORD=budgelope
+      - MONGO_DB_HOST=192.168.8.13
+      - MONGO_DB_PORT=27017
+      - MONGO_DB_PARAMETERS=?authSource=admin
+      - MONGO_DB_DATABASE=budgelope

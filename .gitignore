@@ -335,3 +335,4 @@ out
 
 
 dist/
+.env
