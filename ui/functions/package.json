@@ -3,8 +3,8 @@
   "description": "Cloud Functions for Firebase",
   "dependencies": {
     "@google-cloud/storage": "^2.5.0",
-    "firebase-admin": "^6.5.1",
-    "firebase-functions": "^2.3.1",
+    "firebase-admin": "^11.4.1",
+    "firebase-functions": "^4.1.1",
     "moment": "^2.29.4",
     "xml2js": "^0.4.19"
   },
